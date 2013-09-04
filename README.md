@@ -7,6 +7,10 @@ Please read [introduction to Mingo](https://github.com/dmgcodevil/mingo/wiki/Int
 about how and why did the idea create the Mingo framework, also [getting started](https://github.com/dmgcodevil/mingo/wiki/Getting-started) 
 article to get information about main features of Mingo framework.
 
+## Contacts
+If you run into any issues or have questions and suggestions please contact with as:
+
+Email: mingoframework@gmail.com
 
 
 ## License
