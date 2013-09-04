@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<context xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="../../../main/resources/xml-schema/context.xsd">
+
+
+    <querySetConfig dbName="dbTestCommon">
+        <querySet path="/xml/query1.xml"/>
+        <querySet path="/xml/query2.xml"/>
+    </querySetConfig>
+
+    <queryExecutor type="MongoDriver"/>
+
+    <mongo port="27017" host="localhost"/>
+
+</context>

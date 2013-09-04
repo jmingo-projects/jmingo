@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+    <!-- CONTEXT SCHEMA -->
+
+    <!-- definition of simple types -->
+    <xs:simpleType name="ID" id="ID">
+        <xs:restriction base="xs:NCName"/>
+    </xs:simpleType>
+
+    <xs:simpleType name="queryExecutorType">
+        <xs:restriction base="xs:normalizedString">
+            <xs:enumeration value="MongoDriver"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="queryExecutorAnalyzerType">
+        <xs:restriction base="xs:normalizedString">
+            <xs:enumeration value="jexl"/>
+            <xs:enumeration value="springEL"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <!-- definition of attributes -->
+    <xs:attribute name="id" type="xs:ID"/>
+
+
+    <xs:element name="querySet">
+        <xs:complexType mixed="true">
+            <xs:attribute name="path" use="required" type="xs:string"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="defaultConverter">
+        <xs:complexType>
+            <xs:attribute name="class" use="required" type="xs:string"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="converters">
+        <xs:complexType>
+           <xs:attribute name="package" type="xs:string"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="querySetConfig">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="querySet" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="dbName" type="xs:string"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="queryExecutor">
+        <xs:complexType>
+            <xs:attribute name="type" type="queryExecutorType" use="optional"
+                          default="MongoDriver"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="queryAnalyzer">
+        <xs:complexType>
+            <xs:attribute name="type" type="queryExecutorAnalyzerType" use="optional"
+                          default="jexl"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="mongo">
+        <xs:complexType>
+            <xs:attribute name="host" type="xs:string" use="optional" default="localhost"/>
+            <xs:attribute name="port" type="xs:integer" use="optional" default="27017"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="context">
+        <xs:complexType mixed="true">
+            <xs:sequence>
+                <xs:element ref="querySetConfig" minOccurs="1" maxOccurs="1"/>
+                <xs:element ref="queryExecutor" minOccurs="0" maxOccurs="1"/>
+                <xs:element ref="queryAnalyzer" minOccurs="0" maxOccurs="1"/>
+                <xs:element ref="mongo" minOccurs="0" maxOccurs="1"/>
+                <xs:element ref="defaultConverter" minOccurs="0" maxOccurs="1"/>
+                <xs:element ref="converters" minOccurs="0" maxOccurs="1"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+</xs:schema>

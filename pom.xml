@@ -1,0 +1,74 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.git.mingo</groupId>
+    <artifactId>mingo</artifactId>
+    <packaging>pom</packaging>
+    <version>1.0.0</version>
+    <name>Mingo framework</name>
+
+    <properties>
+        <slf4jVersion>1.7.5</slf4jVersion>
+        <commonsCollectionsVersion>3.2.1</commonsCollectionsVersion>
+        <commonsLang3Version>3.1</commonsLang3Version>
+        <ver.surefire-plugin>2.13</ver.surefire-plugin>
+        <org.springframework.version>3.2.2.RELEASE</org.springframework.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <guavaVersion>14.0.1</guavaVersion>
+        <mongoDriverVersion>2.11.2</mongoDriverVersion>
+        <embedmongo-version>0.1.9</embedmongo-version>
+        <mavenRepoPath/> <!-- pass the value from the command line as -DmavenRepoPath={path} -->
+    </properties>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <configuration>
+                        <source>1.7</source>
+                        <target>1.7</target>
+                        <encoding>UTF-8</encoding>
+                    </configuration>
+                </plugin>
+
+                <plugin>
+                    <groupId>com.github.joelittlejohn.embedmongo</groupId>
+                    <artifactId>embedmongo-maven-plugin</artifactId>
+                    <version>${embedmongo-version}</version>
+                    <executions>
+                        <execution>
+                            <id>start</id>
+                            <goals>
+                                <goal>start</goal>
+                                <!-- use the 'run' goal instead to start mongodb and wait -->
+                            </goals>
+                            <configuration>
+                                <logging>none</logging>
+                                <port>27017</port>
+                                <version>2.4.3</version>
+                                <databaseDirectory>${project.build.directory}/mongotest
+                                </databaseDirectory>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>stop</id>
+                            <goals>
+                                <goal>stop</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+    <modules>
+        <module>mingo-core</module>
+        <module>mingo-test</module>
+    </modules>
+</project>

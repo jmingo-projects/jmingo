@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<querySet xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="../../../../main/resources/xml-schema/query.xsd">
+
+    <config dbName="testDb" collectionName="testCollection"/>
+
+    <query id="query-1">
+        {$match : {"title": "#title"}}
+    </query>
+
+    <query id="query-2">body query-2</query>
+
+</querySet>

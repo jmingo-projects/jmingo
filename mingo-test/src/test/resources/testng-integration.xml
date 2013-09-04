@@ -1,0 +1,8 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+<suite name="MingoTestIntegration" annotations="JDK">
+    <test name="mingo-test-integration" verbose="10" annotations="JDK">
+        <packages>
+            <package name="com.mingo.integ.repository"/>
+        </packages>
+    </test>
+</suite>

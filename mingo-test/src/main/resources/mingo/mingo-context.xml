@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<context>
+
+    <querySetConfig dbName="mingotest">
+        <querySet path="/mingo/testQuerySet.xml"/>
+        <querySet path="/mingo/userQuerySet.xml"/>
+        <querySet path="/mingo/reviewQuerySet.xml"/>
+    </querySetConfig>
+
+    <queryExecutor type="MongoDriver"/>
+    <queryAnalyzer type="jexl"/>
+
+    <!--<mongo port="27017" host="localhost"/>-->
+
+    <!--<defaultConverter class="com.mingo.convert.DefaultConverter"/>-->
+    <converters package="com.mingo.converter"/>
+</context>

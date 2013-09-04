@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<querySet>
+
+    <config collectionName="test"/>
+
+    <query id="getTestByName" type="aggregation">
+        <case id="nameNotEmpty" condition="not empty(name)">
+            {$match: {name : "#name"}}</case>
+    </query>
+    <query id="getTestById" type="simple">
+            {'_id' : "#id"}
+    </query>
+    <query id="getTestByIdentifier" type="aggregation">
+            {$match: {identifier : "#identifier"}}
+    </query>
+</querySet>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<querySet xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:noNamespaceSchemaLocation="../../../../main/resources/xml-schema/query.xsd">
+
+    <config collectionName="collectionOne"/>
+
+    <query id="query-1" type="aggregation">
+        db.review.aggregate({ "$match" : { , { "$unwind" : "$tags"} ,
+        { "$project" : { "moderationStatus" : 1 , "tags" : 1 , "count" : { "$add" : [ 1]}}} ,
+        { "$group" : { "_id" : "$tags" , "totalCount" : { "$sum" : "$count"}}});
+    </query>
+
+</querySet>

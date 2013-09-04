@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+    <!-- QUERY SCHEMA -->
+
+    <!-- definition of simple types -->
+    <xs:simpleType name="ID" id="ID">
+        <xs:restriction base="xs:NCName"/>
+    </xs:simpleType>
+
+    <xs:simpleType name="queryType">
+        <xs:restriction base="xs:normalizedString">
+            <xs:enumeration value="aggregation"/>
+            <xs:enumeration value="simple"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <!-- definition of simple elements -->
+    <xs:element name="body" type="xs:string" nillable="true"/>
+
+    <!-- definition of attributes -->
+    <xs:attribute name="id" type="xs:ID"/>
+    <xs:attribute name="condition" type="xs:string"/>
+
+    <xs:element name="config">
+        <xs:complexType>
+            <xs:attribute name="dbName" type="xs:string"/>
+            <xs:attribute name="collectionName" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="queryFragment">
+        <xs:complexType mixed="true">
+            <xs:attribute ref="id" use="required"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="fragment">
+        <xs:complexType>
+            <xs:attribute name="ref" use="required" type="xs:string"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="case">
+        <xs:complexType mixed="true">
+            <!--<xs:attribute ref="condition" use="optional"/>-->
+            <xs:sequence>
+                <xs:element ref="fragment" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute ref="id" use="required"/>
+            <xs:attribute name="type" type="queryType" use="optional"/>
+            <xs:attribute ref="condition" use="required"/>
+            <xs:attribute name="priority" type="xs:integer" default="0"/>
+            <xs:attribute name="converter-class" type="xs:string"/>
+            <xs:attribute name="converter-method" type="xs:string"/>
+            <xs:attribute name="converter-inherit" type="xs:boolean" default="true"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="query">
+        <xs:complexType mixed="true">
+            <xs:sequence>
+                <xs:element ref="case" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="fragment" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute ref="id" use="required"/>
+            <!-- <xs:attribute name="extends" type="xs:string"/>-->
+            <xs:attribute name="type" type="queryType" default="simple"/>
+            <xs:attribute name="converter-class" type="xs:string"/>
+            <xs:attribute name="converter-method" type="xs:string"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="querySet">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="config" minOccurs="1" maxOccurs="1"/>
+                <xs:element ref="queryFragment" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="query" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+</xs:schema>
+

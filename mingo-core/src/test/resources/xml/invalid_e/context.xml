@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<context xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="../../../../main/resources/xml-schema/context.xsd">
+
+
+    <querySetConfig>
+        <querySet path="/xml/invalid_e/query1.xml"/>
+    </querySetConfig>
+
+    <queryExecutor type="MongoDriver"/>
+    <queryAnalyzer type="jexl"/>
+
+    <mongo port="27017" host="localhost"/>
+
+
+
+</context>

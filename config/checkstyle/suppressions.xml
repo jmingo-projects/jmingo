@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE suppressions PUBLIC
+    "-//Puppy Crawl//DTD Suppressions 1.1//EN"
+    "http://www.puppycrawl.com/dtds/suppressions_1_1.dtd">
+
+<suppressions>
+
+    <suppress checks="JavadocMethod" files=".*Test"/>
+    <suppress checks="MagicNumber" files=".*Test"/>
+    <suppress checks="MethodLength" files=".*Test"/>
+    <suppress checks="ExecutableStatementCount" files=".*Test"/>
+    <!-- Disabled due to this issue: http://sourceforge.net/tracker/index.php?func=detail&aid=3441097&group_id=29721&atid=397078 -->
+    <suppress checks="InnerAssignment" files=".*java"/>
+    <!--Disabled for now. Need to check only methods logic, but not the name and javadocs-->
+    <suppress checks="StrictDuplicateCode" files=".*java"/>
+
+</suppressions>

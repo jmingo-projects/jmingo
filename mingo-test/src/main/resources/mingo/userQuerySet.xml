@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<querySet>
+
+    <config collectionName="user"/>
+
+    <query id="getByName" type="aggregation">
+            {$match: {name : "#name"}}
+    </query>
+
+</querySet>
