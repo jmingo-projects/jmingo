@@ -25,7 +25,6 @@ import java.util.Map;
  */
 public class QueryStatement {
 
-
     private String preparedQuery;
 
     private String dbName;
@@ -37,6 +36,9 @@ public class QueryStatement {
     private String converterMethod;
 
     private QueryType queryType = QueryType.SIMPLE;
+
+    /* escape null parameters*/
+    private boolean escapeNullParameters;
 
     /**
      * Gets prepared query.
@@ -93,6 +95,15 @@ public class QueryStatement {
     }
 
     /**
+     * Gets escape null parameters mode.
+     *
+     * @return true or false
+     */
+    public boolean isEscapeNullParameters() {
+        return escapeNullParameters;
+    }
+
+    /**
      * Constructor with parameters.
      *
      * @param context    mingo context
@@ -126,11 +137,13 @@ public class QueryStatement {
             converterClass = queryCase.getConverter();
             converterMethod = queryCase.getConverterMethod();
             queryType = queryCase.getQueryType();
+            escapeNullParameters = pQuery.isEscapeNullParameters();
         } else {
             preparedQuery = replaceQueryParameters(pQuery.getBody(), parameters);
             converterClass = pQuery.getConverter();
             converterMethod = pQuery.getConverterMethod();
             queryType = pQuery.getQueryType();
+            escapeNullParameters = pQuery.isEscapeNullParameters();
         }
     }
 

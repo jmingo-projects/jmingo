@@ -1,6 +1,6 @@
 package com.mingo.executor;
 
-import com.mingo.query.aggregation.PipelineBuilder;
+import com.mingo.query.parser.QueryParser;
 import com.mongodb.AggregationOutput;
 import com.mongodb.BasicDBList;
 import com.mongodb.DBCollection;
@@ -26,25 +26,24 @@ public abstract class AbstractQueryExecutor implements QueryExecutor {
 
     protected final static int FIRST_ELEMENT = 0;
 
-    private final PipelineBuilder pipelineBuilder = new PipelineBuilder();
+    private final QueryParser queryParser = new QueryParser();
 
-    protected PipelineBuilder getPipelineBuilder() {
-        return pipelineBuilder;
+    protected QueryParser getQueryParser() {
+        return queryParser;
     }
 
     /**
      * Perform aggregation query.
      *
      * @param dbCollection db collection
-     * @param query        query
+     * @param operators    operators
      * @return {@link AggregationOutput}
      */
-    protected AggregationOutput performAggregationQuery(DBCollection dbCollection, String query) {
+    protected AggregationOutput performAggregationQuery(DBCollection dbCollection, BasicDBList operators) {
         Assert.notNull(dbCollection, "dbCollection cannot be null");
-        Assert.hasText(query, "query cannot be null or empty");
-        BasicDBList operatorsDB = pipelineBuilder.buildAggregation(query);
-        DBObject firstOperator = (DBObject) operatorsDB.remove(FIRST_ELEMENT);
-        return dbCollection.aggregate(firstOperator, operatorsDB.toArray(new DBObject[FIRST_ELEMENT]));
+        Assert.notEmpty(operators, "operators cannot be null or empty");
+        DBObject firstOperator = (DBObject) operators.remove(FIRST_ELEMENT);
+        return dbCollection.aggregate(firstOperator, operators.toArray(new DBObject[FIRST_ELEMENT]));
     }
 
 }

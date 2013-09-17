@@ -154,7 +154,7 @@ public class MongoQueryExecutor extends AbstractQueryExecutor implements QueryEx
         <T> List<T> queryForList(QueryStatement queryStatement, Class<T> type) {
             DBCollection dbCollection = getDbCollection(queryStatement);
             AggregationOutput aggregationOutput = performAggregationQuery(dbCollection,
-                queryStatement.getPreparedQuery());
+                (BasicDBList) getQueryParser().parse(queryStatement));
             BasicDBList source = getAsBasicDBList(aggregationOutput);
             List<T> result = convertList(type, source, queryStatement.getConverterClass(),
                 queryStatement.getConverterMethod());
@@ -165,7 +165,7 @@ public class MongoQueryExecutor extends AbstractQueryExecutor implements QueryEx
         <T> T queryForObject(QueryStatement queryStatement, Class<T> type) {
             DBCollection dbCollection = getDbCollection(queryStatement);
             AggregationOutput aggregationOutput = performAggregationQuery(dbCollection,
-                queryStatement.getPreparedQuery());
+                (BasicDBList) getQueryParser().parse(queryStatement));
             BasicDBList result = getAsBasicDBList(aggregationOutput);
             return convertOne(type, result, queryStatement.getConverterClass(), queryStatement.getConverterMethod());
         }
@@ -179,7 +179,7 @@ public class MongoQueryExecutor extends AbstractQueryExecutor implements QueryEx
         @Override
         <T> List<T> queryForList(QueryStatement queryStatement, Class<T> type) {
             DBCollection dbCollection = getDbCollection(queryStatement);
-            DBCursor source = dbCollection.find(getPipelineBuilder().build(queryStatement.getPreparedQuery()));
+            DBCursor source = dbCollection.find(getQueryParser().parse(queryStatement));
             List<T> result = convertList(type, source, queryStatement.getConverterClass(),
                 queryStatement.getConverterMethod());
             return result != null ? result : Lists.<T>newArrayList();
@@ -188,7 +188,7 @@ public class MongoQueryExecutor extends AbstractQueryExecutor implements QueryEx
         @Override
         <T> T queryForObject(QueryStatement queryStatement, Class<T> type) {
             DBCollection dbCollection = getDbCollection(queryStatement);
-            DBObject result = dbCollection.findOne(getPipelineBuilder().build(queryStatement.getPreparedQuery()));
+            DBObject result = dbCollection.findOne(getQueryParser().parse(queryStatement));
             return convertOne(type, result, queryStatement.getConverterClass(), queryStatement.getConverterMethod());
         }
     }

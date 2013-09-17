@@ -4,10 +4,13 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.mongodb.util.JSON;
 import com.mongodb.util.JSONCallback;
+import net.jcip.annotations.ThreadSafe;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
+import org.bson.BSONCallback;
+
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
-import org.apache.commons.lang3.StringUtils;
-import org.bson.BSONCallback;
 
 /**
  * Copyright 2012-2013 The Mingo Team
@@ -25,7 +28,16 @@ import org.bson.BSONCallback;
  * limitations under the License.
  * <p/>
  * This class is implementation of {@link com.mingo.query.parser.json.JsonParser} interface.
+ * <p/>
+ * Conditions with empty values will be removed from pipeline.
+ * Example:
+ * source: {$match : { "field1": { $in: []}, "field2": { "$gt" : "value2"}}}
+ * after build:[{$match : {field2": { "$gt" : "value2"}}}]
+ * <p/>
+ * source: {$match : { "field1": { $in: [value1, value2]}, "field2": { "$gt" : ""}}}
+ * after build:[ {$match : { "field1": { $in: [value1, value2]}}} ]
  */
+@ThreadSafe
 public class EscapeParser implements JsonParser {
 
     private BSONCallback bsonCallback = new CustomJSONCallback();
@@ -38,6 +50,7 @@ public class EscapeParser implements JsonParser {
     @Override
     public DBObject parse(String json) {
         lock.lock();
+        Validate.notBlank(json, "json cannot be null or empty.");
         try {
             return (DBObject) JSON.parse(json, bsonCallback);
         } finally {
@@ -53,14 +66,14 @@ public class EscapeParser implements JsonParser {
         @Override
         public void gotString(String name, String v) {
             // exclude fields with empty parameters
-            if(StringUtils.isNotEmpty(v)) {
+            if (StringUtils.isNotEmpty(v)) {
                 super.gotString(name, v);
             }
         }
 
         @Override
         protected void _put(String name, Object val) {
-            if(isElementNotEmpty(val)) {
+            if (isElementNotEmpty(val)) {
                 super._put(name, val);
             }
         }
@@ -70,7 +83,7 @@ public class EscapeParser implements JsonParser {
             String name = curName();
             Object done = super.objectDone();
 
-            if(name != null && !isElementNotEmpty(done)) {
+            if (name != null && !isElementNotEmpty(done)) {
                 return cur().removeField(name);
             }
             return done;
@@ -78,14 +91,14 @@ public class EscapeParser implements JsonParser {
     }
 
     private boolean isElementNotEmpty(Object value) {
-        if(value instanceof BasicDBObject) {
+        if (value instanceof BasicDBObject) {
             BasicDBObject dbObjVal = (BasicDBObject) value;
-            if(dbObjVal.isEmpty()) {
+            if (dbObjVal.isEmpty()) {
                 return false;
             }
-            for(Map.Entry<String, Object> entry : dbObjVal.entrySet()) {
+            for (Map.Entry<String, Object> entry : dbObjVal.entrySet()) {
                 boolean tmp = isElementNotEmpty(entry.getValue());
-                if(!tmp) {
+                if (!tmp) {
                     return false;
                 } else {
                     continue;

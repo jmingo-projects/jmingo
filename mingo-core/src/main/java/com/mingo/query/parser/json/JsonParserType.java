@@ -1,10 +1,5 @@
 package com.mingo.query.parser.json;
 
-import com.mongodb.DBObject;
-import com.mongodb.util.JSON;
-import net.jcip.annotations.ThreadSafe;
-import org.apache.commons.lang3.Validate;
-
 /**
  * Copyright 2012-2013 The Mingo Team
  * <p/>
@@ -19,18 +14,32 @@ import org.apache.commons.lang3.Validate;
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * <p/>
- * This class is implementation of {@link com.mingo.query.parser.json.JsonParser} interface.
  */
-@ThreadSafe
-public class DefaultJsonParser implements JsonParser {
+public enum JsonParserType {
 
     /**
-     * {@inheritDoc}.
+     * Represents {@link com.mingo.query.parser.json.DefaultJsonParser} parser.
      */
-    @Override
-    public synchronized DBObject parse(String json) {
-        Validate.notBlank(json, "json cannot be null or empty.");
-        return (DBObject) JSON.parse(json);
+    DEFAULT(new DefaultJsonParser()),
+
+    /**
+     * Represents {@link com.mingo.query.parser.json.EscapeParser} parser.
+     */
+    ESCAPE(new EscapeParser());
+
+    private JsonParser jsonParser;
+
+    private JsonParserType(JsonParser jsonParser) {
+        this.jsonParser = jsonParser;
     }
+
+    /**
+     * Gets json parser.
+     *
+     * @return json parser
+     */
+    public JsonParser getJsonParser() {
+        return jsonParser;
+    }
+
 }

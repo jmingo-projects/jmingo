@@ -29,6 +29,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * limitations under the License.
  */
 @ThreadSafe
+@Deprecated /* use com.mingo.query.parser.QueryParser */
 public class PipelineBuilder {
 
     private static final String DEFAULT_QUERY = "{$match : {}}";

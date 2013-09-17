@@ -53,7 +53,7 @@
             <xs:attribute name="converter-class" type="xs:string"/>
             <xs:attribute name="converter-method" type="xs:string"/>
             <xs:attribute name="converter-inherit" type="xs:boolean" default="true"/>
-            <xs:attribute name="escape-null-parameters" type="xs:boolean" default="true"/>
+           <!-- <xs:attribute name="escape-null-parameters" type="xs:boolean" default="true"/>-->
         </xs:complexType>
     </xs:element>
 

@@ -4,9 +4,8 @@
 
     <config collectionName="test"/>
 
-    <query id="getTestByName" type="aggregation">
-        <case id="nameNotEmpty" condition="not empty(name)">
-            {$match: {name : "#name"}}</case>
+    <query id="getTestByName" type="aggregation" escape-null-parameters="false">
+        {$match: {name : "#name"}}
     </query>
     <query id="getTestById" type="simple">
             {'_id' : "#id"}

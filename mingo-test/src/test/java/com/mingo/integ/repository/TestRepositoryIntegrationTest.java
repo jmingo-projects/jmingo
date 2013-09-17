@@ -2,6 +2,7 @@ package com.mingo.integ.repository;
 
 import com.mingo.domain.Item;
 import com.mingo.repository.api.ITestRepository;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.testng.Assert;
@@ -58,10 +59,10 @@ public class TestRepositoryIntegrationTest extends CommonIntegrationTest {
         Assert.assertEquals(savedTestList.size(), 2);
     }
 
-    @Test(groups = "integration", expectedExceptions = RuntimeException.class)
+    @Test(groups = "integration")
     public void testSaveAndReadByEmptyName() {
         List<com.mingo.domain.Test> savedTestList = testRepository.getByName("");
-        Assert.assertNull(savedTestList);
+        Assert.assertTrue(CollectionUtils.isEmpty(savedTestList));
     }
 
     private com.mingo.domain.Test createTest(String identifier, String suffix) {
