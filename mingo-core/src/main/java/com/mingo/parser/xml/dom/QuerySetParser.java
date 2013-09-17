@@ -78,6 +78,7 @@ public class QuerySetParser implements Parser<QuerySet> {
     private static final String CONVERTER_CLASS_ATTR = "converter-class";
     private static final String CONVERTER_METHOD_ATTR = "converter-method";
     private static final String CONVERTER_INHERIT_ATTR = "converter-inherit";
+    private static final String ESCAPE_NULL_PARAMETERS = "escape-null-parameters";
     private static final String DB_NAME = "dbName";
     private static final String TYPE_ATTR = "type";
 
@@ -190,6 +191,7 @@ public class QuerySetParser implements Parser<QuerySet> {
         query.setQueryType(QueryType.getByName(attributes.get(TYPE_ATTR)));
         query.setConverter(attributes.get(CONVERTER_CLASS_ATTR));
         query.setConverterMethod(attributes.get(CONVERTER_METHOD_ATTR));
+        query.setEscapeNullParameters(getAttributeBoolean(node, ESCAPE_NULL_PARAMETERS));
         if (node.hasChildNodes()) {
             NodeList childList = node.getChildNodes();
             for (int i = 0; i < childList.getLength(); i++) {

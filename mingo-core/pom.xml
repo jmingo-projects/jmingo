@@ -101,7 +101,7 @@
                     </configLocation>
                     <suppressionsFile>${project.parent.basedir}/config/checkstyle/suppressions.xml
                     </suppressionsFile>
-                    <excludes>**/PipelineBuilder.java</excludes>
+                    <excludes>**/PipelineBuilder.java, **/EscapeParser.java</excludes>
                 </configuration>
                 <executions>
                     <execution>

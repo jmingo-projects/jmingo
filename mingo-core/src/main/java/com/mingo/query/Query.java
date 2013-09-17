@@ -37,6 +37,9 @@ public class Query {
 
     private String converterMethod;
 
+    /* escape null parameters*/
+    private boolean escapeNullParameters = true;
+
     private QueryType queryType = QueryType.SIMPLE;
 
     private Set<QueryCase> cases = Collections.emptySet();
@@ -214,13 +217,32 @@ public class Query {
         return filtered.iterator().next();
     }
 
+    /**
+     * Gets escape null parameters mode.
+     *
+     * @return true or false
+     */
+    public boolean isEscapeNullParameters() {
+        return escapeNullParameters;
+    }
+
+    /**
+     * Sets escape null parameters mode.
+     *
+     * @param escapeNullParameters true or false
+     */
+    public void setEscapeNullParameters(boolean escapeNullParameters) {
+        this.escapeNullParameters = escapeNullParameters;
+    }
+
     @Override
     public String toString() {
         return "Query{" +
             "id='" + id + '\'' +
             ", compositeId='" + compositeId + '\'' +
             ", body='" + body + '\'' +
-            ", queryType=" + queryType +
+            ", queryType=" + queryType + '\'' +
+            ", escapeNullParameters=" + escapeNullParameters + '\'' +
             ", cases=" + cases +
             '}';
     }
