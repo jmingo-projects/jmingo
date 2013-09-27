@@ -9,6 +9,7 @@ import static com.mingo.parser.xml.dom.DomUtil.getFirstNecessaryTagOccurrence;
 import static com.mingo.parser.xml.dom.DomUtil.isNotEmpty;
 import static com.mingo.query.util.QueryUtils.validate;
 import static com.mingo.query.util.QueryUtils.wrap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.mingo.exceptions.ParserException;
 import com.mingo.parser.Parser;
@@ -17,6 +18,8 @@ import com.mingo.query.QueryCase;
 import com.mingo.query.QueryFragment;
 import com.mingo.query.QuerySet;
 import com.mingo.query.QueryType;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBObject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
@@ -82,7 +85,7 @@ public class QuerySetParser implements Parser<QuerySet> {
     private static final String DB_NAME = "dbName";
     private static final String TYPE_ATTR = "type";
 
-    private static final String INVALID_QUERY_ERROR_MSG = "invalid query with id: {}. Query: {}";
+    private static final String INVALID_QUERY_ERROR_MSG = "invalid query format with id: {}. Query: {}";
 
     /**
      * Constructor with parameters.
@@ -156,8 +159,11 @@ public class QuerySetParser implements Parser<QuerySet> {
      */
     private QueryFragment parseQueryFragment(Node fragmentNode) {
         String fragmentId = getAttributeString(fragmentNode, ID);
+        String condition = getAttributeString(fragmentNode, CONDITION);
         String fragmentBody = processString(fragmentNode.getTextContent());
-        return new QueryFragment(fragmentId, fragmentBody);
+        QueryFragment queryFragment = new QueryFragment(fragmentId, fragmentBody);
+        queryFragment.setCondition(condition);
+        return queryFragment;
     }
 
     /**
@@ -197,7 +203,7 @@ public class QuerySetParser implements Parser<QuerySet> {
             for (int i = 0; i < childList.getLength(); i++) {
                 Node child = childList.item(i);
                 // parse query body
-                parseBody(queryBodyBuilder, child, querySet);
+                parseBody(queryBodyBuilder, child, querySet, query.getQueryType());
                 // parse <case> tag
                 parseCaseTag(child, query, querySet);
             }
@@ -243,7 +249,7 @@ public class QuerySetParser implements Parser<QuerySet> {
             NodeList childList = node.getChildNodes();
             for (int i = 0; i < childList.getLength(); i++) {
                 Node child = childList.item(i);
-                parseBody(caseBodyBuilder, child, querySet);
+                parseBody(caseBodyBuilder, child, querySet, type);
             }
 
             queryCase.setBody(StringUtils.strip(caseBodyBuilder.toString()));
@@ -255,7 +261,8 @@ public class QuerySetParser implements Parser<QuerySet> {
         query.addQueryCase(queryCase);
     }
 
-    private void parseBody(StringBuilder builder, Node node, QuerySet querySet) throws ParserException {
+    private void parseBody(StringBuilder builder, Node node, QuerySet querySet,
+                           QueryType queryType) throws ParserException {
         if (node == null) {
             return;
         }
@@ -265,20 +272,35 @@ public class QuerySetParser implements Parser<QuerySet> {
                 builder.append(processString(body));
             }
         } else if (FRAGMENT.equals(node.getNodeName())) {
-            applyFragment(builder, getFragmentRef(node), querySet);
+            applyFragment(builder, getFragmentRef(node), querySet, queryType);
         }
     }
 
-    private String getFragmentRef(Node child) {
-        return getAttributeString(child, FRAGMENT_REF_ATTR);
+    private QueryFragment getFragmentRef(Node child) {
+        QueryFragment fragment = new QueryFragment();
+        fragment.setId(getAttributeString(child, FRAGMENT_REF_ATTR));
+        fragment.setCondition(getAttributeString(child, CONDITION));
+        return fragment;
     }
 
-    private void applyFragment(StringBuilder body, String fRef, QuerySet querySet) throws ParserException {
-        QueryFragment queryFragment = querySet.getQueryFragmentById(fRef);
+    private void applyFragment(StringBuilder body, QueryFragment fragment, QuerySet querySet,
+                               QueryType queryType) throws ParserException {
+        QueryFragment queryFragment = querySet.getQueryFragmentById(fragment.getId());
         if (queryFragment != null) {
-            body.append(processString(queryFragment.getBody()));
+            if (StringUtils.isNotBlank(fragment.getCondition()) && QueryType.AGGREGATION.equals(queryType)) {
+                /******************************************/
+                // TODO implement without DBObject
+                DBObject frObj =
+                    new BasicDBObject(FRAGMENT,
+                        Lists.newArrayList(new BasicDBObject(CONDITION, fragment.getCondition()),
+                            new BasicDBObject("body", queryFragment.getBody())));
+                body.append(frObj.toString());
+                /******************************************/
+            } else {
+                body.append(processString(queryFragment.getBody()));
+            }
         } else {
-            throw new ParserException("not found query fragment for ref: " + fRef);
+            throw new ParserException("not found query fragment for ref: " + fragment.getId());
         }
     }
 

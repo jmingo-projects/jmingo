@@ -24,6 +24,8 @@ public class QueryFragment {
 
     private String body;
 
+    private String condition;
+
     /**
      * Default constructor.
      */
@@ -78,6 +80,24 @@ public class QueryFragment {
     }
 
     /**
+     * Gets condition.
+     *
+     * @return condition
+     */
+    public String getCondition() {
+        return condition;
+    }
+
+    /**
+     * Sets condition.
+     *
+     * @param condition condition
+     */
+    public void setCondition(String condition) {
+        this.condition = condition;
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -93,6 +113,7 @@ public class QueryFragment {
         return new EqualsBuilder()
             .append(id, that.id)
             .append(body, that.body)
+            .append(condition, that.condition)
             .isEquals();
     }
 
@@ -104,6 +125,8 @@ public class QueryFragment {
         return new HashCodeBuilder()
             .append(id)
             .append(body)
+            .append(condition)
             .toHashCode();
     }
+
 }

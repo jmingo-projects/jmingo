@@ -47,6 +47,7 @@ public final class QueryUtils {
     private static final String PARAMETER_PREFIX = "#";
     private static final String PARAMETER_PATTERN = "\"" + PARAMETER_PREFIX + "{}\"";
     private static final String PIPELINE_TEMPLATE = "[{}]";
+    private static final String OPERATION_TEMPLATE = "{{}}";
     private static final ObjectSerializer OBJECT_SERIALIZER = JSONSerializers.getLegacy();
 
     /**
@@ -175,6 +176,16 @@ public final class QueryUtils {
     }
 
     /**
+     * Wraps query in {} brackets.
+     *
+     * @param query query
+     * @return wrapped query
+     */
+    public static String wrapInBracket(String query) {
+        return format(OPERATION_TEMPLATE, query).getMessage();
+    }
+
+    /**
      * Replace parameters in query.
      *
      * @param query      query
@@ -197,6 +208,7 @@ public final class QueryUtils {
         }
         return removeParameters(query);
     }
+
 
     private static String removeParameters(String query) {
         if (StringUtils.isBlank(query)) {
