@@ -13,10 +13,14 @@
         {'body' : 'query-2-fragment'}
     </queryFragment>
 
-    <query id="query-1" type="aggregation">
+   <query id="query-1" type="aggregation">
         <fragment ref="query-1f" condition="empty(name1)"/>,
         {'body' : 'query-1'},
         <fragment ref="query-2f" condition="not empty(name2)"/>
+    </query>
+
+    <query id="query-2" type="aggregation">
+        <fragment ref="query-1f" condition="not empty(name1)"/>
     </query>
 
 <!--

@@ -10,6 +10,10 @@
         {$group: {_id: "$tags", totalCount: {$sum: "$count"}}}
     </queryFragment>
 
+    <queryFragment id="moderationStatusFragment">
+        {$match : {"moderationStatus": "#moderationStatus"}}
+    </queryFragment>
+
     <query id="getById" type="simple">
         {'_id' : "#id"}
     </query>
@@ -26,7 +30,7 @@
            converter-class="com.mingo.converter.ReviewSpecificConverter"
            converter-method="convertCountByTags">
         <case id="moderationStatusNotEmpty" condition="not empty(moderationStatus)">
-            {$match : {"moderationStatus": "#moderationStatus"}},
+            <fragment ref="moderationStatusFragment" condition="not empty(moderationStatus)"/>,
             <fragment ref="getCountByTagsCommon"/>
         </case>
         {$match : {"moderationStatus": "STATUS_NOT_MODERATED"}},
@@ -48,7 +52,7 @@
         {$match : { "rating": "#rating"}}
     </query>
     <query id="getByModerationStatus" type="aggregation">
-        {$match : { "moderationStatus": "#moderationStatus"}}
+        {$match : {"moderationStatus": "#moderationStatus"}}
     </query>
 
     <query id="getByMultipleParameters" type="aggregation">

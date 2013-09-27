@@ -7,6 +7,7 @@ import com.mingo.query.Query;
 import com.mingo.query.fragment.QueryFragmentInjector;
 import com.mingo.util.ParameterBuilder;
 import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -18,6 +19,13 @@ import java.util.Map;
 public class QueryFragmentInjectorTest {
 
     private QueryFragmentInjector queryFragmentManager = new QueryFragmentInjector();
+
+    private Context context;
+
+    @BeforeClass
+    private void setUp() throws ContextInitializationException {
+        context = ContextLoader.getInstance().load("/xml/correct_fragment/context.xml");
+    }
 
     @DataProvider(name = "testAggregationQueryProvider")
     public Object[][] testAggregationQueryProvider() {
@@ -34,15 +42,20 @@ public class QueryFragmentInjectorTest {
     }
 
     @Test(groups = "unit", dataProvider = "testAggregationQueryProvider")
-    public void testAggregationQuery(Map<String, Object> parameters, String expected) throws ContextInitializationException {
-        String contextPath = "/xml/correct_fragment/context.xml";
-        // when
-        Context context = ContextLoader.getInstance().load(contextPath);
+    public void testAggregationQueryOne(Map<String, Object> parameters, String expected) throws ContextInitializationException {
         Query query = context.getQueryByCompositeId("dbTest.collection.query-1");
         String result = queryFragmentManager.injectFragments(query, parameters);
-        System.out.println(result);
         Assert.assertEquals(result, expected);
-        Assert.assertNotNull(query);
+    }
+
+    @Test
+    public void testAggregationQueryTwo() throws ContextInitializationException {
+        Query query = context.getQueryByCompositeId("dbTest.collection.query-2");
+        String result1 = queryFragmentManager.injectFragments(query, new ParameterBuilder().add("name1", "test").build());
+        Assert.assertEquals(result1, "{'body' : 'query-1-fragment'},{'body2' : 'query-1-fragment'}");
+
+        String result2 = queryFragmentManager.injectFragments(query, new ParameterBuilder().add("name1", "").build());
+        Assert.assertEquals(result2, "");
     }
 
 }
