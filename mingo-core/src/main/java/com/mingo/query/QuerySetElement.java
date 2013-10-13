@@ -18,14 +18,25 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-public class QueryFragment extends QuerySetElement {
+public class QuerySetElement {
 
-    private String condition;
+    private String id;
+
+    private String body;
 
     /**
      * Default constructor.
      */
-    public QueryFragment() {
+    public QuerySetElement() {
+    }
+
+    /**
+     * Constructor with parameters.
+     *
+     * @param id id
+     */
+    public QuerySetElement(String id) {
+        this.id = id;
     }
 
     /**
@@ -34,27 +45,45 @@ public class QueryFragment extends QuerySetElement {
      * @param id   id
      * @param body body
      */
-    public QueryFragment(String id, String body) {
-        super(id, body);
-    }
-
-
-    /**
-     * Gets condition.
-     *
-     * @return condition
-     */
-    public String getCondition() {
-        return condition;
+    public QuerySetElement(String id, String body) {
+        this.id = id;
+        this.body = body;
     }
 
     /**
-     * Sets condition.
+     * Gets id.
      *
-     * @param condition condition
+     * @return id
      */
-    public void setCondition(String condition) {
-        this.condition = condition;
+    public String getId() {
+        return id;
+    }
+
+    /**
+     * Sets id.
+     *
+     * @param id id
+     */
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    /**
+     * Gets body.
+     *
+     * @return body
+     */
+    public String getBody() {
+        return body;
+    }
+
+    /**
+     * Sets body.
+     *
+     * @param body body
+     */
+    public void setBody(String body) {
+        this.body = body;
     }
 
     /**
@@ -65,14 +94,14 @@ public class QueryFragment extends QuerySetElement {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof QueryFragment)) {
+        if (!(o instanceof QuerySetElement)) {
             return false;
         }
 
-        QueryFragment that = (QueryFragment) o;
+        QuerySetElement that = (QuerySetElement) o;
         return new EqualsBuilder()
-            .appendSuper(super.equals(o))
-            .append(condition, that.condition)
+            .append(id, that.id)
+            .append(body, that.body)
             .isEquals();
     }
 
@@ -82,9 +111,20 @@ public class QueryFragment extends QuerySetElement {
     @Override
     public int hashCode() {
         return new HashCodeBuilder()
-            .appendSuper(super.hashCode())
-            .append(condition)
+            .append(id)
+            .append(body)
             .toHashCode();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        return "QuerySetElement{" +
+            "id='" + id + '\'' +
+            ", body='" + body + '\'' +
+            '}';
     }
 
 }

@@ -6,6 +6,9 @@ import com.google.common.collect.Sets;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.util.Collections;
 import java.util.Set;
@@ -25,13 +28,9 @@ import java.util.Set;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-public class Query {
-
-    private String id;
+public class Query extends QuerySetElement {
 
     private String compositeId;
-
-    private String body;
 
     private String converter;
 
@@ -45,12 +44,18 @@ public class Query {
     private Set<QueryCase> cases = Collections.emptySet();
 
     /**
+     * Default constructor.
+     */
+    public Query() {
+    }
+
+    /**
      * Constructor with parameters.
      *
      * @param id id
      */
     public Query(String id) {
-        this.id = id;
+        super(id);
     }
 
     /**
@@ -60,26 +65,7 @@ public class Query {
      * @param body body
      */
     public Query(String id, String body) {
-        this.id = id;
-        this.body = body;
-    }
-
-    /**
-     * Gets id.
-     *
-     * @return id
-     */
-    public String getId() {
-        return id;
-    }
-
-    /**
-     * Sets id.
-     *
-     * @param id id
-     */
-    public void setId(String id) {
-        this.id = id;
+        super(id, body);
     }
 
     /**
@@ -98,24 +84,6 @@ public class Query {
      */
     public void setCompositeId(String compositeId) {
         this.compositeId = compositeId;
-    }
-
-    /**
-     * Gets body.
-     *
-     * @return body
-     */
-    public String getBody() {
-        return body;
-    }
-
-    /**
-     * Sets body.
-     *
-     * @param body body
-     */
-    public void setBody(String body) {
-        this.body = body;
     }
 
     /**
@@ -235,16 +203,58 @@ public class Query {
         this.escapeNullParameters = escapeNullParameters;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Query)) {
+            return false;
+        }
+
+        Query that = (Query) o;
+        return new EqualsBuilder()
+            .appendSuper(super.equals(o))
+            .append(compositeId, that.compositeId)
+            .append(converter, that.converter)
+            .append(converterMethod, that.converterMethod)
+            .append(escapeNullParameters, that.escapeNullParameters)
+            .append(queryType, that.queryType)
+            .append(cases, that.cases)
+            .isEquals();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder()
+            .appendSuper(super.hashCode())
+            .append(compositeId)
+            .append(converter)
+            .append(converterMethod)
+            .append(escapeNullParameters)
+            .append(queryType)
+            .append(cases)
+            .toHashCode();
+    }
+
     @Override
     public String toString() {
-        return "Query{" +
-            "id='" + id + '\'' +
-            ", compositeId='" + compositeId + '\'' +
-            ", body='" + body + '\'' +
-            ", queryType=" + queryType + '\'' +
-            ", escapeNullParameters=" + escapeNullParameters + '\'' +
-            ", cases=" + cases +
-            '}';
+        return new ToStringBuilder(this).
+            append("id", getId()).
+            append("body", getBody()).
+            append("compositeId", compositeId).
+            append("converter", converter).
+            append("converterMethod", converterMethod).
+            append("escapeNullParameters", escapeNullParameters).
+            append("queryType", queryType).
+            append("cases", cases).
+            toString();
     }
 
 }

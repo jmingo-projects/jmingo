@@ -1,6 +1,9 @@
 package com.mingo.query;
 
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
  * Copyright 2012-2013 The Mingo Team
@@ -17,17 +20,12 @@ import org.apache.commons.lang3.Validate;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-public class QueryCase implements Comparable<QueryCase> {
-
-    private String id;
+public class QueryCase extends QuerySetElement implements Comparable<QueryCase> {
 
     private int priority;
 
     /* condition define in EL format*/
     private String condition;
-
-    /* contains query which satisfies condition */
-    private String body;
 
     private String converter;
 
@@ -36,21 +34,28 @@ public class QueryCase implements Comparable<QueryCase> {
     private QueryType queryType = QueryType.SIMPLE;
 
     /**
-     * Gets id.
-     *
-     * @return id
+     * Default constructor.
      */
-    public String getId() {
-        return id;
+    public QueryCase() {
     }
 
     /**
-     * Sets id.
+     * Constructor with parameters.
      *
      * @param id id
      */
-    public void setId(String id) {
-        this.id = id;
+    public QueryCase(String id) {
+        super(id);
+    }
+
+    /**
+     * Constructor with parameters.
+     *
+     * @param id   id
+     * @param body body
+     */
+    public QueryCase(String id, String body) {
+        super(id, body);
     }
 
     /**
@@ -87,24 +92,6 @@ public class QueryCase implements Comparable<QueryCase> {
      */
     public void setCondition(String condition) {
         this.condition = condition;
-    }
-
-    /**
-     * Gets body.
-     *
-     * @return body
-     */
-    public String getBody() {
-        return body;
-    }
-
-    /**
-     * Sets body.
-     *
-     * @param body body
-     */
-    public void setBody(String body) {
-        this.body = body;
     }
 
     /**
@@ -163,20 +150,56 @@ public class QueryCase implements Comparable<QueryCase> {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof QueryCase)) {
+            return false;
+        }
+
+        QueryCase that = (QueryCase) o;
+        return new EqualsBuilder()
+            .appendSuper(super.equals(o))
+            .append(converter, that.converter)
+            .append(converterMethod, that.converterMethod)
+            .append(priority, that.priority)
+            .append(queryType, that.queryType)
+            .isEquals();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder()
+            .appendSuper(super.hashCode())
+            .append(converter)
+            .append(converterMethod)
+            .append(priority)
+            .append(queryType)
+            .toHashCode();
+    }
 
     /**
      * {@inheritDoc}
      */
     @Override
     public String toString() {
-        return "QueryCase{" +
-            "id='" + id + '\'' +
-            ", queryType=" + queryType +
-            ", priority=" + priority +
-            ", condition='" + condition + '\'' +
-            ", body='" + body + '\'' +
-            ", converter='" + converter + '\'' +
-            '}';
+        return new ToStringBuilder(this).
+            append("id", getId()).
+            append("body", getBody()).
+            append("priority", priority).
+            append("condition", condition).
+            append("converter", converter).
+            append("converterMethod", converterMethod).
+            append("queryType", queryType).
+            toString();
     }
 
     /**

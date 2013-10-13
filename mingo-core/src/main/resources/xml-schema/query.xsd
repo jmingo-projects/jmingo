@@ -37,7 +37,6 @@
     <xs:element name="fragment">
         <xs:complexType>
             <xs:attribute name="ref" use="required" type="xs:string"/>
-            <xs:attribute name="condition" type="xs:string"/>
         </xs:complexType>
     </xs:element>
 

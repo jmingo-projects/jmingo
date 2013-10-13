@@ -1,6 +1,9 @@
 package com.mingo.convert;
 
+
+import static com.mingo.mongo.util.MongoUtil.toDBObject;
 import com.google.common.collect.Lists;
+import com.mingo.convert.mongo.type.TypeTransformer;
 import com.mongodb.AggregationOutput;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
@@ -14,6 +17,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
 
 /**
  * Copyright 2012-2013 The Mingo Team
@@ -37,7 +41,6 @@ public final class ConversionUtils {
     private ConversionUtils() {
         throw new UnsupportedOperationException("It's prohibited to create instances of the class.");
     }
-
 
     /**
      * Gets first element from source if source has BasicDBList type.
@@ -202,14 +205,12 @@ public final class ConversionUtils {
      * @return field as long
      */
     public static Long getAsLong(String field, Iterable<DBObject> dbItems) {
-        Long value = null;
-        for (Object item : dbItems) {
-            value = getAsLong(field, (DBObject) item);
-            if (value != null) {
-                break;
+        return getAsObject(field, dbItems, new TypeTransformer<Long>() {
+            @Override
+            public Long transform(DBObject dbObject, String fieldName) {
+                return getAsLong(fieldName, dbObject);
             }
-        }
-        return value;
+        });
     }
 
     /**
@@ -220,9 +221,26 @@ public final class ConversionUtils {
      * @return field as integer
      */
     public static Integer getAsInteger(String field, Iterable<DBObject> dbItems) {
-        Integer value = null;
+        return getAsObject(field, dbItems, new TypeTransformer<Integer>() {
+            @Override
+            public Integer transform(DBObject dbObject, String fieldName) {
+                return getAsInteger(fieldName, dbObject);
+            }
+        });
+    }
+
+    /**
+     * Return specified field value as integer.
+     *
+     * @param field   field in result
+     * @param dbItems list of {@link DBObject}
+     * @return field as integer
+     */
+    private static <T> T getAsObject(String field, Iterable<DBObject> dbItems,
+                                     TypeTransformer<T> transformer) {
+        T value = null;
         for (Object item : dbItems) {
-            value = getAsInteger(field, (DBObject) item);
+            value = transformer.transform(toDBObject(item), field);
             if (value != null) {
                 break;
             }
