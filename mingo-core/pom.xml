@@ -95,22 +95,9 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>2.9.1</version>
                 <configuration>
-                    <configLocation>${project.parent.basedir}/config/checkstyle/checkstyle.xml
-                    </configLocation>
-                    <suppressionsFile>${project.parent.basedir}/config/checkstyle/suppressions.xml
-                    </suppressionsFile>
                     <excludes>**/PipelineBuilder.java, **/EscapeParser.java</excludes>
                 </configuration>
-                <executions>
-                    <execution>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>

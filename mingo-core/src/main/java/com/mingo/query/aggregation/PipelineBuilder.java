@@ -133,8 +133,6 @@ public class PipelineBuilder {
                 boolean tmp = isElementNotEmpty(entry.getValue());
                 if (!tmp) {
                     return false;
-                } else {
-                    continue;
                 }
             }
         }

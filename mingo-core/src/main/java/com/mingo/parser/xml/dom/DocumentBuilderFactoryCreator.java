@@ -68,7 +68,7 @@ public class DocumentBuilderFactoryCreator {
             return ImmutableList.of();
         }
 
-        ImmutableList.Builder sourceBuilder = ImmutableList.<Source>builder();
+        ImmutableList.Builder<Source> sourceBuilder = ImmutableList.<Source>builder();
         for (String xsdSchemaPath : xsdSchemaPaths) {
             sourceBuilder.add(createSchemaSource(xsdSchemaPath));
         }
@@ -95,7 +95,7 @@ public class DocumentBuilderFactoryCreator {
     private static Schema createSchema(List<Source> sources) throws ParserConfigurationException {
         Schema schema;
         try {
-            schema = SCHEMA_FACTORY.newSchema(sources.toArray(new Source[0]));
+            schema = SCHEMA_FACTORY.newSchema(sources.toArray(new Source[sources.size()]));
         } catch (SAXException e) {
             throw new ParserConfigurationException(ExceptionUtils.getMessage(e));
         }

@@ -1,7 +1,6 @@
 package com.mingo.convert;
 
 
-import static com.mingo.mongo.util.MongoUtil.toDBObject;
 import com.google.common.collect.Lists;
 import com.mingo.convert.mongo.type.TypeTransformer;
 import com.mongodb.AggregationOutput;
@@ -14,20 +13,22 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 
 import java.text.ParseException;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+
+import static com.mingo.mongo.util.MongoUtil.toDBObject;
 
 
 /**
  * Copyright 2012-2013 The Mingo Team
- * <p/>
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * <p/>
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- * <p/>
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -100,16 +101,10 @@ public final class ConversionUtils {
     }
 
     private static <T> List<T> convertDBList(Class<T> type, BasicDBList basicDBList, Converter<T> converter) {
-        List<T> list = null;
-        if (CollectionUtils.isNotEmpty(basicDBList)) {
-            list = new ArrayList<>();
-            for (Object item : basicDBList) {
-                if (item instanceof DBObject) {
-                    list.add(converter.convert(type, (DBObject) item));
-                }
-            }
+        if (CollectionUtils.isEmpty(basicDBList)) {
+            return Collections.emptyList();
         }
-        return list;
+        return Lists.transform(basicDBList, (item) -> converter.convert(type, cast(item)));
     }
 
     /**
@@ -205,12 +200,7 @@ public final class ConversionUtils {
      * @return field as long
      */
     public static Long getAsLong(String field, Iterable<DBObject> dbItems) {
-        return getAsObject(field, dbItems, new TypeTransformer<Long>() {
-            @Override
-            public Long transform(DBObject dbObject, String fieldName) {
-                return getAsLong(fieldName, dbObject);
-            }
-        });
+        return getAsObject(field, dbItems, (dbObject, fieldName) -> getAsLong(fieldName, dbObject));
     }
 
     /**
@@ -221,12 +211,7 @@ public final class ConversionUtils {
      * @return field as integer
      */
     public static Integer getAsInteger(String field, Iterable<DBObject> dbItems) {
-        return getAsObject(field, dbItems, new TypeTransformer<Integer>() {
-            @Override
-            public Integer transform(DBObject dbObject, String fieldName) {
-                return getAsInteger(fieldName, dbObject);
-            }
-        });
+        return getAsObject(field, dbItems, (dbObject, fieldName) -> getAsInteger(fieldName, dbObject));
     }
 
     /**
@@ -303,6 +288,13 @@ public final class ConversionUtils {
             return false;
         }
         return true;
+    }
+
+    public static DBObject cast(Object source) {
+        if (source instanceof DBObject) {
+            return (DBObject) source;
+        }
+        throw new IllegalArgumentException("source object should be instance of: " + DBObject.class);
     }
 
 }

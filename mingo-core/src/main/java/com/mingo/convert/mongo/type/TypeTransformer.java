@@ -19,6 +19,7 @@ import com.mongodb.DBObject;
  *
  * @param <T> the type of the class modeled by this {@code Class} object.
  */
+@FunctionalInterface
 public interface TypeTransformer<T> {
 
     /**

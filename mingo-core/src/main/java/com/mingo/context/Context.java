@@ -1,10 +1,13 @@
 package com.mingo.context;
 
 import static com.mingo.query.util.QueryUtils.validateCompositeId;
+
+import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.mingo.convert.Converter;
 import com.mingo.convert.ConverterService;
+import com.mingo.exceptions.ContextInitializationException;
 import com.mingo.query.Query;
 import com.mingo.query.QueryAnalyzerType;
 import com.mingo.query.QueryExecutorType;
@@ -38,6 +41,14 @@ import java.util.Set;
 public class Context {
 
     private static final String QUERY_NOT_FOUND_ERROR_MSG = "not found query with composite id: '{}'";
+
+    public static Context create(String contextPath) {
+        try {
+            return ContextLoader.getInstance().load(contextPath);
+        } catch (ContextInitializationException e) {
+            throw Throwables.propagate(e);
+        }
+    }
 
     private Context(Builder builder) {
         this.querySets = ImmutableSet.copyOf(builder.querySets);

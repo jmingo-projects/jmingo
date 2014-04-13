@@ -69,13 +69,8 @@ public class MongoQueryExecutor extends AbstractQueryExecutor implements QueryEx
      */
     @Override
     public <T> T queryForObject(String queryName, Class<T> type, Map<String, Object> parameters) {
-        LOGGER.debug("queryForObject(queryName={}, type={}, parameters={})", new Object[]{queryName, type, parameters});
-        return doQuery(queryName, type, parameters, new QueryCallback<T, T>() {
-            @Override
-            public T query(QueryStrategy queryStrategy, QueryStatement queryStatement, Class<T> type) {
-                return queryStrategy.queryForObject(queryStatement, type);
-            }
-        });
+        LOGGER.debug("queryForObject(queryName={}, type={}, parameters={})", queryName, type, parameters);
+        return doQuery(queryName, type, parameters, QueryStrategy::queryForObject);
     }
 
     /**
@@ -88,13 +83,8 @@ public class MongoQueryExecutor extends AbstractQueryExecutor implements QueryEx
 
     @Override
     public <T> List<T> queryForList(String queryName, Class<T> type, Map<String, Object> parameters) {
-        LOGGER.debug("queryForList(queryName={}, type={}, parameters={})", new Object[]{queryName, type, parameters});
-        return doQuery(queryName, type, parameters, new QueryCallback<T, List<T>>() {
-            @Override
-            public List<T> query(QueryStrategy queryStrategy, QueryStatement queryStatement, Class<T> type) {
-                return queryStrategy.queryForList(queryStatement, type);
-            }
-        });
+        LOGGER.debug("queryForList(queryName={}, type={}, parameters={})", queryName, type, parameters);
+        return doQuery(queryName, type, parameters, QueryStrategy::<T>queryForList);
     }
 
     @Override
@@ -117,6 +107,7 @@ public class MongoQueryExecutor extends AbstractQueryExecutor implements QueryEx
      * @param <S> the type of target object
      * @param <R> the type of query result
      */
+    @FunctionalInterface
     private interface QueryCallback<S, R> {
         R query(QueryStrategy queryStrategy, QueryStatement queryStatement, Class<S> type);
     }
