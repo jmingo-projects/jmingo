@@ -70,6 +70,7 @@
         <xs:complexType>
             <xs:attribute name="host" type="xs:string" use="optional" default="localhost"/>
             <xs:attribute name="port" type="xs:integer" use="optional" default="27017"/>
+            <!--<xs:attribute name="dbName" type="xs:string" use="required"/> todo iss5-->
         </xs:complexType>
     </xs:element>
 

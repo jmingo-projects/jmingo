@@ -49,6 +49,7 @@ public class MingoTemplate {
      * @param mongo   mongo {@link Mongo}
      * @param context mingo context{@link Context}
      */
+    @Deprecated(/*use Context.builder().mongo() to set mongo instance and getMongo() to get*/)
     public MingoTemplate(Mongo mongo, Context context) {
         this.mongo = mongo;
         this.context = context;

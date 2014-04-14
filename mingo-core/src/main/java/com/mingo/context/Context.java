@@ -8,34 +8,38 @@ import com.google.common.collect.Sets;
 import com.mingo.convert.Converter;
 import com.mingo.convert.ConverterService;
 import com.mingo.exceptions.ContextInitializationException;
+import com.mingo.context.conf.MongoConfig;
 import com.mingo.query.Query;
 import com.mingo.query.QueryAnalyzerType;
 import com.mingo.query.QueryExecutorType;
 import com.mingo.query.QuerySet;
 import com.mingo.query.analyzer.QueryAnalyzer;
 import com.mingo.query.analyzer.QueryAnalyzerFactory;
+import com.mongodb.Mongo;
+import com.mongodb.MongoClient;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.helpers.MessageFormatter;
 
+import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.Set;
 
 /**
  * Copyright 2012-2013 The Mingo Team
- * <p/>
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * <p/>
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- * <p/>
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * <p/>
+ * <p>
  * It's cornerstone of framework.
  */
 public class Context {
@@ -56,6 +60,23 @@ public class Context {
         this.queryAnalyzerType = builder.queryAnalyzerType;
         this.databaseHost = builder.databaseHost;
         this.databasePort = builder.databasePort;
+        if (builder.mongoConfig != null) {
+            this.mongoConfig = builder.mongoConfig;
+        } else {
+            this.mongoConfig = MongoConfig.builder().dbHost(databaseHost).dbPort(databasePort).build();
+        }
+
+        //init mongo instance
+        if (builder.mongo != null) {
+            this.mongo = builder.mongo;
+        } else {
+            try {
+                this.mongo = new MongoClient(mongoConfig.getDatabaseHost(), mongoConfig.getDatabasePort());
+            } catch (UnknownHostException e) {
+                throw Throwables.propagate(e);
+            }
+        }
+
         this.defaultConverter = builder.defaultConverter;
         this.converterService = builder.converterService;
         postConstruct();
@@ -71,9 +92,15 @@ public class Context {
 
     private ConverterService converterService;
 
+    @Deprecated
     private String databaseHost;
 
+    @Deprecated
     private int databasePort;
+
+    private MongoConfig mongoConfig;
+
+    private Mongo mongo;
 
     private Converter defaultConverter;
 
@@ -105,7 +132,7 @@ public class Context {
      * @return database host
      */
     public String getDatabaseHost() {
-        return databaseHost;
+        return mongoConfig.getDatabaseHost();
     }
 
     /**
@@ -114,9 +141,16 @@ public class Context {
      * @return database port
      */
     public int getDatabasePort() {
-        return databasePort;
+        return mongoConfig.getDatabasePort();
     }
 
+    public MongoConfig getMongoConfig() {
+        return mongoConfig;
+    }
+
+    public Mongo getMongo() {
+        return mongo;
+    }
 
     /**
      * Gets query analyzer type.
@@ -219,7 +253,7 @@ public class Context {
         Query query = getQueryByCompositeId(compositeId);
         if (query == null) {
             throw new RuntimeException(MessageFormatter.format(QUERY_NOT_FOUND_ERROR_MSG,
-                compositeId).getMessage());
+                    compositeId).getMessage());
         }
         return query;
     }
@@ -243,9 +277,15 @@ public class Context {
      */
     public static class Builder {
 
+        private Mongo mongo;
+
+        @Deprecated
         private String databaseHost;
 
+        @Deprecated
         private int databasePort;
+
+        private MongoConfig mongoConfig;
 
         private Set<QuerySet> querySets = Collections.emptySet();
 
@@ -256,6 +296,10 @@ public class Context {
         private Converter defaultConverter;
 
         private ConverterService converterService;
+
+        public void mongo(Mongo pMongo) {
+            this.mongo = pMongo;
+        }
 
         /**
          * Add query set.
@@ -320,9 +364,21 @@ public class Context {
          * @param pDatabasePort database port
          * @return {@link Builder}
          */
+        @Deprecated
         public Builder connection(String pDatabaseHost, int pDatabasePort) {
             this.databaseHost = pDatabaseHost;
             this.databasePort = pDatabasePort;
+            return this;
+        }
+
+        /**
+         * Sets mongo configuration.
+         *
+         * @param pMongoConfig mongo config
+         * @return {@link Builder}
+         */
+        public Builder mongoConfig(MongoConfig pMongoConfig) {
+            this.mongoConfig = pMongoConfig;
             return this;
         }
 
@@ -365,15 +421,15 @@ public class Context {
     @Override
     public String toString() {
         return "Context{" +
-            "querySets=" + querySets +
-            ", queryExecutorType=" + queryExecutorType +
-            ", queryAnalyzerType=" + queryAnalyzerType +
-            ", queryAnalyzer=" + queryAnalyzer +
-            ", converterService=" + converterService +
-            ", databaseHost='" + databaseHost + '\'' +
-            ", databasePort=" + databasePort +
-            ", defaultConverter=" + defaultConverter +
-            '}';
+                "querySets=" + querySets +
+                ", queryExecutorType=" + queryExecutorType +
+                ", queryAnalyzerType=" + queryAnalyzerType +
+                ", queryAnalyzer=" + queryAnalyzer +
+                ", converterService=" + converterService +
+                ", databaseHost='" + databaseHost + '\'' +
+                ", databasePort=" + databasePort +
+                ", defaultConverter=" + defaultConverter +
+                '}';
     }
 
 }
