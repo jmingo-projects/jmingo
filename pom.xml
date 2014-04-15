@@ -87,5 +87,6 @@
     <modules>
         <module>mingo-core</module>
         <module>mingo-test</module>
+        <module>mingo-core-v2</module>
     </modules>
 </project>

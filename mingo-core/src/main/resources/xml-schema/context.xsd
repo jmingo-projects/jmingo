@@ -48,7 +48,7 @@
             <xs:sequence>
                 <xs:element ref="querySet" minOccurs="0" maxOccurs="unbounded"/>
             </xs:sequence>
-            <xs:attribute name="dbName" type="xs:string"/>
+            <xs:attribute name="dbName" type="xs:string"/> <!--todo remove it, redundant conf, mongo el has it-->
         </xs:complexType>
     </xs:element>
 
@@ -78,7 +78,7 @@
         <xs:complexType mixed="true">
             <xs:sequence>
                 <xs:element ref="querySetConfig" minOccurs="1" maxOccurs="1"/>
-                <xs:element ref="queryExecutor" minOccurs="0" maxOccurs="1"/>
+                <xs:element ref="queryExecutor" minOccurs="0" maxOccurs="1"/> <!--todo remove it, redundant conf-->
                 <xs:element ref="queryAnalyzer" minOccurs="0" maxOccurs="1"/>
                 <xs:element ref="mongo" minOccurs="0" maxOccurs="1"/>
                 <xs:element ref="defaultConverter" minOccurs="0" maxOccurs="1"/>
