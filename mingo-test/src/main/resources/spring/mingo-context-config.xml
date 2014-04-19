@@ -6,16 +6,12 @@
 
 
     <!--Mingo configuration-->
-    <bean id="mingoContext" class="com.mingo.context.Context" depends-on="mongoTemplate"
-          factory-bean="mingoContextFactory" factory-method="createMingoContext">
-        <constructor-arg value="/mingo/mingo-context.xml"/>
-       <!-- <constructor-arg ref="defaultMongoConverter"/>-->
-    </bean>
-    <bean id="mingoContextFactory" class="com.mingo.config.MingoContextFactory"/>
 
-    <bean id="mingoTemplate" class="com.mingo.core.MingoTemplate" depends-on="mongo">
+    <bean id="mingoContextFactory" class="com.mingo.config.MingoTemplateFactory"/>
+
+    <bean id="mingoTemplate" class="com.mingo.MingoTemplate" depends-on="mongo" factory-bean="mingoContextFactory" factory-method="createMingoTemplate">
+        <constructor-arg value="/mingo/mingo-context.xml"/>
         <constructor-arg ref="mongo"/>
-        <constructor-arg ref="mingoContext"/>
     </bean>
 
 </beans>

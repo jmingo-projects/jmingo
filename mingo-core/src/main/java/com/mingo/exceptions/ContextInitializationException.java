@@ -15,7 +15,7 @@ package com.mingo.exceptions;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-public class ContextInitializationException extends Exception {
+public class ContextInitializationException extends RuntimeException {
 
     /**
      * Default constructor.

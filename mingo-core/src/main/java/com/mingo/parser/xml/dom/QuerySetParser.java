@@ -1,16 +1,7 @@
 package com.mingo.parser.xml.dom;
 
-import static com.mingo.parser.xml.dom.DocumentBuilderFactoryCreator.createDocumentBuilderFactory;
-import static com.mingo.parser.xml.dom.DomUtil.getAttributeBoolean;
-import static com.mingo.parser.xml.dom.DomUtil.getAttributeInt;
-import static com.mingo.parser.xml.dom.DomUtil.getAttributeString;
-import static com.mingo.parser.xml.dom.DomUtil.getAttributes;
-import static com.mingo.parser.xml.dom.DomUtil.getFirstNecessaryTagOccurrence;
-import static com.mingo.parser.xml.dom.DomUtil.isNotEmpty;
-import static com.mingo.query.util.QueryUtils.validate;
-import static com.mingo.query.util.QueryUtils.wrap;
 import com.google.common.collect.Sets;
-import com.mingo.exceptions.ParserException;
+import com.mingo.exceptions.MingoParserException;
 import com.mingo.parser.Parser;
 import com.mingo.query.Query;
 import com.mingo.query.QueryCase;
@@ -29,29 +20,39 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
+
+import static com.mingo.parser.xml.dom.DocumentBuilderFactoryCreator.createDocumentBuilderFactory;
+import static com.mingo.parser.xml.dom.DomUtil.getAttributeBoolean;
+import static com.mingo.parser.xml.dom.DomUtil.getAttributeInt;
+import static com.mingo.parser.xml.dom.DomUtil.getAttributeString;
+import static com.mingo.parser.xml.dom.DomUtil.getAttributes;
+import static com.mingo.parser.xml.dom.DomUtil.getFirstNecessaryTagOccurrence;
+import static com.mingo.parser.xml.dom.DomUtil.isNotEmpty;
+import static com.mingo.query.util.QueryUtils.validate;
+import static com.mingo.query.util.QueryUtils.wrap;
 
 /**
  * Copyright 2012-2013 The Mingo Team
- * <p/>
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * <p/>
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- * <p/>
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * <p/>
+ * <p>
  * This class is implementation of {@link Parser} interface for parsing QuerySet xml.
  */
 public class QuerySetParser implements Parser<QuerySet> {
@@ -79,7 +80,7 @@ public class QuerySetParser implements Parser<QuerySet> {
     private static final String CONVERTER_METHOD_ATTR = "converter-method";
     private static final String CONVERTER_INHERIT_ATTR = "converter-inherit";
     private static final String ESCAPE_NULL_PARAMETERS = "escape-null-parameters";
-    private static final String DB_NAME = "dbName";
+    //private static final String DB_NAME = "dbName";
     private static final String TYPE_ATTR = "type";
 
     private static final String INVALID_QUERY_ERROR_MSG = "invalid query with id: {}. Query: {}";
@@ -92,7 +93,7 @@ public class QuerySetParser implements Parser<QuerySet> {
      * @throws ParserConfigurationException {@link ParserConfigurationException}
      */
     public QuerySetParser(ParserConfiguration parserConfiguration, ErrorHandler parseErrorHandler)
-        throws ParserConfigurationException {
+            throws ParserConfigurationException {
         this.documentBuilderFactory = createDocumentBuilderFactory(parserConfiguration);
         this.parseErrorHandler = parseErrorHandler;
     }
@@ -101,7 +102,7 @@ public class QuerySetParser implements Parser<QuerySet> {
      * {@inheritDoc}
      */
     @Override
-    public QuerySet parse(InputStream xml) throws ParserException {
+    public QuerySet parse(InputStream xml) throws MingoParserException {
         LOGGER.debug("QuerySetParser:: START PARSING");
         QuerySet querySet;
         try {
@@ -114,7 +115,7 @@ public class QuerySetParser implements Parser<QuerySet> {
             parseQueryFragments(root, querySet);
             parseQueries(root, querySet);
         } catch (Exception e) {
-            throw new ParserException(e);
+            throw new MingoParserException(e);
         }
         return querySet;
     }
@@ -126,14 +127,14 @@ public class QuerySetParser implements Parser<QuerySet> {
      * @param element  element of XML document
      * @param querySet {@link QuerySet}
      */
-    private void parseConfigTag(Element element, QuerySet querySet) throws ParserException {
+    private void parseConfigTag(Element element, QuerySet querySet) throws MingoParserException {
         Validate.notNull(element, "element cannot be null");
         Validate.notNull(querySet, "query set cannot be null");
         Node configTag = getFirstNecessaryTagOccurrence(element, CONFIG_TAG);
         String collectionName = getAttributeString(configTag, COLLECTION_NAME_ATTR);
         Validate.notEmpty(collectionName, "collectionName cannot be null or empty");
         querySet.setCollectionName(collectionName);
-        querySet.setDbName(getAttributeString(configTag, DB_NAME));
+        //querySet.setDbName(getAttributeString(configTag, DB_NAME));
     }
 
     private void parseQueryFragments(Element root, QuerySet querySet) {
@@ -166,7 +167,7 @@ public class QuerySetParser implements Parser<QuerySet> {
      * @param root element XML document
      * @return set of {@link Query} elements
      */
-    private void parseQueries(Element root, QuerySet querySet) throws ParserException {
+    private void parseQueries(Element root, QuerySet querySet) throws MingoParserException {
         NodeList queryNodeList = root.getElementsByTagName(QUERY_TAG);
         if (isNotEmpty(queryNodeList)) {
             for (int i = 0; i < queryNodeList.getLength(); i++) {
@@ -181,7 +182,7 @@ public class QuerySetParser implements Parser<QuerySet> {
      * @param node node
      * @return {@link Query}
      */
-    private void parseQueryTag(Node node, QuerySet querySet) throws ParserException {
+    private void parseQueryTag(Node node, QuerySet querySet) throws MingoParserException {
         if (node == null || !QUERY_TAG.equals(node.getNodeName())) {
             return;
         }
@@ -205,8 +206,8 @@ public class QuerySetParser implements Parser<QuerySet> {
         query.setBody(queryBodyBuilder.toString());
 
         if (!validate(wrap(query.getBody()))) {
-            throw new ParserException(MessageFormatter.format(INVALID_QUERY_ERROR_MSG,
-                query.getId(), query).getMessage());
+            throw new MingoParserException(MessageFormatter.format(INVALID_QUERY_ERROR_MSG,
+                    query.getId(), query).getMessage());
         }
         querySet.addQuery(query);
     }
@@ -218,7 +219,7 @@ public class QuerySetParser implements Parser<QuerySet> {
      * @param node node
      * @return {@link QueryCase}
      */
-    private void parseCaseTag(Node node, Query query, QuerySet querySet) throws ParserException {
+    private void parseCaseTag(Node node, Query query, QuerySet querySet) throws MingoParserException {
         if (node == null || !CASE_TAG.equals(node.getNodeName())) {
             return;
         }
@@ -248,14 +249,14 @@ public class QuerySetParser implements Parser<QuerySet> {
 
             queryCase.setBody(StringUtils.strip(caseBodyBuilder.toString()));
             if (!validate(wrap(queryCase.getBody()))) {
-                throw new ParserException(MessageFormatter.format(INVALID_QUERY_ERROR_MSG,
-                    queryCase.getId(), queryCase).getMessage());
+                throw new MingoParserException(MessageFormatter.format(INVALID_QUERY_ERROR_MSG,
+                        queryCase.getId(), queryCase).getMessage());
             }
         }
         query.addQueryCase(queryCase);
     }
 
-    private void parseBody(StringBuilder builder, Node node, QuerySet querySet) throws ParserException {
+    private void parseBody(StringBuilder builder, Node node, QuerySet querySet) throws MingoParserException {
         if (node == null) {
             return;
         }
@@ -273,12 +274,12 @@ public class QuerySetParser implements Parser<QuerySet> {
         return getAttributeString(child, FRAGMENT_REF_ATTR);
     }
 
-    private void applyFragment(StringBuilder body, String fRef, QuerySet querySet) throws ParserException {
+    private void applyFragment(StringBuilder body, String fRef, QuerySet querySet) throws MingoParserException {
         QueryFragment queryFragment = querySet.getQueryFragmentById(fRef);
         if (queryFragment != null) {
             body.append(processString(queryFragment.getBody()));
         } else {
-            throw new ParserException("not found query fragment for ref: " + fRef);
+            throw new MingoParserException("not found query fragment for ref: " + fRef);
         }
     }
 

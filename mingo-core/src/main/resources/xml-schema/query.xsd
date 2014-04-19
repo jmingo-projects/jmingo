@@ -24,7 +24,7 @@
 
     <xs:element name="config">
         <xs:complexType>
-            <xs:attribute name="dbName" type="xs:string"/>
+           <!-- <xs:attribute name="dbName" type="xs:string"/>--> <!--deprecated-->
             <xs:attribute name="collectionName" type="xs:string" use="required"/>
         </xs:complexType>
     </xs:element>

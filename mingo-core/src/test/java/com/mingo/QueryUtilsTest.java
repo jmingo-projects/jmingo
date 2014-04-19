@@ -25,10 +25,9 @@ public class QueryUtilsTest {
         return new Object[][]{
             {null},
             {""},
-            {"dbName.collectionName"},
-            {" .collectionName.query"},
-            {"dbName. .query"},
-            {"dbName.collectionName. "},
+            {"collectionName"},
+            {" .query"},
+            {"collectionName. "},
             {" . . "}
         };
     }

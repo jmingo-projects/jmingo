@@ -1,7 +1,7 @@
 package com.mingo.query;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSortedSet;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -176,13 +176,7 @@ public class Query extends QuerySetElement {
      * @return query case
      */
     public QueryCase getQueryCaseById(final String caseId) {
-        Set<QueryCase> filtered = Sets.filter(cases, new Predicate<QueryCase>() {
-            @Override
-            public boolean apply(QueryCase input) {
-                return input.getId().equals(caseId);
-            }
-        });
-        return filtered.iterator().next();
+        return Iterables.find(cases, input -> input.getId().equals(caseId));
     }
 
     /**

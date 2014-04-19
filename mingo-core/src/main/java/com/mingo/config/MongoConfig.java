@@ -14,16 +14,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.mingo.context.conf;
+package com.mingo.config;
+
+import com.mongodb.ServerAddress;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class MongoConfig {
 
-    public static String DEF_HOST = "localhost";
-    public static int DEF_PORT = 27017;
+    public static String DEF_HOST = ServerAddress.defaultHost();
+    public static int DEF_PORT = ServerAddress.defaultPort();
 
     private String databaseHost;
     private int databasePort;
     private String dbName;
+
+    private Map<String, String> options;
 
     private MongoConfig() {
         throw new UnsupportedOperationException("private constructor, use builder");
@@ -45,16 +52,22 @@ public class MongoConfig {
         return dbName;
     }
 
+    public Map<String, String> getOptions() {
+        return options;
+    }
+
     public MongoConfig(Builder builder) {
         this.databaseHost = builder.databaseHost;
         this.databasePort = builder.databasePort;
         this.dbName = builder.dbName;
+        this.options = builder.options;
     }
 
     public static class Builder {
         private String databaseHost = DEF_HOST;
         private int databasePort = DEF_PORT;
         private String dbName;
+        private Map<String, String> options = new HashMap<>();
 
         public Builder dbHost(String host) {
             this.databaseHost = host;
@@ -69,6 +82,14 @@ public class MongoConfig {
         public Builder dbName(String db) {
             this.dbName = db;
             return this;
+        }
+
+        public void options(Map<String, String> options) {
+            this.options = options;
+        }
+
+        public void option(String name, String val) {
+            options.put(name, val);
         }
 
         public MongoConfig build() {

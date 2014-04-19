@@ -1,7 +1,6 @@
 package com.mingo;
 
 import static com.mingo.query.util.QueryUtils.buildCompositeId;
-import com.mingo.context.ContextLoader;
 import com.mingo.convert.DefaultConverter;
 import com.mingo.context.Context;
 import com.mingo.query.Query;
@@ -16,7 +15,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 /**
- * Test for {@link com.mingo.context.ContextLoader}
+ * Test for {@link com.mingo.context.Context}
  */
 public class CorrectContextLoaderTest {
 
@@ -37,36 +36,36 @@ public class CorrectContextLoaderTest {
         // given
         String contextPath = "/xml/correct/context.xml";
         // when
-        Context context = ContextLoader.getInstance().load(contextPath);
+        Context context = new Context(contextPath);
         // then
         checkContext(context);
         checkQuerySets(context);
     }
 
     private void checkContext(Context context) {
-        Assert.assertTrue(CollectionUtils.isNotEmpty(context.getQuerySets()));
-        Assert.assertEquals(context.getQuerySets().size(), 2);
-        Assert.assertEquals(context.getDatabasePort(), DB_PORT);
-        Assert.assertEquals(context.getDatabaseHost(), DB_HOST);
+        Assert.assertTrue(CollectionUtils.isNotEmpty(context.getQueryManager().getQuerySets()));
+        Assert.assertEquals(context.getQueryManager().getQuerySets().size(), 2);
+        Assert.assertEquals(context.getMongoDBFactory().getMongo().getAddress().getPort(), DB_PORT);
+        Assert.assertEquals(context.getMongoDBFactory().getMongo().getAddress().getHost(), DB_HOST);
         Assert.assertEquals(context.getQueryExecutorType(), QueryExecutorType.MONGO_DRIVER);
         Assert.assertEquals(context.getQueryAnalyzerType(), QueryAnalyzerType.JEXL);
 //        Assert.assertNotNull(context.getConverters());
 //        Assert.assertNotNull(context.getConverters().get("simpleDomainConverter"));
 //        Assert.assertTrue(context.getConverters().get("simpleDomainConverter") instanceof SimpleDomainConverter);
-        Assert.assertNotNull(context.getDefaultConverter());
-        Assert.assertTrue(context.getDefaultConverter() instanceof DefaultConverter);
+        Assert.assertNotNull(context.getConverterService().getDefaultConverter());
+        Assert.assertTrue(context.getConverterService().getDefaultConverter() instanceof DefaultConverter);
     }
 
     private void checkQuerySets(Context context) {
-        QuerySet querySetOne = context.getQuerySetByPath("/xml/correct/query1.xml");
-        QuerySet querySetTwo = context.getQuerySetByPath("/xml/correct/query2.xml");
+        QuerySet querySetOne = context.getQueryManager().getQuerySetByPath("/xml/correct/query1.xml");
+        QuerySet querySetTwo =context.getQueryManager().getQuerySetByPath("/xml/correct/query2.xml");
         checkQuerySetOne(querySetOne);
         checkQuerySetTwo(querySetTwo);
-        Query queryOne = getQueryByCompositeId(context, buildCompositeId(DB_TEST, COLLECTION_ONE, QUERY_1));
-        Query queryTwo = getQueryByCompositeId(context, buildCompositeId(DB_TEST, COLLECTION_ONE, QUERY_2));
-        Query queryThree = getQueryByCompositeId(context, buildCompositeId(DB_TEST_ROOT, COLLECTION_TWO, QUERY_3));
-        Query queryFour = getQueryByCompositeId(context, buildCompositeId(DB_TEST_ROOT, COLLECTION_TWO, QUERY_4));
-        Query notExist = getQueryByCompositeId(context, buildCompositeId(DB_TEST, COLLECTION_ONE, QUERY_NON_EXISTENT));
+        Query queryOne = getQueryByCompositeId(context, buildCompositeId(COLLECTION_ONE, QUERY_1));
+        Query queryTwo = getQueryByCompositeId(context, buildCompositeId(COLLECTION_ONE, QUERY_2));
+        Query queryThree = getQueryByCompositeId(context, buildCompositeId(COLLECTION_TWO, QUERY_3));
+        Query queryFour = getQueryByCompositeId(context, buildCompositeId(COLLECTION_TWO, QUERY_4));
+        Query notExist = getQueryByCompositeId(context, buildCompositeId(COLLECTION_ONE, QUERY_NON_EXISTENT));
         Assert.assertNotNull(queryOne);
         Assert.assertNotNull(queryTwo);
         Assert.assertNotNull(queryThree);
@@ -81,10 +80,9 @@ public class CorrectContextLoaderTest {
     private void checkQuerySetOne(QuerySet querySet) {
         Assert.assertNotNull(querySet, "'/xml/correct/query1.xml' mot found");
         Assert.assertEquals(querySet.getQueries().size(), 2);
-        Assert.assertEquals(querySet.getDbName(), "dbTest");
         Assert.assertEquals(querySet.getCollectionName(), "collectionOne");
-        Query queryOne = querySet.getQueries().get("query-1");
-        Query queryTwo = querySet.getQueries().get("query-2");
+        Query queryOne = querySet.getQueryMap().get("query-1");
+        Query queryTwo = querySet.getQueryMap().get("query-2");
         checkQueryOne(queryOne);
         checkQueryTwo(queryTwo);
     }
@@ -92,9 +90,8 @@ public class CorrectContextLoaderTest {
     private void checkQuerySetTwo(QuerySet querySet) {
         Assert.assertNotNull(querySet, "'/xml/correct/query2.xml' mot found");
         Assert.assertEquals(querySet.getQueries().size(), 2);
-        Assert.assertEquals(querySet.getDbName(), "dbTestCommon");
-        Query queryThree = querySet.getQueries().get("query-3");
-        Query queryFour = querySet.getQueries().get("query-4");
+        Query queryThree = querySet.getQueryMap().get("query-3");
+        Query queryFour = querySet.getQueryMap().get("query-4");
         Assert.assertNotNull(querySet.getQueryFragments());
         Assert.assertTrue(CollectionUtils.isNotEmpty(querySet.getQueryFragments()));
         QueryFragment queryFragment = querySet.getQueryFragments().iterator().next();
@@ -105,7 +102,7 @@ public class CorrectContextLoaderTest {
     }
 
     private Query getQueryByCompositeId(Context context, String id) {
-        return context.getQueryByCompositeId(id);
+        return context.getQueryManager().getQueryByCompositeId(id);
     }
 
     private void checkQueryOne(Query query) {

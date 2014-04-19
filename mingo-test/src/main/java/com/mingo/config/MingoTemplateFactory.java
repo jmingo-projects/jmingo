@@ -1,9 +1,9 @@
 package com.mingo.config;
 
+import com.mingo.MingoTemplate;
 import com.mingo.context.Context;
-import com.mingo.context.ContextLoader;
-import com.mingo.convert.Converter;
 import com.mingo.exceptions.ContextInitializationException;
+import com.mongodb.Mongo;
 import org.springframework.util.Assert;
 
 /**
@@ -21,37 +21,23 @@ import org.springframework.util.Assert;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-public class MingoContextFactory {
+public class MingoTemplateFactory {
 
     /**
-     * Creates mingo context.
+     * Creates mingo template.
      *
      * @param contextPath the path to mingo context
-     * @return loaded and initialized mingo context
+     * @return mingo template
      */
-    public Context createMingoContext(String contextPath) {
+    public MingoTemplate createMingoTemplate(String contextPath, Mongo mongo) {
         Assert.hasText(contextPath, "contextPath must not be null or empty.");
         Context context;
         try {
-            context = ContextLoader.getInstance().load(contextPath);
+            context = new Context(contextPath, mongo);
         } catch (ContextInitializationException e) {
             throw new RuntimeException("Failed to load mingo context. context path: " + contextPath, e);
         }
-        return context;
-    }
-
-    /**
-     * Creates mingo context.
-     *
-     * @param contextPath      the path to mingo context
-     * @param defaultConverter the default converter
-     * @return loaded and initialized mingo context
-     */
-    public Context createMingoContext(String contextPath, Converter defaultConverter) {
-        Assert.notNull(defaultConverter, "default converter must not be null");
-        Context context = createMingoContext(contextPath);
-        context.setDefaultConverter(defaultConverter);
-        return context;
+        return context.getMingoTemplate();
     }
 
 }

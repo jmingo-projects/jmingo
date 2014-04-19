@@ -4,7 +4,7 @@
          xsi:noNamespaceSchemaLocation="../../../../main/resources/xml-schema/context.xsd">
 
 
-    <querySetConfig dbName="dbTestCommon">
+    <querySetConfig>
         <querySet path="/xml/invalid_b/query1.xml"/>
         <querySet path="/xml/invalid_b/query2.xml"/>
     </querySetConfig>
@@ -12,9 +12,6 @@
     <queryExecutor type="MongoDriver"/>
     <queryAnalyzer type="jexl"/>
 
-    <mongo port="27017" host="localhost"/>
-    <converters>
-        <converter name="simpleDomainConverter" class="com.mingo.converter.custom.SimpleDomainConverter"/>
-        <converter name="simpleDomainConverter" class="com.mingo.converter.custom.SimpleDomainConverter"/>
-    </converters>
+    <mongo port="27017" host="localhost" dbName="dbTestCommon"/>
+
 </context>

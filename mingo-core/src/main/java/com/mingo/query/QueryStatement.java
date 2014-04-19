@@ -1,7 +1,7 @@
 package com.mingo.query;
 
 import static com.mingo.query.util.QueryUtils.replaceQueryParameters;
-import com.mingo.context.Context;
+
 import com.mingo.query.analyzer.QueryAnalyzer;
 import com.mingo.query.util.QueryUtils;
 import org.apache.commons.lang3.Validate;
@@ -106,16 +106,14 @@ public class QueryStatement {
     /**
      * Constructor with parameters.
      *
-     * @param context    mingo context
      * @param queryName  query name
      * @param parameters query parameters
      */
-    public QueryStatement(Context context, String queryName, Map<String, Object> parameters) {
+    public QueryStatement(QueryManager queryManager, QueryAnalyzer queryAnalyzer,  String queryName, Map<String, Object> parameters) {
         Validate.notBlank(queryName, "query name cannot be null or empty");
-        Query query = context.lookupQuery(queryName);
-        dbName = QueryUtils.getDbName(queryName);
+        Query query = queryManager.lookupQuery(queryName);
         collectionName = QueryUtils.getCollectionName(queryName);
-        prepare(context.getQueryAnalyzer(), query, parameters);
+        prepare(queryAnalyzer, query, parameters);
     }
 
     /**

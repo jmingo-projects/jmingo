@@ -1,6 +1,7 @@
 package com.mingo.query.util;
 
 import static org.slf4j.helpers.MessageFormatter.format;
+
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.mingo.query.Query;
@@ -20,13 +21,13 @@ import java.util.Map;
 
 /**
  * Copyright 2012-2013 The Mingo Team
- * <p/>
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * <p/>
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- * <p/>
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -38,10 +39,9 @@ public final class QueryUtils {
     private QueryUtils() {
     }
 
-    private static final int DB_NAME_POSITION = 0;
-    private static final int COLLECTION_NAME_POSITION = 1;
-    private static final int QUERY_ID_POSITION = 2;
-    private static final int NUMBER_OF_ELEMENTS = 3;
+    private static final int COLLECTION_NAME_POSITION = 0;
+    private static final int QUERY_ID_POSITION = 1;
+    private static final int NUMBER_OF_ELEMENTS = 2;
 
     /* this prefixed must be placed before parameter name */
     private static final String PARAMETER_PREFIX = "#";
@@ -51,30 +51,18 @@ public final class QueryUtils {
     private static final ObjectSerializer OBJECT_SERIALIZER = JSONSerializers.getLegacy();
 
     /**
-     * Builds composite query ID ith next structure "dbName.collectionName.id".
+     * Builds composite query ID ith next structure "collectionName.id".
      *
-     * @param dbName         DB name
      * @param collectionName collection name
      * @param id             query id
-     * @return composite ID - { [dbName].[collectionName].[id] }
+     * @return composite ID - { [collectionName].[id] }
      */
-    public static String buildCompositeId(String dbName, String collectionName, String id) {
-        Validate.notBlank(dbName, "dbName cannot be null");
+    public static String buildCompositeId(String collectionName, String id) {
         Validate.notBlank(collectionName, "collectionName cannot be null");
         Validate.notBlank(id, "id cannot be null");
-        return StringUtils.join(Lists.newArrayList(dbName, collectionName, id), ".");
+        return StringUtils.join(Lists.newArrayList(collectionName, id), ".");
     }
 
-    /**
-     * Gets db name from composite query id.
-     *
-     * @param compositeQueryId composite query id
-     * @return db name
-     */
-    public static String getDbName(String compositeQueryId) {
-        String[] elements = StringUtils.split(compositeQueryId, ".");
-        return getElementByPosition(elements, NUMBER_OF_ELEMENTS, DB_NAME_POSITION);
-    }
 
     /**
      * Gets collection name from composite query id.
@@ -114,11 +102,11 @@ public final class QueryUtils {
      * @param querySet {@link com.mingo.query.QuerySet}
      */
     public static void createCompositeIdForQueries(QuerySet querySet) {
-        if (MapUtils.isEmpty(querySet.getQueries())) {
+        if (MapUtils.isEmpty(querySet.getQueryMap())) {
             return;
         }
-        for (Query query : querySet.getQueries().values()) {
-            query.setCompositeId(buildCompositeId(querySet.getDbName(), querySet.getCollectionName(), query.getId()));
+        for (Query query : querySet.getQueryMap().values()) {
+            query.setCompositeId(buildCompositeId(querySet.getCollectionName(), query.getId()));
         }
     }
 
@@ -133,11 +121,11 @@ public final class QueryUtils {
     public static void validateCompositeId(String compositeId) throws NullPointerException, IllegalArgumentException {
         Validate.notBlank(compositeId, "compositeId cannot be null or empty");
         String[] elements = StringUtils.split(compositeId, ".");
-        Validate.isTrue(elements.length == NUMBER_OF_ELEMENTS, "composite id should consist of three parts: " +
-            "([database-name].[collection-name].[query-id]). current value: " + compositeId);
+        Validate.isTrue(elements.length == NUMBER_OF_ELEMENTS, "composite id should consist of " + NUMBER_OF_ELEMENTS + " parts: " +
+                "([collection-name].[query-id]). current value: " + compositeId);
         for (int index = 0; index < elements.length; index++) {
             Validate.notBlank(elements[index], "element with position: " + (index + 1) +
-                " in composite id is empty. current value: " + compositeId);
+                    " in composite id is empty. current value: " + compositeId);
         }
     }
 
@@ -201,7 +189,7 @@ public final class QueryUtils {
                     } else {
                         String replacement = createReplacement(parameter.getKey(), parameter.getValue());
                         query = StringUtils.replace(query, replacement,
-                            getParameterAsString(parameter.getValue()));
+                                getParameterAsString(parameter.getValue()));
                     }
                 }
             }
@@ -248,7 +236,7 @@ public final class QueryUtils {
             }
         } else {
             throw new RuntimeException("unsupported parameter type. parameter value: " +
-                parameter + ", class: " + parameter.getClass());
+                    parameter + ", class: " + parameter.getClass());
         }
         return val;
     }
@@ -291,18 +279,18 @@ public final class QueryUtils {
 
     private static boolean isFullReplace(Object parameter) {
         return parameter instanceof Collection ||
-            parameter instanceof Object[] ||
-            parameter instanceof Number ||
-            parameter instanceof Date;
+                parameter instanceof Object[] ||
+                parameter instanceof Number ||
+                parameter instanceof Date;
     }
 
     private static boolean isTypeSupported(Object val) {
         return val instanceof String
-            || val instanceof Number
-            || val instanceof Date
-            || val instanceof Collection
-            || val instanceof Object[]
-            || val instanceof Enum;
+                || val instanceof Number
+                || val instanceof Date
+                || val instanceof Collection
+                || val instanceof Object[]
+                || val instanceof Enum;
     }
 
 }

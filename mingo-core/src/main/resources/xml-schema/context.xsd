@@ -31,6 +31,21 @@
         </xs:complexType>
     </xs:element>
 
+    <xs:element name="option">
+        <xs:complexType mixed="true">
+            <xs:attribute name="name" use="required" type="xs:string"/>
+            <xs:attribute name="value" use="required" type="xs:string"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="options">
+        <xs:complexType mixed="true">
+            <xs:sequence>
+                <xs:element ref="option" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+
     <xs:element name="defaultConverter">
         <xs:complexType>
             <xs:attribute name="class" use="required" type="xs:string"/>
@@ -39,7 +54,7 @@
 
     <xs:element name="converters">
         <xs:complexType>
-           <xs:attribute name="package" type="xs:string"/>
+            <xs:attribute name="package" type="xs:string"/>
         </xs:complexType>
     </xs:element>
 
@@ -48,11 +63,18 @@
             <xs:sequence>
                 <xs:element ref="querySet" minOccurs="0" maxOccurs="unbounded"/>
             </xs:sequence>
-            <xs:attribute name="dbName" type="xs:string"/> <!--todo remove it, redundant conf, mongo el has it-->
+            <!--<xs:attribute name="dbName" type="xs:string"/>--> <!--todo remove it, redundant conf, mongo el has it-->
         </xs:complexType>
     </xs:element>
 
+
+    <!--Deprecated-->
     <xs:element name="queryExecutor">
+        <xs:annotation>
+            <xs:documentation>
+                This property is deprecated, don't rely on it
+            </xs:documentation>
+        </xs:annotation>
         <xs:complexType>
             <xs:attribute name="type" type="queryExecutorType" use="optional"
                           default="MongoDriver"/>
@@ -67,10 +89,14 @@
     </xs:element>
 
     <xs:element name="mongo">
-        <xs:complexType>
+        <xs:complexType mixed="true">
+            <xs:sequence>
+                <xs:element ref="options" minOccurs="0" maxOccurs="1"/>
+            </xs:sequence>
             <xs:attribute name="host" type="xs:string" use="optional" default="localhost"/>
             <xs:attribute name="port" type="xs:integer" use="optional" default="27017"/>
-            <!--<xs:attribute name="dbName" type="xs:string" use="required"/> todo iss5-->
+            <xs:attribute name="dbName" type="xs:string" use="required"/>
+            <!-- todo iss5-->
         </xs:complexType>
     </xs:element>
 
@@ -78,9 +104,10 @@
         <xs:complexType mixed="true">
             <xs:sequence>
                 <xs:element ref="querySetConfig" minOccurs="1" maxOccurs="1"/>
-                <xs:element ref="queryExecutor" minOccurs="0" maxOccurs="1"/> <!--todo remove it, redundant conf-->
+                <xs:element ref="queryExecutor" minOccurs="0" maxOccurs="1"/>
+                <!--todo remove it, redundant conf-->
                 <xs:element ref="queryAnalyzer" minOccurs="0" maxOccurs="1"/>
-                <xs:element ref="mongo" minOccurs="0" maxOccurs="1"/>
+                <xs:element ref="mongo" minOccurs="1" maxOccurs="1"/>
                 <xs:element ref="defaultConverter" minOccurs="0" maxOccurs="1"/>
                 <xs:element ref="converters" minOccurs="0" maxOccurs="1"/>
             </xs:sequence>

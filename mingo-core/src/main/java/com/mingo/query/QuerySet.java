@@ -3,6 +3,8 @@ package com.mingo.query;
 import static com.mingo.query.util.QueryUtils.getQueryId;
 import static com.mingo.query.util.QueryUtils.validateCompositeId;
 import static org.slf4j.helpers.MessageFormatter.format;
+
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -11,6 +13,7 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.Validate;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -66,6 +69,7 @@ public class QuerySet {
      *
      * @return DB name
      */
+    @Deprecated
     public String getDbName() {
         return dbName;
     }
@@ -75,6 +79,7 @@ public class QuerySet {
      *
      * @param dbName DB name
      */
+    @Deprecated
     public void setDbName(String dbName) {
         this.dbName = dbName;
     }
@@ -102,8 +107,17 @@ public class QuerySet {
      *
      * @return queries
      */
-    public Map<String, Query> getQueries() {
+    public Map<String, Query> getQueryMap() {
         return ImmutableMap.copyOf(queries);
+    }
+
+    /**
+     * Gets queries.
+     *
+     * @return queries
+     */
+    public List<Query> getQueries() {
+        return ImmutableList.copyOf(queries.values());
     }
 
     /**

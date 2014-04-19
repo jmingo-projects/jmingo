@@ -1,6 +1,6 @@
 package com.mingo.parser;
 
-import com.mingo.exceptions.ParserException;
+import com.mingo.exceptions.MingoParserException;
 
 import java.io.InputStream;
 
@@ -30,7 +30,7 @@ public interface Parser<T> {
      *
      * @param is {@link InputStream}
      * @return specific domain object as result of parsing
-     * @throws ParserException {@link ParserException}
+     * @throws MingoParserException {@link MingoParserException}
      */
-    T parse(InputStream is) throws ParserException;
+    T parse(InputStream is) throws MingoParserException;
 }

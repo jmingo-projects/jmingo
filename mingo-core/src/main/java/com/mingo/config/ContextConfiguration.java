@@ -1,4 +1,4 @@
-package com.mingo.context.conf;
+package com.mingo.config;
 
 import com.mingo.query.QueryAnalyzerType;
 import com.mingo.query.QueryExecutorType;
@@ -6,13 +6,13 @@ import com.mingo.query.conf.QuerySetConfiguration;
 
 /**
  * Copyright 2012-2013 The Mingo Team
- * <p/>
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * <p/>
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- * <p/>
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -39,6 +39,8 @@ public class ContextConfiguration {
     // TODO add to shema, add parsing and so on
     private String parameterPrefix;
 
+    private MongoConfig mongoConfig;
+
     /**
      * Gets query set configuration.
      *
@@ -59,11 +61,12 @@ public class ContextConfiguration {
 
     /**
      * Gets query executor type.
+     * Since was proposed another approach to define executor hence this method returns only MONGO_DRIVER.
      *
      * @return query executor type
      */
     public QueryExecutorType getQueryExecutorType() {
-        return queryExecutorType;
+        return QueryExecutorType.MONGO_DRIVER;
     }
 
     /**
@@ -102,8 +105,9 @@ public class ContextConfiguration {
      *
      * @return database host
      */
+    @Deprecated
     public String getDatabaseHost() {
-        return databaseHost;
+        return mongoConfig.getDatabaseHost();
     }
 
     /**
@@ -111,6 +115,7 @@ public class ContextConfiguration {
      *
      * @param databaseHost database host
      */
+    @Deprecated
     public void setDatabaseHost(String databaseHost) {
         this.databaseHost = databaseHost;
     }
@@ -120,8 +125,9 @@ public class ContextConfiguration {
      *
      * @return database port
      */
+    @Deprecated
     public int getDatabasePort() {
-        return databasePort;
+        return mongoConfig.getDatabasePort();
     }
 
     /**
@@ -129,6 +135,7 @@ public class ContextConfiguration {
      *
      * @param databasePort database port
      */
+    @Deprecated
     public void setDatabasePort(int databasePort) {
         this.databasePort = databasePort;
     }
@@ -168,20 +175,28 @@ public class ContextConfiguration {
         this.parameterPrefix = parameterPrefix;
     }
 
+    public MongoConfig getMongoConfig() {
+        return mongoConfig;
+    }
+
+    public void setMongoConfig(MongoConfig mongoConfig) {
+        this.mongoConfig = mongoConfig;
+    }
+
     /**
      * {@inheritDoc}
      */
     @Override
     public String toString() {
         return "ContextConfiguration{" +
-            "querySetConfiguration=" + querySetConfiguration +
-            ", queryExecutorType=" + queryExecutorType +
-            ", queryAnalyzerType=" + queryAnalyzerType +
-            ", databaseHost='" + databaseHost + '\'' +
-            ", databasePort=" + databasePort +
-            ", defaultConverter='" + defaultConverter + '\'' +
-            ", converterPackageScan='" + converterPackageScan + '\'' +
-            '}';
+                "querySetConfiguration=" + querySetConfiguration +
+                ", queryExecutorType=" + queryExecutorType +
+                ", queryAnalyzerType=" + queryAnalyzerType +
+                ", databaseHost='" + databaseHost + '\'' +
+                ", databasePort=" + databasePort +
+                ", defaultConverter='" + defaultConverter + '\'' +
+                ", converterPackageScan='" + converterPackageScan + '\'' +
+                '}';
     }
 
 }

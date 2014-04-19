@@ -1,9 +1,8 @@
 package com.mingo.repository.impl;
 
 import com.google.common.collect.ImmutableMap;
-import com.mingo.core.MingoTemplate;
+import com.mingo.MingoTemplate;
 import com.mingo.domain.Test;
-import com.mingo.executor.QueryExecutor;
 import com.mingo.repository.api.ITestRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -50,20 +49,20 @@ public class TestRepository extends AbstractBaseRepository<String, Test>
 
     @Override
     public List<Test> getByName(String name) {
-        return (List<Test>) mingoTemplate.queryForList("mingotest.test.getTestByName", getDomainClass(),
+        return (List<Test>) mingoTemplate.queryForList("test.getTestByName", getDomainClass(),
             ImmutableMap.<String, Object>of("name", name));
 
     }
 
     @Override
     public Test getByIdentifier(String identifier) {
-        return mingoTemplate.queryForObject("mingotest.test.getTestByIdentifier", getDomainClass(),
+        return mingoTemplate.queryForObject("test.getTestByIdentifier", getDomainClass(),
             ImmutableMap.<String, Object>of("identifier", identifier));
     }
 
     @Override
     public Test getById(String id) {
-        return mingoTemplate.queryForObject("mingotest.test.getTestById", getDomainClass(),
+        return mingoTemplate.queryForObject("test.getTestById", getDomainClass(),
             ImmutableMap.<String, Object>of("id", id));
     }
 }

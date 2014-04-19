@@ -34,6 +34,7 @@ public class QuerySetConfiguration {
      *
      * @return database name
      */
+    @Deprecated
     public String getDatabaseName() {
         return databaseName;
     }
@@ -43,6 +44,7 @@ public class QuerySetConfiguration {
      *
      * @param databaseName database name
      */
+    @Deprecated
     public void setDatabaseName(String databaseName) {
         this.databaseName = databaseName;
     }

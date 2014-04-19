@@ -3,11 +3,14 @@ package com.mingo.executor;
 import static com.mingo.convert.ConversionUtils.getAsBasicDBList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.mingo.context.Context;
+import com.mingo.query.QueryManager;
 import com.mingo.convert.ConversionUtils;
 import com.mingo.convert.Converter;
+import com.mingo.convert.ConverterService;
+import com.mingo.mongo.MongoDBFactory;
 import com.mingo.query.QueryStatement;
 import com.mingo.query.QueryType;
+import com.mingo.query.analyzer.QueryAnalyzer;
 import com.mingo.query.util.QueryUtils;
 import com.mongodb.AggregationOutput;
 import com.mongodb.BasicDBList;
@@ -15,7 +18,6 @@ import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
-import com.mongodb.Mongo;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
@@ -41,10 +43,11 @@ import java.util.Map;
  */
 public class MongoQueryExecutor extends AbstractQueryExecutor implements QueryExecutor {
 
-    private Mongo mongo;
+    private MongoDBFactory mongoDBFactory;
 
-    private Context context;
-
+    private QueryManager queryManager;
+    private QueryAnalyzer queryAnalyzer;
+    private ConverterService converterService;
     private Map<QueryType, QueryStrategy> queryStrategyMap =
         new ImmutableMap.Builder<QueryType, QueryStrategy>()
             .put(QueryType.AGGREGATION, new AggregationQueryStrategy())
@@ -53,16 +56,14 @@ public class MongoQueryExecutor extends AbstractQueryExecutor implements QueryEx
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoQueryExecutor.class);
 
-    /**
-     * Constructor with parameters.
-     *
-     * @param mongo   mongo {@link Mongo}
-     * @param context mingo context{@link Context}
-     */
-    public MongoQueryExecutor(Mongo mongo, Context context) {
-        this.mongo = mongo;
-        this.context = context;
+    public MongoQueryExecutor(MongoDBFactory mongoDBFactory, QueryManager queryManager, QueryAnalyzer queryAnalyzer, ConverterService converterService) {
+        this.mongoDBFactory = mongoDBFactory;
+        this.queryManager = queryManager;
+        this.queryAnalyzer = queryAnalyzer;
+        this.converterService = converterService;
     }
+
+
 
     /**
      * {@inheritDoc}
@@ -96,7 +97,7 @@ public class MongoQueryExecutor extends AbstractQueryExecutor implements QueryEx
                              QueryCallback<S, R> queryCallback) {
         Validate.notEmpty(queryName, "query name cannot be null");
         Validate.notNull(type, "type cannot be null");
-        QueryStatement queryStatement = new QueryStatement(context, queryName, parameters);
+        QueryStatement queryStatement = new QueryStatement(queryManager, queryAnalyzer, queryName, parameters);
         QueryStrategy queryStrategy = queryStrategyMap.get(queryStatement.getQueryType());
         return queryCallback.query(queryStrategy, queryStatement, type);
     }
@@ -113,7 +114,7 @@ public class MongoQueryExecutor extends AbstractQueryExecutor implements QueryEx
     }
 
     private DB getDB(String queryName) {
-        return mongo.getDB(QueryUtils.getDbName(queryName));
+        return  mongoDBFactory.getDB();
     }
 
     private DBCollection getDbCollection(QueryStatement queryStatement) {
@@ -121,7 +122,7 @@ public class MongoQueryExecutor extends AbstractQueryExecutor implements QueryEx
     }
 
     private DBCollection getDbCollection(String dbName, String collectionName) {
-        DB db = mongo.getDB(dbName);
+        DB db = getDB(dbName);
         return db.getCollection(collectionName);
     }
 
@@ -201,24 +202,24 @@ public class MongoQueryExecutor extends AbstractQueryExecutor implements QueryEx
         if (StringUtils.isNotBlank(converterClass) && StringUtils.isNotBlank(converterMethod)) {
             return (List<T>) convertByMethod(result, converterClass, converterMethod);
         } else {
-            Converter<T> converter = context.lookupConverter(type);
+            Converter<T> converter = converterService.lookupConverter(type);
             if (converter != null) {
                 return convertList(type, result, converter);
             }
         }
-        return convertList(type, result, context.<T>getDefaultConverter());
+        return convertList(type, result, converterService.getDefaultConverter());
     }
 
     private <T> T convertOne(Class<T> type, DBObject result, String converterClass, String converterMethod) {
         if (StringUtils.isNotBlank(converterClass) && StringUtils.isNotBlank(converterMethod)) {
             return convertByMethod(result, converterClass, converterMethod);
         } else {
-            Converter<T> converter = context.lookupConverter(type);
+            Converter<T> converter = converterService.lookupConverter(type);
             if (converter != null) {
                 return converter.convert(type, result);
             }
         }
-        return convertOne(type, result, context.<T>getDefaultConverter());
+        return convertOne(type, result, converterService.getDefaultConverter());
     }
 
     /**
@@ -242,7 +243,7 @@ public class MongoQueryExecutor extends AbstractQueryExecutor implements QueryEx
     @SuppressWarnings("unchecked")
     private <T> T convertByMethod(DBObject source,
                                   String converterClass, String converterMethod) {
-        return context.getConverterService().convertByMethod(source, converterClass, converterMethod);
+        return converterService.convertByMethod(source, converterClass, converterMethod);
     }
 
 }

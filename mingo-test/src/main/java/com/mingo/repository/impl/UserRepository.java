@@ -1,9 +1,8 @@
 package com.mingo.repository.impl;
 
 import com.google.common.collect.ImmutableMap;
-import com.mingo.core.MingoTemplate;
+import com.mingo.MingoTemplate;
 import com.mingo.domain.User;
-import com.mingo.executor.QueryExecutor;
 import com.mingo.repository.api.IUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,7 +32,7 @@ public class UserRepository extends AbstractBaseRepository<String, User>
 
     @Override
     public User getByName(String name) {
-        return mingoTemplate.queryForObject("mingotest.user.getByName", getDomainClass(),
+        return mingoTemplate.queryForObject("user.getByName", getDomainClass(),
             ImmutableMap.<String, Object>of("name", name));
     }
 

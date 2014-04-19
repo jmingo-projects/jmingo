@@ -15,8 +15,8 @@ public class ConverterServiceTest {
     @Test(groups = "unit")
     public void testConverterService() {
         ConverterService converterService = new ConverterService("com.mingo.converter.custom, com.mingo.converter.custom.test");
-        Converter<SimpleDomain> simpleDomainConverter = converterService.lookup(SimpleDomain.class);
-        Converter<TestDomain> testDomainConverter = converterService.lookup(TestDomain.class);
+        Converter<SimpleDomain> simpleDomainConverter = converterService.lookupConverter(SimpleDomain.class);
+        Converter<TestDomain> testDomainConverter = converterService.lookupConverter(TestDomain.class);
         Assert.assertNotNull(simpleDomainConverter);
         Assert.assertNotNull(testDomainConverter);
     }

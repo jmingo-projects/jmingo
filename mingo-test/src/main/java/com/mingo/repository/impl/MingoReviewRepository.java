@@ -2,12 +2,11 @@ package com.mingo.repository.impl;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-import com.mingo.core.MingoTemplate;
+import com.mingo.MingoTemplate;
 import com.mingo.domain.Author;
 import com.mingo.domain.ModerationStatus;
 import com.mingo.domain.Review;
 import com.mingo.repository.api.IReviewRepository;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Repository;
@@ -44,7 +43,7 @@ public class MingoReviewRepository implements IReviewRepository {
     @Autowired
     private MongoTemplate mongoTemplate;
 
-    private static final String DB_COLLECTION_NAME = "mingotest.review.";
+    private static final String DB_COLLECTION_NAME = "review.";
 
 
     protected Class getDomainClass() {

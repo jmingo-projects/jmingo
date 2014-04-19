@@ -3,7 +3,7 @@
 <querySet xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:noNamespaceSchemaLocation="../../../../main/resources/xml-schema/query.xsd">
 
-    <config dbName="dbTest" collectionName="collectionOne"/>
+    <config collectionName="collectionOne"/>
 
     <queryFragment id="query-1f">
         {'body' : 'query-1-fragment'}

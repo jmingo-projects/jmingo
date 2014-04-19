@@ -2,7 +2,7 @@
 
 <context>
 
-    <querySetConfig dbName="mingotest">
+    <querySetConfig>
         <querySet path="/mingo/testQuerySet.xml"/>
         <querySet path="/mingo/userQuerySet.xml"/>
         <querySet path="/mingo/reviewQuerySet.xml"/>
@@ -11,7 +11,7 @@
     <queryExecutor type="MongoDriver"/>
     <queryAnalyzer type="jexl"/>
 
-    <!--<mongo port="27017" host="localhost"/>-->
+    <mongo dbName="mingotest"/>
 
     <!--<defaultConverter class="com.mingo.convert.DefaultConverter"/>-->
     <converters package="com.mingo.converter"/>

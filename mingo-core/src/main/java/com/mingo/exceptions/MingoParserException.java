@@ -1,4 +1,3 @@
-package com.mingo.exceptions;
 
 /**
  * Copyright 2012-2013 The Mingo Team
@@ -15,39 +14,26 @@ package com.mingo.exceptions;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-public class ParserException extends Exception {
+package com.mingo.exceptions;
 
-    /**
-     * Default constructor.
-     */
-    public ParserException() {
+/**
+ * Created by dmgcodevil on 19.04.2014.
+ */
+public class MingoParserException extends RuntimeException {
+
+    public MingoParserException() {
     }
 
-    /**
-     * Constructor with parameters.
-     *
-     * @param message message
-     */
-    public ParserException(String message) {
+    public MingoParserException(String message) {
         super(message);
     }
 
-    /**
-     * Constructor with parameters.
-     *
-     * @param cause cause
-     */
-    public ParserException(Throwable cause) {
+    public MingoParserException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public MingoParserException(Throwable cause) {
         super(cause);
     }
 
-    /**
-     * Constructor with parameters.
-     *
-     * @param message message
-     * @param cause   cause
-     */
-    public ParserException(String message, Throwable cause) {
-        super(message, cause);
-    }
 }

@@ -1,6 +1,5 @@
 package com.mingo.convert;
 
-import static java.text.MessageFormat.format;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -11,25 +10,24 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.reflections.util.ClasspathHelper;
+import org.slf4j.helpers.MessageFormatter;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+
+import static java.text.MessageFormat.format;
 
 /**
  * Copyright 2012-2013 The Mingo Team
- * <p/>
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * <p/>
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- * <p/>
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -38,23 +36,28 @@ import java.util.Set;
  */
 public class ConverterService {
 
+    private Converter defaultConverter = new DefaultConverter();
+
     private Set<String> convertersPackages;
 
-    private Set<Class<? extends Converter>> convertersClasses;
+    private Set<Class<?>> convertersClasses;
 
     private Map<Class<?>, Converter> cachedConverters = Maps.newHashMap();
 
     private Map<String, Object> specificConverters = Maps.newHashMap();
 
     private List<ClassLoader> classLoaders = Lists.newArrayList(ClasspathHelper.contextClassLoader(),
-        ClasspathHelper.staticClassLoader());
+            ClasspathHelper.staticClassLoader());
 
     private static final String CONVERTER_ERROR_MSG = "can't be registered more then one converter for {0} type";
 
     private static final String CONVERTER_LOAD_ERROR = "cannot load converters from package: {0}";
 
     private static final String CONVERTER_INSTANTIATION_ERROR =
-        "converter instantiation process has failed. Converter class: {0}";
+            "converter instantiation process has failed. Converter class: {0}";
+
+    private static final String BAD_CONVERTER =
+            "converter: '{}' should implement " + Converter.class.getCanonicalName() + " interface.";
 
 
     /**
@@ -68,7 +71,22 @@ public class ConverterService {
             this.convertersPackages = Sets.newHashSet(StringUtils.split(convertersPackages, ","));
             initConvertersClasses();
         }
+    }
 
+    public ConverterService(String convertersPackages, Converter defaultConverter) {
+        this(convertersPackages);
+        this.defaultConverter = defaultConverter;
+    }
+
+    public ConverterService(String convertersPackages, String defaultConverter) {
+        this(convertersPackages);
+        if (StringUtils.isNotBlank(defaultConverter)) {
+            this.defaultConverter = initializeConverter(defaultConverter);
+        }
+    }
+
+    public <T>Converter<T> getDefaultConverter() {
+        return defaultConverter;
     }
 
     /**
@@ -78,7 +96,7 @@ public class ConverterService {
      * @param <T>    the type of the class modeled by this {@code Class} object
      * @return converter for specified type. null if converter not found.
      */
-    public <T> Converter<T> lookup(final Class<T> aClass) {
+    public <T> Converter<T> lookupConverter(final Class<T> aClass) {
         if (CollectionUtils.isEmpty(convertersClasses)) {
             return null;
         }
@@ -86,13 +104,13 @@ public class ConverterService {
             return cachedConverters.get(aClass);
         }
 
-        Set<Class<? extends Converter>> converters = getConverters(aClass);
+        Set<Class<?>> converters = getConverters(aClass);
         if (CollectionUtils.isNotEmpty(converters)) {
             if (converters.size() > 1) {
                 throw new RuntimeException(format(CONVERTER_ERROR_MSG, aClass));
             }
             try {
-                Converter converter = converters.iterator().next().newInstance();
+                Converter converter = (Converter) converters.iterator().next().newInstance();
                 cachedConverters.put(aClass, converter);
                 return converter;
             } catch (InstantiationException | IllegalAccessException e) {
@@ -142,8 +160,8 @@ public class ConverterService {
         }
     }
 
-    private Set<Class<? extends Converter>> getConvertersClasses(String converterPackage) {
-        Set<Class<? extends Converter>> classes = Collections.emptySet();
+    private Set<Class<?>> getConvertersClasses(String converterPackage) {
+        Set<Class<?>> classes = Collections.emptySet();
         for (ClassLoader classLoader : classLoaders) {
             classes = getConvertersClasses(converterPackage, classLoader);
             if (CollectionUtils.isNotEmpty(classes)) {
@@ -153,18 +171,18 @@ public class ConverterService {
         return classes;
     }
 
-    private Set<Class<? extends Converter>> getConvertersClasses(String converterPackage, ClassLoader classLoader) {
-        Set<Class<? extends Converter>> classes = Collections.emptySet();
+    private Set<Class<?>> getConvertersClasses(String converterPackage, ClassLoader classLoader) {
+        Set<Class<?>> classes = Collections.emptySet();
         try {
             ClassPath classPath = ClassPath.from(classLoader);
             Set<com.google.common.reflect.ClassPath.ClassInfo> classInfos =
-                classPath.getTopLevelClassesRecursive(converterPackage);
+                    classPath.getTopLevelClassesRecursive(converterPackage);
             if (CollectionUtils.isNotEmpty(classInfos)) {
                 classes = Sets.newHashSet();
                 for (com.google.common.reflect.ClassPath.ClassInfo classInfo : classInfos) {
-                    Class converterClass = Class.forName(classInfo.getName());
+                    Class<?> converterClass = Class.forName(classInfo.getName());
                     if (Converter.class.isAssignableFrom(converterClass) &&
-                        classInfo.getName().contains(converterPackage)) {
+                            classInfo.getName().contains(converterPackage)) {
                         classes.add(converterClass);
                     }
                 }
@@ -175,11 +193,11 @@ public class ConverterService {
         return classes;
     }
 
-    private <T> Set<Class<? extends Converter>> getConverters(final Class<T> aClass) {
-        Set<Class<? extends Converter>> suitableConverters = new HashSet<>();
-        for (Class<? extends Converter> converterClass : convertersClasses) {
+    private Set<Class<?>> getConverters(final Class<?> aClass) {
+        Set<Class<?>> suitableConverters = new HashSet<>();
+        for (Class<?> converterClass : convertersClasses) {
             if (converterClass.getGenericInterfaces().length > 0 &&
-                converterClass.getGenericInterfaces()[0] instanceof ParameterizedType) {
+                    converterClass.getGenericInterfaces()[0] instanceof ParameterizedType) {
                 ParameterizedType pt = (ParameterizedType) converterClass.getGenericInterfaces()[0];
                 if (pt.getActualTypeArguments().length > 0 && pt.getActualTypeArguments()[0] instanceof Class) {
                     Class<?> at = (Class<?>) pt.getActualTypeArguments()[0];
@@ -190,6 +208,21 @@ public class ConverterService {
             }
         }
         return suitableConverters;
+    }
+
+    private Converter initializeConverter(String converterClassName) {
+        try {
+            Class converterClass = Class.forName(converterClassName);
+            if (Converter.class.isAssignableFrom(converterClass)) {
+                return (Converter) converterClass.newInstance();
+            } else {
+                throw new RuntimeException(
+                        MessageFormatter.format(BAD_CONVERTER, converterClassName).getMessage());
+            }
+        } catch (ClassNotFoundException | IllegalAccessException | InstantiationException ex) {
+            throw new RuntimeException(MessageFormatter.format(CONVERTER_LOAD_ERROR,
+                    converterClassName).getMessage(), ex);
+        }
     }
 
 }

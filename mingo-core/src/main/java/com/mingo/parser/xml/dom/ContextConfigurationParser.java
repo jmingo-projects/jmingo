@@ -1,15 +1,10 @@
 package com.mingo.parser.xml.dom;
 
-import static com.mingo.parser.xml.dom.DocumentBuilderFactoryCreator.createDocumentBuilderFactory;
-import static com.mingo.parser.xml.dom.DomUtil.assertPositive;
-import static com.mingo.parser.xml.dom.DomUtil.getAttributeInt;
-import static com.mingo.parser.xml.dom.DomUtil.getAttributeString;
-import static com.mingo.parser.xml.dom.DomUtil.getFirstNecessaryTagOccurrence;
-import static com.mingo.parser.xml.dom.DomUtil.getFirstTagOccurrence;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-import com.mingo.context.conf.ContextConfiguration;
-import com.mingo.exceptions.ParserException;
+import com.mingo.config.ContextConfiguration;
+import com.mingo.config.MongoConfig;
+import com.mingo.exceptions.MingoParserException;
 import com.mingo.parser.Parser;
 import com.mingo.query.QueryAnalyzerType;
 import com.mingo.query.QueryExecutorType;
@@ -25,27 +20,30 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
 
-import java.io.InputStream;
-import java.util.Set;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import java.io.InputStream;
+import java.util.Set;
+
+import static com.mingo.parser.xml.dom.DocumentBuilderFactoryCreator.createDocumentBuilderFactory;
+import static com.mingo.parser.xml.dom.DomUtil.*;
 
 /**
  * Copyright 2012-2013 The Mingo Team
- * <p/>
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * <p/>
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- * <p/>
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * <p/>
+ * <p>
  * This class is implementation of {@link Parser} interface.
  * XML parser for context configuration. See  context.xsd schema for details.
  */
@@ -77,6 +75,9 @@ public class ContextConfigurationParser implements Parser<ContextConfiguration> 
     private static final String CONVERTERS_PACKAGE_ATTR = "package";
     private static final String CONVERTER_CLASS_ATTR = "class";
 
+    private static final String OPTIONS_TAG = "options";
+    private static final String OPTION_TAG = "option";
+
     /**
      * Constructor with parameters.
      *
@@ -85,7 +86,7 @@ public class ContextConfigurationParser implements Parser<ContextConfiguration> 
      * @throws ParserConfigurationException {@link ParserConfigurationException}
      */
     public ContextConfigurationParser(ParserConfiguration parserConfiguration, ErrorHandler parseErrorHandler)
-        throws ParserConfigurationException {
+            throws ParserConfigurationException {
         this.documentBuilderFactory = createDocumentBuilderFactory(parserConfiguration);
         this.parseErrorHandler = parseErrorHandler;
     }
@@ -94,7 +95,7 @@ public class ContextConfigurationParser implements Parser<ContextConfiguration> 
      * {@inheritDoc}
      */
     @Override
-    public ContextConfiguration parse(InputStream xml) throws ParserException {
+    public ContextConfiguration parse(InputStream xml) throws MingoParserException {
         LOGGER.debug("ContextConfiguration:: START PARSING");
         ContextConfiguration contextConfiguration;
         try {
@@ -106,11 +107,11 @@ public class ContextConfigurationParser implements Parser<ContextConfiguration> 
             contextConfiguration.setQuerySetConfiguration(parseQuerySetConfigTag(element));
             contextConfiguration.setQueryExecutorType(parseQueryExecutorTag(element));
             contextConfiguration.setQueryAnalyzerType(parseQueryAnalyzerTag(element));
-            parseMongoTag(contextConfiguration, element);
+            contextConfiguration.setMongoConfig(parseMongoTag(element));
             parseConvertersTag(contextConfiguration, element);
             contextConfiguration.setDefaultConverter(parseDefaultConverterTag(element));
         } catch (Exception e) {
-            throw new ParserException(e);
+            throw new MingoParserException(e);
         }
         return contextConfiguration;
     }
@@ -121,7 +122,7 @@ public class ContextConfigurationParser implements Parser<ContextConfiguration> 
      * @param element element of XML document
      * @return set of paths queries definitions
      */
-    private QuerySetConfiguration parseQuerySetConfigTag(Element element) throws ParserException {
+    private QuerySetConfiguration parseQuerySetConfigTag(Element element) throws MingoParserException {
         Set<String> querySets = ImmutableSet.of();
         // expected what xml contains single <querySetConfig> tag
         // therefore take first element from node list is normal
@@ -159,16 +160,17 @@ public class ContextConfigurationParser implements Parser<ContextConfiguration> 
      *
      * @param element element of XML document
      * @return {@link QueryExecutorType}
-     * @throws ParserException {@link ParserException}
+     * @throws MingoParserException {@link MingoParserException}
      */
-    private QueryExecutorType parseQueryExecutorTag(Element element) throws ParserException {
+    @Deprecated
+    private QueryExecutorType parseQueryExecutorTag(Element element) throws MingoParserException {
         QueryExecutorType type = null;
         Node queryExecutorNode = getFirstTagOccurrence(element, QUERY_EXECUTOR_TAG);
         if (queryExecutorNode != null) {
             type = QueryExecutorType.getByName(getAttributeString(queryExecutorNode,
-                QUERY_EXECUTOR_TYPE_ATTR));
+                    QUERY_EXECUTOR_TYPE_ATTR));
             if (type == null) {
-                throw new ParserException("unsupported query executor type.");
+                throw new MingoParserException("unsupported query executor type.");
             }
         }
         return type;
@@ -179,16 +181,16 @@ public class ContextConfigurationParser implements Parser<ContextConfiguration> 
      *
      * @param element element of XML document
      * @return {@link QueryAnalyzerType}
-     * @throws ParserException {@link ParserException}
+     * @throws MingoParserException {@link MingoParserException}
      */
-    private QueryAnalyzerType parseQueryAnalyzerTag(Element element) throws ParserException {
+    private QueryAnalyzerType parseQueryAnalyzerTag(Element element) throws MingoParserException {
         QueryAnalyzerType type = null;
         Node queryAnalyzerNode = getFirstTagOccurrence(element, QUERY_ANALYZER_TAG);
         if (queryAnalyzerNode != null) {
             type = QueryAnalyzerType.getByName(getAttributeString(queryAnalyzerNode,
-                QUERY_ANALYZER_TYPE_ATTR));
+                    QUERY_ANALYZER_TYPE_ATTR));
             if (type == null) {
-                throw new ParserException("unsupported query analyzer type.");
+                throw new MingoParserException("unsupported query analyzer type.");
             }
         }
 
@@ -199,21 +201,36 @@ public class ContextConfigurationParser implements Parser<ContextConfiguration> 
      * Parse <mongo/> tag. All information from this tag will pass to context configuration.
      * Throws exception if 'mongo' tag was not found.
      *
-     * @param contextConfiguration {@link ContextConfiguration}
-     * @param element              element of XML document
-     * @throws ParserException {@link ParserException}
+     * @param element element of XML document
+     * @throws MingoParserException {@link MingoParserException}
      */
-    private void parseMongoTag(ContextConfiguration contextConfiguration, Element element)
-        throws ParserException {
+    private MongoConfig parseMongoTag(Element element)
+            throws MingoParserException {
+        MongoConfig mongoConfig = null;
         Node mongoNode = getFirstTagOccurrence(element, MONGO_TAG);
         if (mongoNode != null) {
-            String databaseHost = getAttributeString(mongoNode, MONGO_HOST_ATTR);
-            int databasePort = getAttributeInt(mongoNode, MONGO_PORT_ATTR);
+
+            String databaseHost = getAttributeString(mongoNode, MONGO_HOST_ATTR, MongoConfig.DEF_HOST);
+            int databasePort = getAttributeInt(mongoNode, MONGO_PORT_ATTR, MongoConfig.DEF_PORT);
+            String dbName = getAttributeString(mongoNode, "dbName");
+            Validate.notBlank(dbName, "attribute 'dbName' is required");
             assertPositive(databasePort, "wrong value for database port. database port must be gt 0");
             Validate.notBlank(databaseHost, "database host cannot be null or empty");
-            contextConfiguration.setDatabaseHost(databaseHost);
-            contextConfiguration.setDatabasePort(databasePort);
+            MongoConfig.Builder mongoConfigBuilder = MongoConfig.builder().dbPort(databasePort)
+                    .dbHost(databaseHost).dbName(dbName);
+            // parse options
+            getAllChildNodes(mongoNode, OPTION_TAG).forEach(optNode -> {
+                if (OPTION_TAG.equals(optNode.getNodeName())) {
+                    mongoConfigBuilder.option(getAttributeString(optNode, "name"), getAttributeString(optNode, "value"));
+                }
+            });
+
+
+            mongoConfig = mongoConfigBuilder.build();
+        } else {
+            throw new MingoParserException(MONGO_TAG + " is required");
         }
+        return mongoConfig;
     }
 
     private void parseConvertersTag(ContextConfiguration contextConfiguration, Element element) {

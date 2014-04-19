@@ -3,7 +3,7 @@
 <querySet xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:noNamespaceSchemaLocation="../../../../main/resources/xml-schema/query.xsd">
 
-    <config dbName="dbTest" collectionName="collectionOne"/>
+    <config collectionName="collectionOne"/>
 
     <query id="query-1" type="aggregation">
         <case id="aggregation-way" condition="name == john">{'case' : 'body'}</case>
