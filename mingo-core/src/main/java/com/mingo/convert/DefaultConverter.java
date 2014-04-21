@@ -9,7 +9,6 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.mingo.convert.mongo.type.ObjectIdDeserializer;
 import com.mingo.convert.mongo.type.deserialize.MongoDateDeserializer;
 import com.mingo.exceptions.ConversionException;
 import com.mongodb.DBObject;
