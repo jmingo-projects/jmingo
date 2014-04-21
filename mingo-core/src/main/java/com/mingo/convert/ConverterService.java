@@ -94,11 +94,11 @@ public class ConverterService {
      *
      * @param aClass class
      * @param <T>    the type of the class modeled by this {@code Class} object
-     * @return converter for specified type. null if converter not found.
+     * @return converter for specified type. returns default converter if there is no suitable converter for this type.
      */
     public <T> Converter<T> lookupConverter(final Class<T> aClass) {
         if (CollectionUtils.isEmpty(convertersClasses)) {
-            return null;
+            return defaultConverter;
         }
         if (cachedConverters.containsKey(aClass)) {
             return cachedConverters.get(aClass);
@@ -117,7 +117,7 @@ public class ConverterService {
                 throw new RuntimeException(format(CONVERTER_INSTANTIATION_ERROR, aClass), e);
             }
         }
-        return null;
+        return defaultConverter;
     }
 
     /**

@@ -1,14 +1,21 @@
 package com.mingo.convert;
 
 import static com.mingo.convert.ConversionUtils.getFirstElement;
+
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.mingo.convert.mongo.type.ObjectIdDeserializer;
 import com.mingo.convert.mongo.type.deserialize.MongoDateDeserializer;
 import com.mingo.exceptions.ConversionException;
 import com.mongodb.DBObject;
 import com.mongodb.util.JSON;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,6 +54,13 @@ public class DefaultConverter<T> implements Converter<T> {
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         SimpleModule module = new SimpleModule();
         module.addDeserializer(Date.class, new MongoDateDeserializer());
+       // module.addDeserializer(String.class, new ObjectIdDeserializer());
+        module.addSerializer(ObjectId.class, new JsonSerializer<ObjectId>() {
+            @Override
+            public void serialize(ObjectId objectId, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException, JsonProcessingException {
+                jsonGenerator.writeString(objectId.toString());
+            }
+        });
         objectMapper.registerModule(module);
     }
 
@@ -58,8 +72,11 @@ public class DefaultConverter<T> implements Converter<T> {
     public T convert(Class<T> type, DBObject source) {
         T result;
         source = getFirstElement(source);
-        String json = JSON.serialize(source);
+        String json;
+         json = JSON.serialize(source);
+
         try {
+            //json = objectMapper.writeValueAsString(source); todo fix issues with ObjectId
             result = objectMapper.readValue(json, type);
         } catch (IOException e) {
             LOGGER.error(ExceptionUtils.getMessage(e));

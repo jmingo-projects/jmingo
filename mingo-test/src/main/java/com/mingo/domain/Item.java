@@ -1,5 +1,7 @@
 package com.mingo.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
  * Copyright 2012-2013 The Mingo Team
  * <p/>
@@ -15,7 +17,8 @@ package com.mingo.domain;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-public class Item {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class Item extends Domain{
 
     private String name;
 
@@ -37,7 +40,8 @@ public class Item {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Item)) return false;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
 
         Item item = (Item) o;
 
@@ -48,6 +52,8 @@ public class Item {
 
     @Override
     public int hashCode() {
-        return name != null ? name.hashCode() : 0;
+        int result = super.hashCode();
+        result = 31 * result + (name != null ? name.hashCode() : 0);
+        return result;
     }
 }

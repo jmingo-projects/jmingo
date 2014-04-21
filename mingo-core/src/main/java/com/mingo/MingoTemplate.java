@@ -15,8 +15,13 @@
  */
 package com.mingo;
 
+import com.mingo.convert.ConverterService;
 import com.mingo.executor.QueryExecutor;
+import com.mingo.mongo.MongoDBFactory;
+import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -27,9 +32,36 @@ public class MingoTemplate {
 
 
     private QueryExecutor queryExecutor;
+    private MongoDBFactory mongoDBFactory;
+    private ConverterService converterService;
 
-    public MingoTemplate(QueryExecutor queryExecutor) {
+    public MingoTemplate(QueryExecutor queryExecutor, MongoDBFactory mongoDBFactory, ConverterService converterService) {
         this.queryExecutor = queryExecutor;
+        this.mongoDBFactory = mongoDBFactory;
+        this.converterService = converterService;
+    }
+
+    public void dropCollection(String collectionName) {
+        mongoDBFactory.getDB().getCollection(collectionName).drop();
+    }
+
+
+    /**
+     * Gets list of objects of specified T type from the collection.
+     *
+     * @param type           the type
+     * @param collectionName the collection name
+     * @return the list of objects of type
+     */
+    public <T> List<T> findAll(Class<T> type, String collectionName) {
+        List<T> result = new ArrayList<>();
+        DBCursor cursor = mongoDBFactory.getDB().getCollection(collectionName).find();
+        while (cursor.hasNext()) {
+            DBObject object = cursor.next();
+            T item = converterService.lookupConverter(type).convert(type, object);
+            result.add(item);
+        }
+        return result;
     }
 
     /**

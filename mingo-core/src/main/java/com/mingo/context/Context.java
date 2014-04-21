@@ -114,7 +114,7 @@ public class Context {
                     : new MongoDBFactory(config.getMongoConfig());
             queryAnalyzer = QueryAnalyzerFactory.createQueryAnalyzer(config.getQueryAnalyzerType());
             mongoQueryExecutor = new MongoQueryExecutor(mongoDBFactory, queryManager, queryAnalyzer, converterService);
-            mingoTemplate = new MingoTemplate(mongoQueryExecutor);
+            mingoTemplate = new MingoTemplate(mongoQueryExecutor, mongoDBFactory, converterService);
         } catch (Throwable e) {
             throw new ContextInitializationException(e);
         }

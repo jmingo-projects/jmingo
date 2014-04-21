@@ -202,24 +202,16 @@ public class MongoQueryExecutor extends AbstractQueryExecutor implements QueryEx
         if (StringUtils.isNotBlank(converterClass) && StringUtils.isNotBlank(converterMethod)) {
             return (List<T>) convertByMethod(result, converterClass, converterMethod);
         } else {
-            Converter<T> converter = converterService.lookupConverter(type);
-            if (converter != null) {
-                return convertList(type, result, converter);
-            }
+            return convertList(type, result, converterService.lookupConverter(type));
         }
-        return convertList(type, result, converterService.getDefaultConverter());
     }
 
     private <T> T convertOne(Class<T> type, DBObject result, String converterClass, String converterMethod) {
         if (StringUtils.isNotBlank(converterClass) && StringUtils.isNotBlank(converterMethod)) {
             return convertByMethod(result, converterClass, converterMethod);
         } else {
-            Converter<T> converter = converterService.lookupConverter(type);
-            if (converter != null) {
-                return converter.convert(type, result);
-            }
+            return converterService.lookupConverter(type).convert(type, result);
         }
-        return convertOne(type, result, converterService.getDefaultConverter());
     }
 
     /**
