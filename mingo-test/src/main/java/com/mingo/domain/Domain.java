@@ -1,11 +1,11 @@
 package com.mingo.domain;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.mingo.annotation.AutoGenerate;
+import com.mingo.annotation.Id;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.springframework.data.annotation.Id;
 
 import java.io.Serializable;
 
@@ -27,7 +27,7 @@ import java.io.Serializable;
 public class Domain implements Serializable {
 
     @Id
-    @JsonProperty(value = "_id")
+    @AutoGenerate
     private String id;
 
     public String getId() {

@@ -15,11 +15,18 @@
  */
 package com.mingo;
 
+import com.mingo.annotation.Document;
 import com.mingo.convert.ConverterService;
+import com.mingo.exceptions.MingoException;
 import com.mingo.executor.QueryExecutor;
+import com.mingo.marshall.MongoBsonMarshaller;
+import com.mingo.marshall.jackson.JacksonMongoBsonMarshallingFactory;
 import com.mingo.mongo.MongoDBFactory;
+import com.mongodb.BasicDBObject;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +41,7 @@ public class MingoTemplate {
     private QueryExecutor queryExecutor;
     private MongoDBFactory mongoDBFactory;
     private ConverterService converterService;
+    private MongoBsonMarshaller bsonMarshaller = JacksonMongoBsonMarshallingFactory.getInstance().createMarshaller();
 
     public MingoTemplate(QueryExecutor queryExecutor, MongoDBFactory mongoDBFactory, ConverterService converterService) {
         this.queryExecutor = queryExecutor;
@@ -41,8 +49,48 @@ public class MingoTemplate {
         this.converterService = converterService;
     }
 
+    /**
+     * Drops specified collection by name.
+     *
+     * @param collectionName the collection name
+     */
     public void dropCollection(String collectionName) {
         mongoDBFactory.getDB().getCollection(collectionName).drop();
+    }
+
+    /**
+     * Drops specified collection by name.
+     *
+     * @param type the type
+     */
+    public void dropCollection(Class<?> type) {
+        mongoDBFactory.getDB().getCollection(getCollectionName(type)).drop();
+    }
+
+    /**
+     * Inserts the object to the collection for the entity type of the object to save.
+     * as the collection name is the {@link com.mingo.annotation.Document#collectionName()} or simple class name
+     * of stored object if collection name isn't explicitly defined in @Document annotation.
+     *
+     * @param objectToInsert the object to store in the collection
+     */
+    public void insert(Object objectToInsert) {
+        assertDocument(objectToInsert);
+        String collectionName = getCollectionName(objectToInsert);
+        insert(objectToInsert, collectionName);
+    }
+
+    /**
+     * Inserts the object to the collection for the entity type of the object to save.
+     *
+     * @param objectToInsert the object to store in the collection
+     * @param collectionName the collection name
+     */
+    public void insert(Object objectToInsert, String collectionName) {
+        assertDocument(objectToInsert);
+        Validate.notBlank(collectionName, "collectionName cannot be null or empty");
+        DBObject dbObject = bsonMarshaller.marshall(BasicDBObject.class, objectToInsert);
+        mongoDBFactory.getDB().getCollection(collectionName).insert(dbObject);
     }
 
 
@@ -63,6 +111,25 @@ public class MingoTemplate {
         }
         return result;
     }
+
+    /**
+     * Gets list of objects of specified T type from the collection.
+     *
+     * @param type the type
+     * @return the list of objects of type
+     */
+    public <T> List<T> findAll(Class<T> type) {
+        String collectionName = getCollectionName(type);
+        List<T> result = new ArrayList<>();
+        DBCursor cursor = mongoDBFactory.getDB().getCollection(collectionName).find();
+        while (cursor.hasNext()) {
+            DBObject object = cursor.next();
+            T item = converterService.lookupConverter(type).convert(type, object);
+            result.add(item);
+        }
+        return result;
+    }
+
 
     /**
      * Perform query with parameters and return instance with specified type as result.
@@ -114,6 +181,32 @@ public class MingoTemplate {
      */
     public <T> List<T> queryForList(String queryName, Class<T> type) {
         return queryExecutor.queryForList(queryName, type);
+    }
+
+    private String getCollectionName(Object object) {
+        return getCollectionName(object.getClass());
+    }
+
+    private String getCollectionName(Class<?> type) {
+        String collectionName;
+        Document document = type.getAnnotation(Document.class);
+        if (StringUtils.isNotBlank(document.collectionName())) {
+            collectionName = document.collectionName();
+        } else {
+            collectionName = type.getSimpleName();
+        }
+        return collectionName;
+    }
+
+    private void assertDocument(Object object) {
+        Validate.notNull("object to insert cannot be null");
+        if (!isDocument(object)) {
+            throw new MingoException("Object [class:" + object.getClass().getName() + "] cannot be saved because isn't annotated with @Document annotation");
+        }
+    }
+
+    private boolean isDocument(Object object) {
+        return object.getClass().isAnnotationPresent(Document.class);
     }
 
 }

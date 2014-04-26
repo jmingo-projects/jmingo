@@ -24,7 +24,7 @@ import java.util.List;
  * @param <ID> The type of unique identifier.
  * @param <T>  The type of objects managed by repository.
  */
-public interface IBaseRepository<ID, T extends Domain> {
+public interface IBaseRepository<ID, T> {
 
     /**
      * Inserts object.

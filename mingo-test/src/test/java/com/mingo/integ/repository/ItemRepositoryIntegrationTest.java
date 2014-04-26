@@ -6,34 +6,33 @@ import com.mingo.repository.impl.ItemRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
 
+import java.util.Date;
 import java.util.Set;
-import java.util.UUID;
 
 import static org.testng.AssertJUnit.assertEquals;
 
-/**
- * Created by dmgcodevil on 21.04.2014.
- */
-public class ItemRepositoryIntegrationTest extends CommonIntegrationTest{
+
+public class ItemRepositoryIntegrationTest extends CommonIntegrationTest {
 
     @Autowired
     private ItemRepository itemRepository;
 
 
-   @Test
-   public void testFindAll(){
-       itemRepository.getMingoTemplate().dropCollection("item");
-       Item item1 = new Item("1");
-       Item item2 = new Item("2");
-       Item item3 = new Item("3");
-       Set<Item> items = Sets.newHashSet();
-       items.add(item1);
-       items.add(item2);
-       items.add(item3);
-       item1.setId(itemRepository.insert(new Item("1")));
-       item2.setId(itemRepository.insert(new Item("2")));
-       item3.setId(itemRepository.insert(new Item("3")));
-       Set<Item> saved = Sets.newHashSet(itemRepository.getMingoTemplate().findAll(Item.class, "item"));
-       assertEquals(saved, items);
+    @Test(groups = "integration")
+    public void testFindAll() {
+        Date date = new Date();
+        itemRepository.getMingoTemplate().dropCollection(Item.class);
+        Item item1 = new Item("1");
+        item1.setDate(date);
+        Item item2 = new Item("2");
+        item2.setDate(date);
+        Item item3 = new Item("3");
+        item3.setDate(date);
+        Set<Item> items = Sets.newHashSet(item1, item2, item3);
+        item1.setId(itemRepository.insert(item1));
+        item2.setId(itemRepository.insert(item2));
+        item3.setId(itemRepository.insert(item3));
+        Set<Item> saved = Sets.newHashSet(itemRepository.getMingoTemplate().findAll(Item.class));
+        assertEquals(saved, items);
     }
 }
