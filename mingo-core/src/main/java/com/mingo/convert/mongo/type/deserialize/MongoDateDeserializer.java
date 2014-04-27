@@ -19,22 +19,18 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdScalarDeserializer;
-import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
+import com.fasterxml.jackson.databind.node.POJONode;
+import com.fasterxml.jackson.databind.util.StdDateFormat;
+import com.google.common.base.Throwables;
 
 import java.io.IOException;
-import java.text.ParsePosition;
+import java.text.ParseException;
 import java.util.Date;
-import java.util.Iterator;
-import java.util.Map;
 
 /**
- * This converter is used only if the mongodb JSON.serialize is used.
+ * This converter is used by default to convert string representation of bson date into {@link Date}.
  */
 public class MongoDateDeserializer extends StdScalarDeserializer<Date> {
-
-    private static final String DATE_TYPE = "$date";
-
-    private static final ISO8601DateFormat ISO_8601_DATE_FORMAT = new ISO8601DateFormat();
 
     /**
      * Default converter.
@@ -49,14 +45,24 @@ public class MongoDateDeserializer extends StdScalarDeserializer<Date> {
     @Override
     public Date deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
         JsonNode tree = jp.readValueAsTree();
-        Iterator<Map.Entry<String, JsonNode>> fieldNameIt = tree.fields();
-        while (fieldNameIt.hasNext()) {
-            Map.Entry<String, JsonNode> entry = fieldNameIt.next();
-            if (DATE_TYPE.equals(entry.getKey())) {
-                return ISO_8601_DATE_FORMAT.parse(entry.getValue().asText(), new ParsePosition(0));
+        if (tree.isPojo()) {
+            POJONode pojoNode = (POJONode) tree;
+            Object pojo = pojoNode.getPojo();
+
+            if (pojo instanceof Date) {
+                return (Date) pojoNode.getPojo();
+            } else {
+                throw new RuntimeException("unsupported date type, expected: " + Date.class.getName());
             }
         }
-        return null;
+        String stringDate = tree.asText();
+        StdDateFormat stdDateFormat = new StdDateFormat();
+        try {
+            return stdDateFormat.parse(stringDate);
+        } catch (ParseException e) {
+            throw Throwables.propagate(e);
+        }
+
     }
 
 }

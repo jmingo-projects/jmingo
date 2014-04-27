@@ -2,11 +2,13 @@ package com.mingo.repository.impl;
 
 import com.mingo.MingoTemplate;
 import com.mingo.domain.Item;
+import com.mingo.query.Criteria;
 import com.mingo.repository.api.IBaseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.util.Date;
 import java.util.List;
 
 
@@ -32,10 +34,17 @@ public class ItemRepository implements IBaseRepository<String, Item> {
         return item.getId();
     }
 
-    //todo swith to mingo template
     @Override
     public Item findById(String id) {
-        return mongoTemplate.findById(id, Item.class);
+        return mingoTemplate.findById(id, Item.class);
+    }
+
+
+    public List<Item> findAfterDate(Date date) {
+        Criteria criteria = Criteria
+                .where("{ 'date' : { '$gt' : \"#date\"} }")
+                .with("date", date);
+        return mingoTemplate.find(criteria, Item.class);
     }
 
     /**
@@ -43,13 +52,13 @@ public class ItemRepository implements IBaseRepository<String, Item> {
      */
     @Override
     public List<Item> findAll() {
-        return mingoTemplate.findAll(Item.class, "item");
+        return mingoTemplate.findAll(Item.class);
     }
 
-    //todo swith to mingo template
     @Override
-    public void update(Item object) {
-
+    public void update(Item item) {
+        Criteria criteria = Criteria.whereId(item.getId());
+        mingoTemplate.update(item, criteria, Item.class);
     }
 
     //todo swith to mingo template

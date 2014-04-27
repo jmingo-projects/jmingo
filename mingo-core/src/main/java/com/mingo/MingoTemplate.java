@@ -22,9 +22,12 @@ import com.mingo.executor.QueryExecutor;
 import com.mingo.marshall.MongoBsonMarshaller;
 import com.mingo.marshall.jackson.JacksonMongoBsonMarshallingFactory;
 import com.mingo.mongo.MongoDBFactory;
+import com.mingo.query.Criteria;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
+import com.mongodb.WriteResult;
+import com.mongodb.util.JSON;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 
@@ -93,6 +96,19 @@ public class MingoTemplate {
         mongoDBFactory.getDB().getCollection(collectionName).insert(dbObject);
     }
 
+    public WriteResult update(Object objectToUpdate, Criteria criteria, Class<?> entityClass) {
+        assertDocument(objectToUpdate);
+        assertDocument(entityClass);
+        DBObject updateDocument = bsonMarshaller.marshall(BasicDBObject.class, objectToUpdate);
+        DBObject queryObject = (DBObject) JSON.parse(criteria.queryString());
+        return update(updateDocument, queryObject, entityClass, criteria.isUpsert(), criteria.isMulti());
+    }
+
+    public WriteResult update(DBObject update, DBObject query, Class<?> entityClass, boolean upsert, boolean multi) {
+        assertDocument(entityClass);
+        String collectionName = getCollectionName(entityClass);
+        return mongoDBFactory.getDB().getCollection(collectionName).update(query, update, upsert, multi);
+    }
 
     /**
      * Gets list of objects of specified T type from the collection.
@@ -130,6 +146,36 @@ public class MingoTemplate {
         return result;
     }
 
+    public <T> T findById(Object id, Class<T> documentType) {
+        assertDocument(documentType);
+        Criteria criteria = Criteria.whereId(id);
+        return findOne(criteria, documentType);
+    }
+
+    public <T> T findOne(Criteria criteria, Class<T> documentType) {
+        T result = null;
+        assertDocument(documentType);
+        DBObject query = (DBObject) JSON.parse(criteria.queryString());
+        DBCursor cursor = mongoDBFactory.getDB().getCollection(getCollectionName(documentType)).find(query);
+        DBObject dbObject = cursor.iterator().next();
+        if (dbObject != null) {
+            result = converterService.lookupConverter(documentType).convert(documentType, dbObject);
+        }
+        return result;
+    }
+
+    public <T> List<T> find(Criteria criteria, Class<T> documentType) {
+        List<T> result = new ArrayList<>();
+        assertDocument(documentType);
+        DBObject query = (DBObject) JSON.parse(criteria.queryString());
+        DBCursor cursor = mongoDBFactory.getDB().getCollection(getCollectionName(documentType)).find(query);
+        while (cursor.hasNext()) {
+            DBObject object = cursor.next();
+            T item = converterService.lookupConverter(documentType).convert(documentType, object);
+            result.add(item);
+        }
+        return result;
+    }
 
     /**
      * Perform query with parameters and return instance with specified type as result.
@@ -200,13 +246,19 @@ public class MingoTemplate {
 
     private void assertDocument(Object object) {
         Validate.notNull("object to insert cannot be null");
-        if (!isDocument(object)) {
-            throw new MingoException("Object [class:" + object.getClass().getName() + "] cannot be saved because isn't annotated with @Document annotation");
+        assertDocument(object.getClass());
+    }
+
+
+    private void assertDocument(Class<?> documentType) {
+        Validate.notNull("document type cannot be null");
+        if (!isDocument(documentType)) {
+            throw new MingoException("[class:" + documentType.getName() + "] isn't annotated with @Document annotation.");
         }
     }
 
-    private boolean isDocument(Object object) {
-        return object.getClass().isAnnotationPresent(Document.class);
+    private boolean isDocument(Class<?> documentType) {
+        return documentType.isAnnotationPresent(Document.class);
     }
 
 }

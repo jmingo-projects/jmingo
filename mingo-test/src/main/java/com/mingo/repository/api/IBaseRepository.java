@@ -1,7 +1,5 @@
 package com.mingo.repository.api;
 
-import com.mingo.domain.Domain;
-
 import java.util.List;
 
 
