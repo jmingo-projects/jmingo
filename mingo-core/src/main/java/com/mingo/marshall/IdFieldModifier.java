@@ -17,17 +17,17 @@ package com.mingo.marshall;
 
 
 import com.google.common.base.Throwables;
-import com.google.common.collect.Iterables;
 import com.mingo.annotation.AutoGenerate;
 import com.mingo.annotation.Document;
 import com.mingo.annotation.Id;
 import org.bson.types.ObjectId;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 
 /**
@@ -36,43 +36,31 @@ import java.util.UUID;
 public class IdFieldModifier {
 
     /**
-     * Generates id value for specified pojo including all pojo's fields if it has field that annotated with @Id and
-     * pojo is annotated with @Document annotation.
+     * Generates ids values for all pojo's fields including
+     * inherited fields that annotated with {@link com.mingo.annotation.Id} and with {@link com.mingo.annotation.AutoGenerate}.
+     * <p>
+     * If {@code pojo} isn't annotated with {@link com.mingo.annotation.Document} then it will be skipped.
+     * Generation depends on type of field:
+     * to generate value for {@code String} field the {@link java.util.UUID} is used.
+     * If type of id field is {@code ObjectId} then the new instance of {@code ObjectId}
+     * will be created using default constructor {@code new ObjectId()}.
+     * <p>
+     * Generates values for nested fields that also have an id field, for instance if the pojo has collection of mingo
+     * documents then for each document form collection will be generated new value.
+     * It applies for {@code Collection} and {@code Array} types,
+     * exception case for {@code Map}.
+     * <p>
+     * If an id field is final, Synthetic or static then new value will not be generated.
      *
-     * @param pojo the pojo for this the id field should be generated
+     * @param pojo the pojo for that the id field should be generated
      */
     public void generateId(Object pojo) {
         if (!isDocument(pojo)) {
             return;
         }
-        validate(pojo);
 
-        fields(pojo).forEach(field -> {
-            try {
-                field.setAccessible(true);
-                if (isId(field)) {
-                    checkAndGenerateId(pojo, field);
-                } else {
-                    Object child = field.get(pojo);
-                    if (child != null) {
-                        if (child instanceof Collection) {
-                            generateIdForList((Collection) child);
-                        } else if (child instanceof Object[]) {
-                            generateIdForArray((Object[]) child);
-                        } else {
-                            generateId(child);
-                        }
-                    }
-                }
-
-            } catch (Throwable e) {
-                throw Throwables.propagate(e);
-            }
-        });
-    }
-
-    private List<Field> fields(Object pojo) {
-        return Arrays.asList(pojo.getClass().getDeclaredFields());
+        doWithFields(pojo, pojo.getClass(), generateId, skipSyntheticField,
+                skipFinalField, skipStaticField);
     }
 
     private boolean isDocument(Object pojo) {
@@ -91,16 +79,6 @@ public class IdFieldModifier {
 
     private void generateIdForList(Collection<?> objects) {
         objects.forEach(this::generateId);
-    }
-
-    private void validate(Object pojo) {
-        boolean idPresent = Iterables.tryFind(Arrays.asList(pojo.getClass().getDeclaredFields()),
-                input -> input.isAnnotationPresent(Id.class)).isPresent();
-
-        if (!idPresent) {
-            throw new RuntimeException("id field isn't present in: " + pojo.getClass()
-                    + ", but this class is annotated with Document. You should annotate some field with @Id if you want to save this object in mongo");
-        }
     }
 
     private void checkAndGenerateId(Object pojo, Field field) throws IllegalAccessException {
@@ -130,6 +108,67 @@ public class IdFieldModifier {
         } catch (IllegalAccessException e) {
             throw Throwables.propagate(e);
         }
+    }
+
+
+    private FieldCallback generateId = (target, field) -> {
+        try {
+            field.setAccessible(true); //make field accessible to set/get value
+            if (isId(field)) {
+                checkAndGenerateId(target, field);
+            } else {
+                Object child = field.get(target);
+                if (child != null) {
+                    if (child instanceof Collection) {
+                        generateIdForList((Collection) child);
+                    } else if (child instanceof Object[]) {
+                        generateIdForArray((Object[]) child);
+                    } else {
+                        generateId(child);
+                    }
+                }
+            }
+
+        } catch (Throwable e) {
+            throw Throwables.propagate(e);
+        }
+    };
+
+    private interface FieldCallback {
+        void apply(Object target, Field field);
+    }
+
+    /**
+     * Filter for fields.
+     */
+    private Predicate<Field> skipSyntheticField = field -> !field.isSynthetic();
+    private Predicate<Field> skipFinalField = field -> !Modifier.isFinal(field.getModifiers());
+    private Predicate<Field> skipStaticField = field -> !Modifier.isStatic(field.getModifiers());
+
+    private void doWithFields(Object target, Class<?> clazz, FieldCallback fc, Predicate<Field>... filters)
+            throws IllegalArgumentException {
+        Class<?> targetClass = clazz;
+        do {
+            Field[] fields = targetClass.getDeclaredFields();
+            for (Field field : fields) {
+                // Skip static and final fields.
+                if (filters != null && filters.length > 0 && !applyFilters(field, filters)) {
+                    continue;
+                }
+                fc.apply(target, field);
+            }
+            targetClass = targetClass.getSuperclass();
+        }
+        while (targetClass != null && targetClass != Object.class);
+    }
+
+    private boolean applyFilters(Field field, Predicate<Field>... filters) {
+        for (Predicate<Field> filter : Arrays.asList(filters)) {
+            if (!filter.test(field)) {
+                return false;
+            }
+        }
+        return true;
     }
 
 }

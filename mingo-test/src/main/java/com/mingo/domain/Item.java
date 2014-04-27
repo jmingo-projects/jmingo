@@ -1,9 +1,5 @@
 package com.mingo.domain;
 
-import com.mingo.annotation.AutoGenerate;
-import com.mingo.annotation.Document;
-import com.mingo.annotation.Id;
-
 import java.util.Date;
 
 /**
@@ -21,22 +17,11 @@ import java.util.Date;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@Document
-public class Item {
 
-    @Id
-    @AutoGenerate
-    private String id;
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
+public class Item extends BaseDocument{
 
     private String name;
+
     private Date date;
 
     public Item() {
@@ -66,11 +51,11 @@ public class Item {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
 
         Item item = (Item) o;
 
         if (date != null ? !date.equals(item.date) : item.date != null) return false;
-        if (id != null ? !id.equals(item.id) : item.id != null) return false;
         if (name != null ? !name.equals(item.name) : item.name != null) return false;
 
         return true;
@@ -78,7 +63,7 @@ public class Item {
 
     @Override
     public int hashCode() {
-        int result = id != null ? id.hashCode() : 0;
+        int result = super.hashCode();
         result = 31 * result + (name != null ? name.hashCode() : 0);
         result = 31 * result + (date != null ? date.hashCode() : 0);
         return result;

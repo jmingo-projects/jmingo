@@ -18,6 +18,7 @@ package com.mingo.annotation;
 import com.fasterxml.jackson.annotation.JacksonAnnotationsInside;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
@@ -26,6 +27,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @JacksonAnnotationsInside
 
 @JsonProperty("_id")
+@Inherited
 public @interface Id {
 }
 
