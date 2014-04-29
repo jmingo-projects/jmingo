@@ -17,6 +17,7 @@ package com.mingo.marshall.jackson;
 
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -44,6 +45,8 @@ public class MongoMapper extends ObjectMapper {
                 .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
                 .withCreatorVisibility(JsonAutoDetect.Visibility.NONE);
         configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        //configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
+        //configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
     }
 
     public MongoMapper(Module module) {

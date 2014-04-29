@@ -13,13 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.mingo.marshall;
+package com.mingo.exceptions;
 
 
-import com.mingo.exceptions.MarshallingException;
-import org.bson.BSONObject;
+public class MarshallingException extends RuntimeException {
+    public MarshallingException() {
+    }
 
-public interface MongoBsonMarshaller {
+    public MarshallingException(String message) {
+        super(message);
+    }
 
-    <T extends BSONObject> T marshall(Class<T> type, Object pojo) throws MarshallingException;
+    public MarshallingException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public MarshallingException(Throwable cause) {
+        super(cause);
+    }
 }

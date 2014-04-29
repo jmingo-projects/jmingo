@@ -17,7 +17,7 @@
         <ver.surefire-plugin>2.13</ver.surefire-plugin>
         <org.springframework.version>4.0.3.RELEASE</org.springframework.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <guavaVersion>14.0.1</guavaVersion>
+        <guavaVersion>17.0</guavaVersion>
         <mongoDriverVersion>2.11.2</mongoDriverVersion>
         <embedmongo-version>0.1.9</embedmongo-version>
         <mavenRepoPath/> <!-- pass the value from the command line as -DmavenRepoPath={path} -->
