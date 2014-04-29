@@ -1,7 +1,7 @@
 package com.mingo.convert;
 
-import com.mingo.marshall.MongoBsonUnmarshaller;
-import com.mingo.marshall.jackson.JacksonMongoBsonMarshallingFactory;
+import com.mingo.marshall.BsonUnmarshaller;
+import com.mingo.marshall.jackson.JacksonBsonMarshallingFactory;
 import com.mongodb.DBObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +29,7 @@ import static com.mingo.convert.ConversionUtils.getFirstElement;
  */
 public class DefaultConverter<T> implements Converter<T> {
 
-    private MongoBsonUnmarshaller mongoBsonUnmarshaller = JacksonMongoBsonMarshallingFactory.getInstance().createUnmarshaller();
+    private BsonUnmarshaller mongoBsonUnmarshaller = JacksonBsonMarshallingFactory.getInstance().createUnmarshaller();
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultConverter.class);
 
 

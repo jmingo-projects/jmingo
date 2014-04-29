@@ -3,7 +3,9 @@ package com.mingo.marshall;
 
 public interface BsonMarshallingFactory {
 
-    MongoBsonMarshaller createMarshaller();
+    BsonMarshaller createMarshaller();
 
-    MongoBsonUnmarshaller createUnmarshaller();
+    BsonUnmarshaller createUnmarshaller();
+
+    JsonToDBObjectMarshaller createJsonToDbObjectMarshaller();
 }

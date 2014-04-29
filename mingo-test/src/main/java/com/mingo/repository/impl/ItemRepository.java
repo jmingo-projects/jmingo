@@ -42,7 +42,7 @@ public class ItemRepository implements IBaseRepository<String, Item> {
 
     public List<Item> findAfterDate(Date date) {
         Criteria criteria = Criteria
-                .where("{ 'date' : { '$gt' : \"#date\"} }")
+                .where("{ 'date' : { '$gt' : '#date'} }")
                 .with("date", date);
         return mingoTemplate.find(criteria, Item.class);
     }

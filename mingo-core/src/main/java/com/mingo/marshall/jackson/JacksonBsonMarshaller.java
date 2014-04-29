@@ -15,16 +15,16 @@
  */
 package com.mingo.marshall.jackson;
 
+import com.mingo.marshall.BsonMarshaller;
 import com.mingo.marshall.MarshallPreProcessor;
-import com.mingo.marshall.MongoBsonMarshaller;
 import org.bson.BSONObject;
 
-public class JacksonMongoBsonMarshaller implements MongoBsonMarshaller {
+public class JacksonBsonMarshaller implements BsonMarshaller {
 
     private MongoMapper mongoMapper;
     private MarshallPreProcessor marshallPreProcessor;
 
-    public JacksonMongoBsonMarshaller(MongoMapper mongoMapper, MarshallPreProcessor marshallPreProcessor) {
+    public JacksonBsonMarshaller(MongoMapper mongoMapper, MarshallPreProcessor marshallPreProcessor) {
         this.mongoMapper = mongoMapper;
         this.marshallPreProcessor = marshallPreProcessor;
     }

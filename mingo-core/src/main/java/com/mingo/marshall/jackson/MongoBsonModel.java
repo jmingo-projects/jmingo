@@ -27,8 +27,6 @@ public class MongoBsonModel extends SimpleModule {
         super.setupModule(context);
         addDeserializer(ObjectId.class, new ObjectIdDeserializer());
         addSerializer(ObjectId.class, new ObjectIdSerializer());
-
-
     }
 
 }

@@ -1,6 +1,6 @@
 package com.mingo.marshall;
 
-import com.mingo.marshall.jackson.JacksonMongoBsonMarshallingFactory;
+import com.mingo.marshall.jackson.JacksonBsonMarshallingFactory;
 import com.mongodb.BasicDBObject;
 import org.testng.annotations.Test;
 
@@ -8,9 +8,9 @@ import static org.testng.Assert.assertEquals;
 
 public class JacksonMongoMarshallingTest {
 
-    private MongoBsonMarshaller mongoBsonMarshaller = JacksonMongoBsonMarshallingFactory.getInstance().createMarshaller();
+    private BsonMarshaller mongoBsonMarshaller = JacksonBsonMarshallingFactory.getInstance().createMarshaller();
 
-    private MongoBsonUnmarshaller mongoBsonUnmarshaller = JacksonMongoBsonMarshallingFactory.getInstance().createUnmarshaller();
+    private BsonUnmarshaller mongoBsonUnmarshaller = JacksonBsonMarshallingFactory.getInstance().createUnmarshaller();
 
     @Test
     public void testMarshall() {

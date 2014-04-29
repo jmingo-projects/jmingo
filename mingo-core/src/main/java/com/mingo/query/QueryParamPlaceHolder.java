@@ -15,6 +15,7 @@ import java.util.Map;
 
 import static org.slf4j.helpers.MessageFormatter.format;
 
+@Deprecated
 public class QueryParamPlaceHolder {
 
     /* this prefixed must be placed before parameter name */

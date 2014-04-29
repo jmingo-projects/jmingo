@@ -2,6 +2,9 @@ package com.mingo.query;
 
 
 import com.google.common.collect.Maps;
+import com.mingo.marshall.JsonToDBObjectMarshaller;
+import com.mingo.marshall.mongo.MongoBsonMarshallingFactory;
+import com.mongodb.DBObject;
 
 import java.util.Map;
 
@@ -11,6 +14,7 @@ public class Criteria {
     private boolean multi;
     private boolean upsert;
     private Map<String, Object> parameters = Maps.newHashMap();
+    private JsonToDBObjectMarshaller jsonToDBObjectMarshaller = MongoBsonMarshallingFactory.getInstance().createJsonToDbObjectMarshaller();
 
     public Criteria(String queryTemplate) {
         this.queryTemplate = queryTemplate;
@@ -52,7 +56,13 @@ public class Criteria {
         return upsert;
     }
 
+    @Deprecated
     public String queryString() {
         return QueryParamPlaceHolder.replaceQueryParameters(queryTemplate, parameters);
     }
+
+    public DBObject query(){
+       return jsonToDBObjectMarshaller.marshall(queryTemplate, parameters);
+    }
+
 }

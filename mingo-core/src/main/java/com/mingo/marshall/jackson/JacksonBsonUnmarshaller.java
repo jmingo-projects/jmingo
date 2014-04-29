@@ -15,15 +15,15 @@
  */
 package com.mingo.marshall.jackson;
 
-import com.mingo.marshall.MongoBsonUnmarshaller;
+import com.mingo.marshall.BsonUnmarshaller;
 import org.bson.BSONObject;
 
 
-public class JacksonMongoBsonUnmarshaller implements MongoBsonUnmarshaller {
+public class JacksonBsonUnmarshaller implements BsonUnmarshaller {
 
     private MongoMapper mongoMapper;
 
-    public JacksonMongoBsonUnmarshaller(MongoMapper mongoMapper) {
+    public JacksonBsonUnmarshaller(MongoMapper mongoMapper) {
         this.mongoMapper = mongoMapper;
     }
 

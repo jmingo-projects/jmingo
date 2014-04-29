@@ -19,15 +19,14 @@ import com.mingo.annotation.Document;
 import com.mingo.convert.ConverterService;
 import com.mingo.exceptions.MingoException;
 import com.mingo.executor.QueryExecutor;
-import com.mingo.marshall.MongoBsonMarshaller;
-import com.mingo.marshall.jackson.JacksonMongoBsonMarshallingFactory;
+import com.mingo.marshall.BsonMarshaller;
+import com.mingo.marshall.jackson.JacksonBsonMarshallingFactory;
 import com.mingo.mongo.MongoDBFactory;
 import com.mingo.query.Criteria;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.WriteResult;
-import com.mongodb.util.JSON;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 
@@ -44,7 +43,7 @@ public class MingoTemplate {
     private QueryExecutor queryExecutor;
     private MongoDBFactory mongoDBFactory;
     private ConverterService converterService;
-    private MongoBsonMarshaller bsonMarshaller = JacksonMongoBsonMarshallingFactory.getInstance().createMarshaller();
+    private BsonMarshaller bsonMarshaller = JacksonBsonMarshallingFactory.getInstance().createMarshaller();
 
     public MingoTemplate(QueryExecutor queryExecutor, MongoDBFactory mongoDBFactory, ConverterService converterService) {
         this.queryExecutor = queryExecutor;
@@ -100,7 +99,7 @@ public class MingoTemplate {
         assertDocument(objectToUpdate);
         assertDocument(entityClass);
         DBObject updateDocument = bsonMarshaller.marshall(BasicDBObject.class, objectToUpdate);
-        DBObject queryObject = (DBObject) JSON.parse(criteria.queryString());
+        DBObject queryObject = criteria.query();
         return update(updateDocument, queryObject, entityClass, criteria.isUpsert(), criteria.isMulti());
     }
 
@@ -155,7 +154,7 @@ public class MingoTemplate {
     public <T> T findOne(Criteria criteria, Class<T> documentType) {
         T result = null;
         assertDocument(documentType);
-        DBObject query = (DBObject) JSON.parse(criteria.queryString());
+        DBObject query = criteria.query();
         DBCursor cursor = mongoDBFactory.getDB().getCollection(getCollectionName(documentType)).find(query);
         DBObject dbObject = cursor.iterator().next();
         if (dbObject != null) {
@@ -167,7 +166,7 @@ public class MingoTemplate {
     public <T> List<T> find(Criteria criteria, Class<T> documentType) {
         List<T> result = new ArrayList<>();
         assertDocument(documentType);
-        DBObject query = (DBObject) JSON.parse(criteria.queryString());
+        DBObject query = criteria.query();
         DBCursor cursor = mongoDBFactory.getDB().getCollection(getCollectionName(documentType)).find(query);
         while (cursor.hasNext()) {
             DBObject object = cursor.next();

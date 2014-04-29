@@ -19,11 +19,14 @@ package com.mingo.marshall;
 import com.mingo.exceptions.MarshallingException;
 import org.bson.BSONObject;
 
+import java.util.Collections;
 import java.util.Map;
 
 public interface JsonToBsonMarshaller<T extends BSONObject> {
 
-    T marshall(String json) throws MarshallingException;
+    default T marshall(String json) throws MarshallingException {
+        return marshall(json, Collections.emptyMap());
+    }
 
     T marshall(String json, Map<String, Object> parameters) throws MarshallingException;
 }

@@ -16,9 +16,10 @@
 package com.mingo.marshall;
 
 
+import com.mingo.exceptions.MarshallingException;
 import org.bson.BSONObject;
 
-public interface MongoBsonUnmarshaller {
+public interface BsonMarshaller {
 
-    <T, B extends BSONObject> T unmarshall(Class<T> type, B source);
+    <T extends BSONObject> T marshall(Class<T> type, Object pojo) throws MarshallingException;
 }

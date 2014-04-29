@@ -6,15 +6,16 @@ import com.mingo.convert.mongo.type.deserialize.MongoDateDeserializer;
 import com.mingo.convert.mongo.type.deserialize.ObjectIdDeserializer;
 import com.mingo.convert.mongo.type.serialize.BsonDateSerializer;
 import com.mingo.convert.mongo.type.serialize.ObjectIdSerializer;
+import com.mingo.marshall.BsonMarshaller;
 import com.mingo.marshall.BsonMarshallingFactory;
+import com.mingo.marshall.BsonUnmarshaller;
+import com.mingo.marshall.JsonToDBObjectMarshaller;
 import com.mingo.marshall.MarshallPreProcessor;
-import com.mingo.marshall.MongoBsonMarshaller;
-import com.mingo.marshall.MongoBsonUnmarshaller;
 import org.bson.types.ObjectId;
 
 import java.util.Date;
 
-public class JacksonMongoBsonMarshallingFactory implements BsonMarshallingFactory {
+public class JacksonBsonMarshallingFactory implements BsonMarshallingFactory {
     private static final MongoBsonModel mongoBsonModel = new MongoBsonModel();
 
     static {
@@ -31,12 +32,12 @@ public class JacksonMongoBsonMarshallingFactory implements BsonMarshallingFactor
     }
 
     private static final MarshallPreProcessor MARSHALL_PRE_PROCESSOR = new MarshallPreProcessor();
-    private static final MongoBsonMarshaller MONGO_BSON_MARSHALLER = new JacksonMongoBsonMarshaller(mongoMapper, MARSHALL_PRE_PROCESSOR);
-    private static final MongoBsonUnmarshaller MONGO_BSON_UNMARSHALLER = new JacksonMongoBsonUnmarshaller(mongoMapper);
+    private static final BsonMarshaller MONGO_BSON_MARSHALLER = new JacksonBsonMarshaller(mongoMapper, MARSHALL_PRE_PROCESSOR);
+    private static final BsonUnmarshaller MONGO_BSON_UNMARSHALLER = new JacksonBsonUnmarshaller(mongoMapper);
 
-    private static final BsonMarshallingFactory instance = new JacksonMongoBsonMarshallingFactory();
+    private static final BsonMarshallingFactory instance = new JacksonBsonMarshallingFactory();
 
-    private JacksonMongoBsonMarshallingFactory() {
+    private JacksonBsonMarshallingFactory() {
 
     }
 
@@ -45,13 +46,18 @@ public class JacksonMongoBsonMarshallingFactory implements BsonMarshallingFactor
     }
 
     @Override
-    public MongoBsonMarshaller createMarshaller() {
+    public BsonMarshaller createMarshaller() {
         return MONGO_BSON_MARSHALLER;
     }
 
     @Override
-    public MongoBsonUnmarshaller createUnmarshaller() {
+    public BsonUnmarshaller createUnmarshaller() {
         return MONGO_BSON_UNMARSHALLER;
+    }
+
+    @Override
+    public JsonToDBObjectMarshaller createJsonToDbObjectMarshaller() {
+        throw new UnsupportedOperationException("There are no Jackson implementation of JsonToDBObjectMarshaller");
     }
 
 }
