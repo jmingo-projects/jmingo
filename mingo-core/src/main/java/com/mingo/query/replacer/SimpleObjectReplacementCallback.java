@@ -1,12 +1,12 @@
 /**
  * Copyright 2012-2013 The Mingo Team
- * <p/>
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * <p/>
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- * <p/>
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,7 +15,20 @@
  */
 package com.mingo.query.replacer;
 
-public interface ReplacementCallback<T> {
+import java.util.Map;
 
-    Object doReplace(T item);
+public class SimpleObjectReplacementCallback extends AbstractReplacementCallback<Object> implements ReplacementCallback<Object> {
+
+    public SimpleObjectReplacementCallback(String prefix, Map<String, Object> replacements) {
+        super(prefix, replacements);
+    }
+
+    public SimpleObjectReplacementCallback(Map<String, Object> replacements) {
+        super(replacements);
+    }
+
+    @Override
+    public Object doReplace(Object item) {
+        return item == null ? item : getReplacement(item);
+    }
 }

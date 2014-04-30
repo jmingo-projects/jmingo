@@ -15,9 +15,7 @@
  */
 package com.mingo;
 
-import com.mingo.annotation.Document;
 import com.mingo.convert.ConverterService;
-import com.mingo.exceptions.MingoException;
 import com.mingo.executor.QueryExecutor;
 import com.mingo.marshall.BsonMarshaller;
 import com.mingo.marshall.jackson.JacksonBsonMarshallingFactory;
@@ -27,12 +25,15 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.WriteResult;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static com.mingo.util.DocumentUtils.assertDocument;
+import static com.mingo.util.DocumentUtils.getCollectionName;
+import static com.mingo.util.DocumentUtils.getIdValue;
 
 /**
  * Interface that specifies a basic set of Mingo operations.
@@ -156,8 +157,8 @@ public class MingoTemplate {
         assertDocument(documentType);
         DBObject query = criteria.query();
         DBCursor cursor = mongoDBFactory.getDB().getCollection(getCollectionName(documentType)).find(query);
-        DBObject dbObject = cursor.iterator().next();
-        if (dbObject != null) {
+        if (cursor.hasNext()) {
+            DBObject dbObject = cursor.iterator().next();
             result = converterService.lookupConverter(documentType).convert(documentType, dbObject);
         }
         return result;
@@ -174,6 +175,50 @@ public class MingoTemplate {
             result.add(item);
         }
         return result;
+    }
+
+    /**
+     * Removes the object from the collection by id.
+     *
+     * @param object the object to remove
+     */
+    public WriteResult remove(Object object) {
+        return remove(object, getCollectionName(object));
+    }
+
+    /**
+     * Removes the object from the collection.
+     *
+     * @param object the object to remove
+     * @param collection the collection name
+     */
+    public WriteResult remove(Object object, String collection){
+        assertDocument(object);
+        Object idValue = getIdValue(object);
+        Criteria criteria = Criteria.whereId(idValue);
+        DBObject query = criteria.query();
+        return remove(query, collection);
+    }
+
+    /**
+     * Removes all documents from the collection that satisfies a given query criteria.
+     *
+     * @param query          the query that specifies criteria used to remove documents
+     * @param collectionName the collection name
+     */
+    public WriteResult remove(DBObject query, String collectionName) {
+        return mongoDBFactory.getDB().getCollection(collectionName).remove(query);
+    }
+
+    /**
+     * Removes all documents from the collection that is used to store the instances of documentClass.
+     *
+     * @param criteria the query criteria
+     * @param documentClass the document class
+     */
+    public <T> void remove(Criteria criteria, Class<T> documentClass){
+        WriteResult writeResult = remove(criteria.query(), getCollectionName(documentClass));
+        writeResult.getField("");
     }
 
     /**
@@ -226,38 +271,6 @@ public class MingoTemplate {
      */
     public <T> List<T> queryForList(String queryName, Class<T> type) {
         return queryExecutor.queryForList(queryName, type);
-    }
-
-    private String getCollectionName(Object object) {
-        return getCollectionName(object.getClass());
-    }
-
-    private String getCollectionName(Class<?> type) {
-        String collectionName;
-        Document document = type.getAnnotation(Document.class);
-        if (StringUtils.isNotBlank(document.collectionName())) {
-            collectionName = document.collectionName();
-        } else {
-            collectionName = type.getSimpleName();
-        }
-        return collectionName;
-    }
-
-    private void assertDocument(Object object) {
-        Validate.notNull("object to insert cannot be null");
-        assertDocument(object.getClass());
-    }
-
-
-    private void assertDocument(Class<?> documentType) {
-        Validate.notNull("document type cannot be null");
-        if (!isDocument(documentType)) {
-            throw new MingoException("[class:" + documentType.getName() + "] isn't annotated with @Document annotation.");
-        }
-    }
-
-    private boolean isDocument(Class<?> documentType) {
-        return documentType.isAnnotationPresent(Document.class);
     }
 
 }

@@ -31,7 +31,7 @@ public class MapReplacementCallback extends AbstractReplacementCallback<Map> imp
     }
 
     @Override
-    public void doReplace(Map map) {
+    public Object doReplace(Map map) {
         MapTraversal.traverseEntries(map, (currPap, entry) -> {
             Object value = entry.getValue();
             Object key = entry.getKey();
@@ -39,6 +39,7 @@ public class MapReplacementCallback extends AbstractReplacementCallback<Map> imp
                     getReplacement(value);
             currPap.replace(key, value, newValue);
         }, o -> !isMap(o));
+        return map;
     }
 
 }

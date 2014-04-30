@@ -18,8 +18,12 @@ package com.mingo.marshall.mongo;
 import com.mingo.exceptions.MarshallingException;
 import com.mingo.marshall.AbstractJsonToBsonMarshaller;
 import com.mingo.marshall.JsonToDBObjectMarshaller;
-import com.mingo.query.replacer.DBObjectReplacementCallback;
+import com.mingo.query.replacer.BasicDBListReplacementCallback;
+import com.mingo.query.replacer.BasicDBObjectReplacementCallback;
 import com.mingo.query.replacer.ReplacementCallback;
+import com.mingo.query.replacer.SimpleObjectReplacementCallback;
+import com.mongodb.BasicDBList;
+import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.mongodb.util.JSON;
 import com.mongodb.util.JSONCallback;
@@ -34,19 +38,33 @@ public class MongoJsonToDBObjectMarshaller extends AbstractJsonToBsonMarshaller<
     }
 
     private static class BSONCallback extends JSONCallback {
-        private ReplacementCallback<DBObject> _replacementCallback;
+        private ReplacementCallback<BasicDBObject> basicDBObjectReplacementCallback;
+        private ReplacementCallback<BasicDBList> basicDBListReplacementCallback;
+        private ReplacementCallback<Object> simpleObjectReplacementCallback;
 
         public BSONCallback(Map<String, Object> parameters) {
-            _replacementCallback = new DBObjectReplacementCallback(parameters);
+            basicDBObjectReplacementCallback = new BasicDBObjectReplacementCallback(parameters);
+            basicDBListReplacementCallback = new BasicDBListReplacementCallback(parameters);
+            simpleObjectReplacementCallback = new SimpleObjectReplacementCallback(parameters);
         }
 
         @Override
         public Object objectDone() {
             Object source = super.objectDone();
-            DBObject dbObject = (DBObject) source;
-            _replacementCallback.doReplace(dbObject);
+            doReplace(source);
             return source;
         }
+
+        private Object doReplace(Object source) {
+            if (source instanceof BasicDBObject) {
+                return basicDBObjectReplacementCallback.doReplace((BasicDBObject) source);
+            }
+            if (source instanceof BasicDBList) {
+                return basicDBListReplacementCallback.doReplace((BasicDBList) source);
+            }
+            return simpleObjectReplacementCallback.doReplace(source);
+        }
     }
+
 
 }

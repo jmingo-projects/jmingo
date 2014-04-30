@@ -15,20 +15,23 @@
  */
 package com.mingo.query.replacer;
 
-import com.mongodb.DBObject;
+import com.mongodb.BasicDBObject;
 
 import java.util.Map;
 
-public class DBObjectReplacementCallback implements ReplacementCallback<DBObject> {
+public class BasicDBObjectReplacementCallback implements ReplacementCallback<BasicDBObject> {
 
-    private ReplacementCallback<Map> replacementCallback;
+    private ReplacementCallback<Map> mapReplacementCallback;
 
-    public DBObjectReplacementCallback(Map<String, Object> replacements) {
-        replacementCallback = new MapReplacementCallback(replacements);
+    public BasicDBObjectReplacementCallback(Map<String, Object> replacements) {
+        mapReplacementCallback = new MapReplacementCallback(replacements);
     }
 
     @Override
-    public void doReplace(DBObject dbObject) {
-        replacementCallback.doReplace(dbObject.toMap());
+    public Object doReplace(BasicDBObject dbObject) {
+        if (dbObject != null) {
+            mapReplacementCallback.doReplace(dbObject);
+        }
+        return dbObject;
     }
 }

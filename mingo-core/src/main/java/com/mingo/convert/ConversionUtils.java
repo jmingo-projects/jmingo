@@ -104,7 +104,7 @@ public final class ConversionUtils {
         if (CollectionUtils.isEmpty(basicDBList)) {
             return Collections.emptyList();
         }
-        return Lists.transform(basicDBList, (item) -> converter.convert(type, cast(item)));
+        return Lists.transform(basicDBList, (item) -> converter.convert(type, castToDbObject(item)));
     }
 
     /**
@@ -290,9 +290,9 @@ public final class ConversionUtils {
         return true;
     }
 
-    public static DBObject cast(Object source) {
+    public static <T extends DBObject> T castToDbObject(Object source) {
         if (source instanceof DBObject) {
-            return (DBObject) source;
+            return (T) source;
         }
         throw new IllegalArgumentException("source object should be instance of: " + DBObject.class);
     }

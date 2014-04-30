@@ -1,5 +1,6 @@
 package com.mingo.integ.repository;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.mingo.domain.Item;
 import com.mingo.repository.impl.ItemRepository;
@@ -8,9 +9,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
-import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 
 public class ItemRepositoryIntegrationTest extends CommonIntegrationTest {
@@ -60,9 +64,70 @@ public class ItemRepositoryIntegrationTest extends CommonIntegrationTest {
         item2.setId(itemRepository.insert(item2));
 
         Set<Item> expected = Sets.newHashSet(item1);
-        //Set<Item> saved = Sets.newHashSet(itemRepository.findAll());
-       Set<Item> saved = Sets.newHashSet(itemRepository.findAfterDate(DateUtils.addDays(new Date(), -2)));
+        Set<Item> saved = Sets.newHashSet(itemRepository.findAfterDate(DateUtils.addDays(new Date(), -2)));
         assertEquals(expected, saved);
-
     }
+
+    @Test(groups = "integration")
+    public void testUpdateByName() {
+        itemRepository.getMingoTemplate().dropCollection(Item.class);
+        //given
+        Item item = new Item("1");
+        String name = "testItem";
+        item.setName(name);
+        //then
+        itemRepository.insert(item);
+        item.setDate(new Date());
+        String id = item.getId();
+        assertNotNull(id);
+        Item saved = itemRepository.findById(id);
+        assertNull(saved.getDate());
+        itemRepository.updateByName(item, name);
+        saved = itemRepository.findById(id);
+        assertEquals(saved.getDate(), item.getDate());
+    }
+
+    @Test(groups = "integration")
+    public void testDelete() {
+        itemRepository.getMingoTemplate().dropCollection(Item.class);
+        //given
+        Item item = new Item("testItem");
+        item.setDate(new Date());
+        //then
+        itemRepository.insert(item);
+        String id = item.getId();
+        Item saved = itemRepository.findById(id);
+        assertNotNull(saved);
+        assertNotNull(saved.getId());
+        assertNotNull(saved.getName());
+        assertNotNull(saved.getDate());
+
+        itemRepository.delete(item);
+        saved = itemRepository.findById(id);
+        assertNull(saved);
+    }
+
+    @Test(groups = "integration")
+    public void testDeleteByName() {
+        itemRepository.getMingoTemplate().dropCollection(Item.class);
+        String sameName = "same_name";
+        Item item1 = new Item(sameName);
+        item1.setDate(new Date());
+        Item item2 = new Item(sameName);
+        item2.setDate(new Date());
+        Item item3 = new Item(sameName);
+        item3.setDate(new Date());
+        List<Item> items = Lists.newArrayList(item1, item2, item3);
+        itemRepository.insert(item1);
+        itemRepository.insert(item2);
+        itemRepository.insert(item3);
+        List<Item> saved = itemRepository.findByName(sameName);
+        assertNotNull(saved);
+        assertEquals(saved.size(), items.size());
+        itemRepository.deleteByName(sameName);
+        saved = itemRepository.findByName(sameName);
+        assertNotNull(saved);
+        assertEquals(saved.size(), 0);
+    }
+
 }

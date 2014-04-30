@@ -1,5 +1,6 @@
 package com.mingo.repository.impl;
 
+import com.google.common.collect.Lists;
 import com.mingo.MingoTemplate;
 import com.mingo.domain.Item;
 import com.mingo.query.Criteria;
@@ -39,6 +40,10 @@ public class ItemRepository implements IBaseRepository<String, Item> {
         return mingoTemplate.findById(id, Item.class);
     }
 
+    public List<Item> findByName(String name){
+        Criteria criteria = Criteria.where("{name : '#name'}").with("name", name);
+        return mingoTemplate.find(criteria, Item.class);
+    }
 
     public List<Item> findAfterDate(Date date) {
         Criteria criteria = Criteria
@@ -61,9 +66,18 @@ public class ItemRepository implements IBaseRepository<String, Item> {
         mingoTemplate.update(item, criteria, Item.class);
     }
 
-    //todo swith to mingo template
+    public void updateByName(Item item, String name) {
+        Criteria criteria = Criteria.where("{name : '#name'}").with("name", name);
+        mingoTemplate.update(item, criteria, Item.class);
+    }
+
     @Override
     public void delete(Item object) {
+        mingoTemplate.remove(object);
+    }
 
+    public void deleteByName(String name){
+        Criteria criteria = Criteria.where("{name : '#name'}").with("name", name);
+        mingoTemplate.remove(criteria, Item.class);
     }
 }

@@ -10,6 +10,8 @@ import org.testng.annotations.Test;
 import java.util.Date;
 import java.util.Map;
 
+import static org.testng.AssertJUnit.assertEquals;
+
 public class MongoJsonToDBObjectMarshallerTest {
 
 
@@ -17,19 +19,22 @@ public class MongoJsonToDBObjectMarshallerTest {
     public void testMarshall() {
         JsonToDBObjectMarshaller jsonToBsonMarshaller = new MongoJsonToDBObjectMarshaller();
         //given
+        Date dateParam = new Date();
         Map<String, Object> parameters = ImmutableMap.<String, Object>builder()
                 .put("statuses", Lists.newArrayList("not_moderated", "passed"))
-                .put("created", new Date())
+                .put("created", dateParam.getTime())
                 .put("t", "scala").build();
         String json = "{$match : { \"moderationStatus\": { $in: \"#statuses\"}, created: { \"$gt\" : '#created'}}, tags : {$in : ['java', '#t', 'groovy']}}";
         DBObject dbObject = jsonToBsonMarshaller.marshall(json, parameters);
         System.out.println(dbObject);
+        assertEquals("{ \"$match\" : { \"moderationStatus\" : { \"$in\" : [ \"not_moderated\" , \"passed\"]} , \"created\" : { \"$gt\" : " + dateParam.getTime() + "}} , \"tags\" : { \"$in\" : [ \"java\" , \"scala\" , \"groovy\"]}}", dbObject.toString());
 
         parameters = ImmutableMap.<String, Object>builder()
                 .put("p", 2).build();
         json = "{$project: {moderationStatus:1, tags: 1, count: {$add: [1, '#p' ]}}}";
         dbObject = jsonToBsonMarshaller.marshall(json, parameters);
         System.out.println(dbObject);
+        assertEquals("{ \"$project\" : { \"moderationStatus\" : 1 , \"tags\" : 1 , \"count\" : { \"$add\" : [ 1 , 2]}}}", dbObject.toString());
     }
 
 }
