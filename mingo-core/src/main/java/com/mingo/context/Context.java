@@ -15,19 +15,19 @@
  */
 package com.mingo.context;
 
+import com.mingo.query.ELEngineType;
 import com.mingo.query.QueryManager;
 import com.mingo.config.ContextConfiguration;
-import com.mingo.convert.ConverterService;
+import com.mingo.mapping.convert.ConverterService;
 import com.mingo.MingoTemplate;
 import com.mingo.exceptions.ContextInitializationException;
 import com.mingo.executor.MongoQueryExecutor;
 import com.mingo.mongo.MongoDBFactory;
 import com.mingo.parser.Parser;
 import com.mingo.parser.xml.dom.ParserFactory;
-import com.mingo.query.QueryAnalyzerType;
 import com.mingo.query.QueryExecutorType;
-import com.mingo.query.analyzer.QueryAnalyzer;
-import com.mingo.query.analyzer.QueryAnalyzerFactory;
+import com.mingo.query.el.ELEngine;
+import com.mingo.query.el.ELEngineFactory;
 import com.mongodb.Mongo;
 import org.apache.commons.lang3.StringUtils;
 
@@ -38,7 +38,7 @@ import static com.mingo.util.FileUtils.getAsInputStream;
 public class Context {
 
 
-    private QueryAnalyzer queryAnalyzer;
+    private ELEngine queryAnalyzer;
 
     private ConverterService converterService;
 
@@ -47,7 +47,7 @@ public class Context {
     private MongoDBFactory mongoDBFactory;
     private MongoQueryExecutor mongoQueryExecutor;
     private MingoTemplate mingoTemplate;
-    private QueryAnalyzerType queryAnalyzerType;
+    private ELEngineType queryAnalyzerType;
 
     private ContextConfiguration config;
 
@@ -64,7 +64,7 @@ public class Context {
         initialize(contextPath, mongo);
     }
 
-    public QueryAnalyzer getQueryAnalyzer() {
+    public ELEngine getQueryAnalyzer() {
         return queryAnalyzer;
     }
 
@@ -92,7 +92,7 @@ public class Context {
         return config;
     }
 
-    public QueryAnalyzerType getQueryAnalyzerType() {
+    public ELEngineType getQueryAnalyzerType() {
         return config.getQueryAnalyzerType();
     }
 
@@ -112,7 +112,7 @@ public class Context {
             queryManager = new QueryManager(config.getQuerySetConfiguration().getQuerySets());
             mongoDBFactory = mongo != null ? new MongoDBFactory(config.getMongoConfig(), mongo)
                     : new MongoDBFactory(config.getMongoConfig());
-            queryAnalyzer = QueryAnalyzerFactory.createQueryAnalyzer(config.getQueryAnalyzerType());
+            queryAnalyzer = ELEngineFactory.create(config.getQueryAnalyzerType());
             mongoQueryExecutor = new MongoQueryExecutor(mongoDBFactory, queryManager, queryAnalyzer, converterService);
             mingoTemplate = new MingoTemplate(mongoQueryExecutor, mongoDBFactory, converterService);
         } catch (Throwable e) {

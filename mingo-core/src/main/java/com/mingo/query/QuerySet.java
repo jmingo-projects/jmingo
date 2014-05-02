@@ -1,7 +1,7 @@
 package com.mingo.query;
 
-import static com.mingo.query.util.QueryUtils.getQueryId;
-import static com.mingo.query.util.QueryUtils.validateCompositeId;
+import static com.mingo.util.QueryUtils.getQueryId;
+import static com.mingo.util.QueryUtils.validateCompositeId;
 import static org.slf4j.helpers.MessageFormatter.format;
 
 import com.google.common.collect.ImmutableList;

@@ -15,10 +15,10 @@
  */
 package com.mingo;
 
-import com.mingo.convert.ConverterService;
+import com.mingo.mapping.convert.ConverterService;
 import com.mingo.executor.QueryExecutor;
-import com.mingo.marshall.BsonMarshaller;
-import com.mingo.marshall.jackson.JacksonBsonMarshallingFactory;
+import com.mingo.mapping.marshall.BsonMarshaller;
+import com.mingo.mapping.marshall.jackson.JacksonBsonMarshallingFactory;
 import com.mingo.mongo.MongoDBFactory;
 import com.mingo.query.Criteria;
 import com.mongodb.BasicDBObject;

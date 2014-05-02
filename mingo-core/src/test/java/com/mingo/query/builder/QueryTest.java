@@ -2,10 +2,12 @@ package com.mingo.query.builder;
 
 
 import com.google.common.collect.ImmutableMap;
-import com.mingo.query.nq.IfElseConditionalConstruct;
-import com.mingo.query.nq.Query;
-import com.mingo.query.nq.QueryElement;
-import com.mingo.query.nq.TextElement;
+import com.mingo.query.IfElseConditionalConstruct;
+import com.mingo.query.Query;
+import com.mingo.query.QueryElement;
+import com.mingo.query.TextElement;
+import com.mingo.query.el.ELEngine;
+import com.mingo.query.el.SpringELEngine;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -17,6 +19,8 @@ import java.util.Map;
 import static org.testng.AssertJUnit.assertEquals;
 
 public class QueryTest {
+
+    private ELEngine elEngine = new SpringELEngine();
 
     private IfElseConditionalConstruct ifElseConstruct = new IfElseConditionalConstruct()
             .withIf("#a > #b", "a gt b")
@@ -84,7 +88,7 @@ public class QueryTest {
     public void testBuildQuery(List<QueryElement> queryElements, Map<String, Object> parameters, String expectedQuery) {
         Query query = new Query();
         query.add(queryElements);
-        String result = query.build(parameters);
+        String result = query.build(elEngine, parameters);
         assertEquals(result, expectedQuery);
     }
 
@@ -92,7 +96,7 @@ public class QueryTest {
     public void testBuildQueryWithMissingParams(List<QueryElement> queryElements, Map<String, Object> parameters, String expectedQuery) {
         Query query = new Query();
         query.add(queryElements);
-        String result = query.build(parameters);
+        String result = query.build(elEngine, parameters);
         assertEquals(result, expectedQuery);
     }
 

@@ -2,8 +2,8 @@ package com.mingo.query;
 
 
 import com.google.common.collect.Maps;
-import com.mingo.marshall.JsonToDBObjectMarshaller;
-import com.mingo.marshall.mongo.MongoBsonMarshallingFactory;
+import com.mingo.mapping.marshall.JsonToDBObjectMarshaller;
+import com.mingo.mapping.marshall.mongo.MongoBsonMarshallingFactory;
 import com.mongodb.DBObject;
 
 import java.util.Map;
@@ -54,11 +54,6 @@ public class Criteria {
 
     public boolean isUpsert() {
         return upsert;
-    }
-
-    @Deprecated
-    public String queryString() {
-        return QueryParamPlaceHolder.replaceQueryParameters(queryTemplate, parameters);
     }
 
     public DBObject query(){

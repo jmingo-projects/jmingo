@@ -1,34 +1,33 @@
 package com.mingo.query;
 
-import com.google.common.collect.ImmutableSortedSet;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Sets;
-import org.apache.commons.collections.CollectionUtils;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+import com.mingo.query.el.ELEngine;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 
-import java.util.Collections;
-import java.util.Set;
+import java.util.List;
+import java.util.Map;
+
+import static com.mingo.util.QueryUtils.pipeline;
 
 /**
  * Copyright 2012-2013 The Mingo Team
- * <p/>
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * <p/>
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- * <p/>
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-public class Query extends QuerySetElement {
+public class Query {
+
+    private final String id;
 
     private String compositeId;
 
@@ -39,14 +38,12 @@ public class Query extends QuerySetElement {
     /* escape null parameters*/
     private boolean escapeNullParameters = true;
 
-    private QueryType queryType = QueryType.SIMPLE;
+    private QueryType queryType = QueryType.PLAIN;
 
-    private Set<QueryCase> cases = Collections.emptySet();
+    private List<QueryElement> queryElements = Lists.newArrayList();
 
-    /**
-     * Default constructor.
-     */
     public Query() {
+        id = "";
     }
 
     /**
@@ -55,17 +52,28 @@ public class Query extends QuerySetElement {
      * @param id id
      */
     public Query(String id) {
-        super(id);
+        this.id = id;
     }
 
-    /**
-     * Constructor with parameters.
-     *
-     * @param id   id
-     * @param body body
-     */
-    public Query(String id, String body) {
-        super(id, body);
+    public String getId() {
+        return id;
+    }
+
+    public String getText() {
+        StringBuilder builder = new StringBuilder();
+        queryElements.forEach(el -> {
+            String elText = el.asString();
+            builder.append(elText);
+            if (!elText.endsWith(",")) {
+                builder.append(",");
+            }
+        });
+        String text = replaceLast(builder.toString(), ",", "");
+        return QueryType.PLAIN.equals(queryType) ? text : pipeline(text);
+    }
+
+    private static String replaceLast(String text, String regex, String replacement) {
+        return text.replaceFirst("(?s)(.*)" + regex, "$1" + replacement);
     }
 
     /**
@@ -147,37 +155,6 @@ public class Query extends QuerySetElement {
         }
     }
 
-    /**
-     * Gets cases.
-     *
-     * @return cases
-     */
-    public Set<QueryCase> getCases() {
-        return ImmutableSortedSet.copyOf(cases);
-    }
-
-    /**
-     * Add query case.
-     *
-     * @param queryCase query case
-     */
-    public void addQueryCase(QueryCase queryCase) {
-        Validate.notNull(queryCase, "query case cannot be null");
-        if (CollectionUtils.isEmpty(cases)) {
-            cases = Sets.newTreeSet();
-        }
-        cases.add(queryCase);
-    }
-
-    /**
-     * Gets query case by id.
-     *
-     * @param caseId case id
-     * @return query case
-     */
-    public QueryCase getQueryCaseById(final String caseId) {
-        return Iterables.find(cases, input -> input.getId().equals(caseId));
-    }
 
     /**
      * Gets escape null parameters mode.
@@ -197,58 +174,29 @@ public class Query extends QuerySetElement {
         this.escapeNullParameters = escapeNullParameters;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof Query)) {
-            return false;
-        }
-
-        Query that = (Query) o;
-        return new EqualsBuilder()
-            .appendSuper(super.equals(o))
-            .append(compositeId, that.compositeId)
-            .append(converter, that.converter)
-            .append(converterMethod, that.converterMethod)
-            .append(escapeNullParameters, that.escapeNullParameters)
-            .append(queryType, that.queryType)
-            .append(cases, that.cases)
-            .isEquals();
+    public Query add(QueryElement queryEl) {
+        queryElements.add(queryEl);
+        return this;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int hashCode() {
-        return new HashCodeBuilder()
-            .appendSuper(super.hashCode())
-            .append(compositeId)
-            .append(converter)
-            .append(converterMethod)
-            .append(escapeNullParameters)
-            .append(queryType)
-            .append(cases)
-            .toHashCode();
+    public Query add(List<QueryElement> qElements) {
+        queryElements.addAll(qElements);
+        return this;
     }
 
-    @Override
-    public String toString() {
-        return new ToStringBuilder(this).
-            append("id", getId()).
-            append("body", getBody()).
-            append("compositeId", compositeId).
-            append("converter", converter).
-            append("converterMethod", converterMethod).
-            append("escapeNullParameters", escapeNullParameters).
-            append("queryType", queryType).
-            append("cases", cases).
-            toString();
+    public Query addTextElement(String text) {
+        queryElements.add(new TextElement(text));
+        return this;
+    }
+
+    public List<QueryElement> getQueryElements() {
+        return ImmutableList.copyOf(queryElements);
+    }
+
+    public String build(ELEngine elEngine, Map<String, Object> parameters) {
+        QBuilder queryBuilder = new QueryBuilder(elEngine, parameters);
+        queryElements.forEach(element -> element.accept(queryBuilder));
+        return queryBuilder.buildQuery();
     }
 
 }

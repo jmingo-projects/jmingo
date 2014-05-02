@@ -1,8 +1,7 @@
 package com.mingo.config;
 
-import com.mingo.query.QueryAnalyzerType;
+import com.mingo.query.ELEngineType;
 import com.mingo.query.QueryExecutorType;
-import com.mingo.query.conf.QuerySetConfiguration;
 
 /**
  * Copyright 2012-2013 The Mingo Team
@@ -25,7 +24,7 @@ public class ContextConfiguration {
 
     private QueryExecutorType queryExecutorType = QueryExecutorType.MONGO_DRIVER;
 
-    private QueryAnalyzerType queryAnalyzerType = QueryAnalyzerType.JEXL;
+    private ELEngineType queryAnalyzerType = ELEngineType.JEXL;
 
     private String databaseHost;
 
@@ -85,7 +84,7 @@ public class ContextConfiguration {
      *
      * @return query analyzer type
      */
-    public QueryAnalyzerType getQueryAnalyzerType() {
+    public ELEngineType getQueryAnalyzerType() {
         return queryAnalyzerType;
     }
 
@@ -94,7 +93,7 @@ public class ContextConfiguration {
      *
      * @param queryAnalyzerType query analyzer type
      */
-    public void setQueryAnalyzerType(QueryAnalyzerType queryAnalyzerType) {
+    public void setQueryAnalyzerType(ELEngineType queryAnalyzerType) {
         if (queryAnalyzerType != null) {
             this.queryAnalyzerType = queryAnalyzerType;
         }

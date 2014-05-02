@@ -22,7 +22,7 @@ import com.google.common.collect.Lists;
 public enum QueryType {
 
     AGGREGATION("aggregation"),
-    SIMPLE("simple");
+    PLAIN("plain");
 
     private String name;
 
@@ -47,10 +47,6 @@ public enum QueryType {
      */
     public static QueryType getByName(final String name) {
         return Iterables.find(Lists.newArrayList(values()),
-            new Predicate<QueryType>() {
-                public boolean apply(QueryType input) {
-                    return input.getName().equals(name);
-                }
-            }, null);
+                input -> input.getName().equals(name), null);
     }
 }

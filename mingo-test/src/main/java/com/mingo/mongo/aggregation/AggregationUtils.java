@@ -1,6 +1,6 @@
 package com.mingo.mongo.aggregation;
 
-import static com.mingo.convert.ConversionUtils.convertToDate;
+import static com.mingo.mapping.convert.ConversionUtils.convertToDate;
 import static com.mingo.mongo.aggregation.AggregationOperators.GT;
 import static com.mingo.mongo.aggregation.AggregationOperators.LT;
 import static com.mongodb.BasicDBObjectBuilder.start;

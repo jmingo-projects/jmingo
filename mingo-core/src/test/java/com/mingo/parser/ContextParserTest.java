@@ -17,23 +17,23 @@ public class ContextParserTest {
     @Test(groups = "unit")
     public void contextParserTest() throws MingoParserException {
         //given
-        String contextXml = "/xml/correct/context.xml";
+        String contextXml = "/xml/context.xml";
         Parser<ContextConfiguration> xmlParser = ParserFactory.createParser(ParserFactory.ParseComponent.CONTEXT);
         //when
         ContextConfiguration contextConfiguration = xmlParser.parse(getClass().getResourceAsStream(contextXml));
         //then
         Assert.assertTrue(CollectionUtils.isNotEmpty(contextConfiguration.getQuerySetConfiguration().getQuerySets()));
-        Assert.assertEquals(contextConfiguration.getQuerySetConfiguration().getQuerySets().size(), 2);
-        Assert.assertTrue(contextConfiguration.getQuerySetConfiguration().getQuerySets().contains("/xml/correct/query1.xml"));
-        Assert.assertTrue(contextConfiguration.getQuerySetConfiguration().getQuerySets().contains("/xml/correct/query2.xml"));
+        int countOfQuerySets = 1;
+        Assert.assertEquals(contextConfiguration.getQuerySetConfiguration().getQuerySets().size(), countOfQuerySets);
+        Assert.assertTrue(contextConfiguration.getQuerySetConfiguration().getQuerySets().contains("/xml/testQuerySet.xml"));
         Assert.assertEquals(QueryExecutorType.MONGO_DRIVER, contextConfiguration.getQueryExecutorType());
         Assert.assertEquals(contextConfiguration.getDatabaseHost(), "localhost");
         Assert.assertEquals(contextConfiguration.getDatabasePort(), 27017);
         Assert.assertEquals(contextConfiguration.getMongoConfig().getDatabasePort(), 27017);
         Assert.assertEquals(contextConfiguration.getMongoConfig().getDatabaseHost(), "localhost");
         Assert.assertEquals(contextConfiguration.getMongoConfig().getDbName(), "dbTest");
-        Assert.assertEquals(contextConfiguration.getDefaultConverter(), "com.mingo.convert.DefaultConverter");
-        Assert.assertEquals(contextConfiguration.getConverterPackageScan(), "com.mingo.converter.custom");
+        Assert.assertEquals(contextConfiguration.getDefaultConverter(), "com.mingo.mapping.convert.DefaultConverter");
+        Assert.assertEquals(contextConfiguration.getConverterPackageScan(), "com.mingo.mapping.converter.custom");
         Assert.assertTrue(MapUtils.isNotEmpty(contextConfiguration.getMongoConfig().getOptions()));
         Assert.assertEquals(contextConfiguration.getMongoConfig().getOptions().size(), 1);
         Assert.assertEquals(contextConfiguration.getMongoConfig().getOptions().get("connectTimeout"), "100");

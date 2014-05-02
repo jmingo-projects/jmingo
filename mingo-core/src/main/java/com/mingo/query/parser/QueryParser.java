@@ -1,8 +1,5 @@
 package com.mingo.query.parser;
 
-import static com.mingo.query.parser.json.JsonParserType.DEFAULT;
-import static com.mingo.query.parser.json.JsonParserType.ESCAPE;
-import static com.mingo.query.util.QueryUtils.wrap;
 import com.mingo.query.QueryStatement;
 import com.mingo.query.QueryType;
 import com.mingo.query.parser.json.EscapeParser;
@@ -10,6 +7,11 @@ import com.mingo.query.parser.json.JsonParser;
 import com.mongodb.BasicDBList;
 import com.mongodb.DBObject;
 import org.apache.commons.lang3.Validate;
+
+import static com.mingo.query.parser.json.JsonParserType.DEFAULT;
+import static com.mingo.query.parser.json.JsonParserType.ESCAPE;
+import static com.mingo.util.QueryUtils.pipeline;
+        ;
 
 /**
  * Copyright 2012-2013 The Mingo Team
@@ -40,7 +42,7 @@ public class QueryParser {
         Validate.notNull(queryStatement, "queryStatement cannot be null");
         QueryType queryType = queryStatement.getQueryType();
         JsonParser jsonParser = getJsonParser(queryStatement.isEscapeNullParameters());
-        return QueryType.SIMPLE.equals(queryType) ?
+        return QueryType.PLAIN.equals(queryType) ?
             parse(queryStatement.getPreparedQuery(), jsonParser) :
             parseAggregation(queryStatement, jsonParser);
     }
@@ -52,9 +54,9 @@ public class QueryParser {
 
     // if escape
     private BasicDBList parseAggregation(QueryStatement queryStatement, JsonParser jsonParser) {
-        BasicDBList operators = (BasicDBList) jsonParser.parse(wrap(queryStatement.getPreparedQuery()));
+        BasicDBList operators = (BasicDBList) jsonParser.parse(pipeline(queryStatement.getPreparedQuery()));
         if (operators.isEmpty() && jsonParser instanceof EscapeParser) {
-            return (BasicDBList) DEFAULT.getJsonParser().parse(wrap(DEFAULT_QUERY));
+            return (BasicDBList) DEFAULT.getJsonParser().parse(pipeline(DEFAULT_QUERY));
         }
         return operators;
     }

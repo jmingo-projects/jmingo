@@ -1,6 +1,5 @@
 package com.mingo.query.aggregation;
 
-import static com.mingo.query.util.QueryUtils.wrap;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
@@ -13,15 +12,17 @@ import org.bson.BSONCallback;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
+import static com.mingo.util.QueryUtils.pipeline;
+
 /**
  * Copyright 2012-2013 The Mingo Team
- * <p/>
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * <p/>
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- * <p/>
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -64,7 +65,7 @@ public class PipelineBuilder {
      * Example:
      * source: {$match : { "field1": { $in: []}, "field2": { "$gt" : "value2"}}}
      * after build:[{$match : {field2": { "$gt" : "value2"}}}]
-     * <p/>
+     * <p>
      * source: {$match : { "field1": { $in: [value1, value2]}, "field2": { "$gt" : ""}}}
      * after build:[ {$match : { "field1": { $in: [value1, value2]}}} ]
      *
@@ -74,8 +75,8 @@ public class PipelineBuilder {
     public BasicDBList buildAggregation(String json) {
         lock.lock();
         try {
-            BasicDBList operators = (BasicDBList) JSON.parse(wrap(json), bsonCallback);
-            return operators.isEmpty() ? (BasicDBList) JSON.parse(wrap(DEFAULT_QUERY)) : operators;
+            BasicDBList operators = (BasicDBList) JSON.parse(pipeline(json), bsonCallback);
+            return operators.isEmpty() ? (BasicDBList) JSON.parse(pipeline(DEFAULT_QUERY)) : operators;
         } finally {
             lock.unlock();
         }
