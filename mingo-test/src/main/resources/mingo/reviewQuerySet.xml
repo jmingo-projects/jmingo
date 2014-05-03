@@ -4,62 +4,74 @@
 
     <config collectionName="review"/>
 
-    <queryFragment id="getCountByTagsCommon">
-        {$unwind: "$tags"},
-        {$project: {moderationStatus:1, tags: 1, count: {$add: [1]}}},
-        {$group: {_id: "$tags", totalCount: {$sum: "$count"}}}
-    </queryFragment>
+    <!--    <queryFragment id="getCountByTagsCommon">
+            {$unwind: "$tags"},
+            {$project: {moderationStatus:1, tags: 1, count: {$add: [1]}}},
+            {$group: {_id: "$tags", totalCount: {$sum: "$count"}}}
+        </queryFragment>
 
-    <queryFragment id="moderationStatusFragment">
-        {$match : {"moderationStatus": "#moderationStatus"}}
-    </queryFragment>
+        <queryFragment id="moderationStatusFragment">
+            {$match : {"moderationStatus": "#moderationStatus"}}
+        </queryFragment>
 
-    <query id="getById" type="simple">
-        {'_id' : "#id"}
-    </query>
+        <query id="getById" type="simple">
+            {'_id' : "#id"}
+        </query>
 
-    <query id="getAll" type="simple">
-        {}
-    </query>
+        <query id="getAll" type="simple">
+            {}
+        </query>
 
-    <query id="getByAuthor" type="simple">
+        <query id="getByAuthor" type="simple">
+            { "author.name": "#name", "author.email": "#email"}
+        </query>-->
+
+    <query id="getByAuthor">
         { "author.name": "#name", "author.email": "#email"}
     </query>
 
-    <query id="getCountByTags" type="aggregation"
-           converter-class="com.mingo.converter.ReviewSpecificConverter"
-           converter-method="convertCountByTags">
-        <case id="moderationStatusNotEmpty" condition="not empty(moderationStatus)">
-            <fragment ref="moderationStatusFragment" condition="not empty(moderationStatus)"/>,
-            <fragment ref="getCountByTagsCommon"/>
-        </case>
-        {$match : {"moderationStatus": "STATUS_NOT_MODERATED"}},
-        <fragment ref="getCountByTagsCommon"/>
+    <query id="getByIdentifier">
+        { "identifier": "#identifier" }
     </query>
 
-    <query id="getByModerationStatuses" type="aggregation">
-        {$match : { "moderationStatus": { $in: "#statuses"}}}
+    <query id="getByStatuses">
+        { "moderationStatus": { $in: "#statuses" } }
     </query>
 
-    <query id="getByCreated" type="aggregation">
-        {$match : { "created": { "$gt" : "#created"}}}
+    <query id="getTagsCount" type="aggregation"
+           converter-class="com.mingo.mapping.converter.custom.ReviewSpecificConverter"
+           converter-method="convertTagsCount">
+        <if condition="#statuses != null and #statuses.size()>0">
+            {$match : { "moderationStatus": { $in: "#statuses"}}},
+        </if>
+        {$unwind: "$tags"},
+        {$project: {moderationStatus:1, tags: 1, count: {$add: [1]}}},
+        {$group: {_id: "$tags", totalCount: {$sum: "$count"}}}
     </query>
 
-    <query id="getByTags" type="aggregation">
-        {$match : { "tags": { $in: "#tags"}}}
-    </query>
-    <query id="getByRating" type="aggregation">
-        {$match : { "rating": "#rating"}}
-    </query>
-    <query id="getByModerationStatus" type="aggregation">
-        {$match : {"moderationStatus": "#moderationStatus"}}
-    </query>
+    <!--    <query id="getByModerationStatuses" type="aggregation">
+            {$match : { "moderationStatus": { $in: "#statuses"}}}
+        </query>
 
-    <query id="getByMultipleParameters" type="aggregation">
-        <case id="isParamsNotEmpty" type="simple" condition="empty(statuses) and empty(created)">
-            {}
-        </case>
-        {$match : { "moderationStatus": { $in: "#statuses"}, "created": { "$gt" : "#created"}}}
-    </query>
+        <query id="getByCreated" type="aggregation">
+            {$match : { "created": { "$gt" : "#created"}}}
+        </query>
+
+        <query id="getByTags" type="aggregation">
+            {$match : { "tags": { $in: "#tags"}}}
+        </query>
+        <query id="getByRating" type="aggregation">
+            {$match : { "rating": "#rating"}}
+        </query>
+        <query id="getByModerationStatus" type="aggregation">
+            {$match : {"moderationStatus": "#moderationStatus"}}
+        </query>
+
+        <query id="getByMultipleParameters" type="aggregation">
+            <case id="isParamsNotEmpty" type="simple" condition="empty(statuses) and empty(created)">
+                {}
+            </case>
+            {$match : { "moderationStatus": { $in: "#statuses"}, "created": { "$gt" : "#created"}}}
+        </query>-->
 
 </querySet>

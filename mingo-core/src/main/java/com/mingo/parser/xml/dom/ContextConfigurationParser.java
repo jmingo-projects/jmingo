@@ -6,9 +6,9 @@ import com.mingo.config.ContextConfiguration;
 import com.mingo.config.MongoConfig;
 import com.mingo.exceptions.MingoParserException;
 import com.mingo.parser.Parser;
-import com.mingo.query.QueryAnalyzerType;
+import com.mingo.query.ELEngineType;
 import com.mingo.query.QueryExecutorType;
-import com.mingo.query.conf.QuerySetConfiguration;
+import com.mingo.config.QuerySetConfiguration;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
@@ -27,7 +27,7 @@ import java.io.InputStream;
 import java.util.Set;
 
 import static com.mingo.parser.xml.dom.DocumentBuilderFactoryCreator.createDocumentBuilderFactory;
-import static com.mingo.parser.xml.dom.DomUtil.*;
+import static com.mingo.parser.xml.dom.util.DomUtil.*;
 
 /**
  * Copyright 2012-2013 The Mingo Team
@@ -180,14 +180,14 @@ public class ContextConfigurationParser implements Parser<ContextConfiguration> 
      * Gets 'type' attr from <queryAnalyzer/> tag.
      *
      * @param element element of XML document
-     * @return {@link QueryAnalyzerType}
+     * @return {@link com.mingo.query.ELEngineType}
      * @throws MingoParserException {@link MingoParserException}
      */
-    private QueryAnalyzerType parseQueryAnalyzerTag(Element element) throws MingoParserException {
-        QueryAnalyzerType type = null;
+    private ELEngineType parseQueryAnalyzerTag(Element element) throws MingoParserException {
+        ELEngineType type = null;
         Node queryAnalyzerNode = getFirstTagOccurrence(element, QUERY_ANALYZER_TAG);
         if (queryAnalyzerNode != null) {
-            type = QueryAnalyzerType.getByName(getAttributeString(queryAnalyzerNode,
+            type = ELEngineType.getByName(getAttributeString(queryAnalyzerNode,
                     QUERY_ANALYZER_TYPE_ATTR));
             if (type == null) {
                 throw new MingoParserException("unsupported query analyzer type.");

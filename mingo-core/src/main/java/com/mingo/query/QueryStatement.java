@@ -1,13 +1,3 @@
-package com.mingo.query;
-
-import static com.mingo.query.util.QueryUtils.replaceQueryParameters;
-
-import com.mingo.query.analyzer.QueryAnalyzer;
-import com.mingo.query.util.QueryUtils;
-import org.apache.commons.lang3.Validate;
-
-import java.util.Map;
-
 /**
  * Copyright 2012-2013 The Mingo Team
  * <p/>
@@ -23,11 +13,16 @@ import java.util.Map;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.mingo.query;
+
+import com.mingo.query.el.ELEngine;
+import com.mingo.util.QueryUtils;
+import java.util.Map;
+import org.apache.commons.lang3.Validate;
+
 public class QueryStatement {
 
     private String preparedQuery;
-
-    private String dbName;
 
     private String collectionName;
 
@@ -35,10 +30,12 @@ public class QueryStatement {
 
     private String converterMethod;
 
-    private QueryType queryType = QueryType.SIMPLE;
+    private QueryType queryType = QueryType.PLAIN;
 
     /* escape null parameters*/
     private boolean escapeNullParameters;
+
+    private Map<String, Object> parameters;
 
     /**
      * Gets prepared query.
@@ -47,15 +44,6 @@ public class QueryStatement {
      */
     public String getPreparedQuery() {
         return preparedQuery;
-    }
-
-    /**
-     * Gets DB name.
-     *
-     * @return DB name
-     */
-    public String getDbName() {
-        return dbName;
     }
 
     /**
@@ -103,46 +91,37 @@ public class QueryStatement {
         return escapeNullParameters;
     }
 
+    public Map<String, Object> getParameters() {
+        return parameters;
+    }
+
     /**
      * Constructor with parameters.
      *
      * @param queryName  query name
      * @param parameters query parameters
      */
-    public QueryStatement(QueryManager queryManager, QueryAnalyzer queryAnalyzer,  String queryName, Map<String, Object> parameters) {
+    public QueryStatement(QueryManager queryManager, ELEngine elEngine, String queryName, Map<String, Object> parameters) {
         Validate.notBlank(queryName, "query name cannot be null or empty");
         Query query = queryManager.lookupQuery(queryName);
         collectionName = QueryUtils.getCollectionName(queryName);
-        prepare(queryAnalyzer, query, parameters);
+        this.parameters = parameters;
+        prepare(elEngine, query, parameters);
     }
 
     /**
-     * Init process composed from several steps:
-     * 1. If there are cases of query then choose which more applicable.
-     * if two or more case satisfied then get with higher priority.
-     * 2. Replace parameters. parameters in query start with #
-     * 3. Get converter class and method.
+     * Build query and prepare for execution.
      *
-     * @param queryAnalyzer query analyzer
-     * @param pQuery        {@link Query}
-     * @param parameters    parameters
-     * @return query statement {@link QueryStatement}
+     * @param elEngine   the EL engine
+     * @param pQuery     {@link Query}
+     * @param parameters parameters
      */
-    private void prepare(QueryAnalyzer queryAnalyzer, Query pQuery, Map<String, Object> parameters) {
-        QueryCase queryCase = queryAnalyzer.analyzeAndGet(pQuery, parameters);
-        if (queryCase != null) {
-            preparedQuery = replaceQueryParameters(queryCase.getBody(), parameters);
-            converterClass = queryCase.getConverter();
-            converterMethod = queryCase.getConverterMethod();
-            queryType = queryCase.getQueryType();
-            escapeNullParameters = pQuery.isEscapeNullParameters();
-        } else {
-            preparedQuery = replaceQueryParameters(pQuery.getBody(), parameters);
-            converterClass = pQuery.getConverter();
-            converterMethod = pQuery.getConverterMethod();
-            queryType = pQuery.getQueryType();
-            escapeNullParameters = pQuery.isEscapeNullParameters();
-        }
+    private void prepare(ELEngine elEngine, Query pQuery, Map<String, Object> parameters) {
+        preparedQuery = pQuery.build(elEngine, parameters);
+        converterClass = pQuery.getConverter();
+        converterMethod = pQuery.getConverterMethod();
+        queryType = pQuery.getQueryType();
+        escapeNullParameters = pQuery.isEscapeNullParameters();
     }
 
 }

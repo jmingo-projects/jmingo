@@ -3,16 +3,10 @@
 <context>
 
     <querySetConfig>
-        <querySet path="/mingo/testQuerySet.xml"/>
-        <querySet path="/mingo/userQuerySet.xml"/>
         <querySet path="/mingo/reviewQuerySet.xml"/>
     </querySetConfig>
 
-    <queryExecutor type="MongoDriver"/>
-    <queryAnalyzer type="jexl"/>
+    <queryAnalyzer type="springEL"/>
 
     <mongo dbName="mingotest"/>
-
-    <!--<defaultConverter class="com.mingo.convert.DefaultConverter"/>-->
-    <converters package="com.mingo.converter"/>
 </context>

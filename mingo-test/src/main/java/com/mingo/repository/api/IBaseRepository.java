@@ -1,5 +1,7 @@
 package com.mingo.repository.api;
 
+import com.mingo.domain.BaseDocument;
+
 import java.util.List;
 
 
@@ -22,7 +24,7 @@ import java.util.List;
  * @param <ID> The type of unique identifier.
  * @param <T>  The type of objects managed by repository.
  */
-public interface IBaseRepository<ID, T> {
+public interface IBaseRepository<ID, T extends BaseDocument> {
 
     /**
      * Inserts object.

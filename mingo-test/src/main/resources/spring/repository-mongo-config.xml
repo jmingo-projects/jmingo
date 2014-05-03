@@ -23,7 +23,7 @@
         <constructor-arg name="mongoDbFactory" ref="mongoDbFactory"/>
     </bean>
 
-    <bean id="defaultMongoConverter" class="com.mingo.converter.BaseMongoConverter">
+    <bean id="defaultMongoConverter" class="com.mingo.mapping.converter.custom.BaseMongoConverter">
         <constructor-arg ref="mongoTemplate"/>
     </bean>
 

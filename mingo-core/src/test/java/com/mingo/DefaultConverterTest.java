@@ -1,7 +1,7 @@
 package com.mingo;
 
-import com.mingo.convert.ConversionUtils;
-import com.mingo.convert.DefaultConverter;
+import com.mingo.mapping.convert.ConversionUtils;
+import com.mingo.mapping.convert.DefaultConverter;
 import com.mingo.domain.SimpleDomain;
 import com.mongodb.BasicDBList;
 import com.mongodb.DBObject;

@@ -1,6 +1,5 @@
 package com.mingo.executor;
 
-import com.mingo.query.parser.QueryParser;
 import com.mongodb.AggregationOutput;
 import com.mongodb.BasicDBList;
 import com.mongodb.DBCollection;
@@ -25,12 +24,6 @@ import org.springframework.util.Assert;
 public abstract class AbstractQueryExecutor implements QueryExecutor {
 
     protected final static int FIRST_ELEMENT = 0;
-
-    private final QueryParser queryParser = new QueryParser();
-
-    protected QueryParser getQueryParser() {
-        return queryParser;
-    }
 
     /**
      * Perform aggregation query.
