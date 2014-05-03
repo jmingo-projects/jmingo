@@ -13,6 +13,8 @@ import org.apache.commons.lang3.Validate;
 
 import java.io.IOException;
 
+import static com.mingo.util.StringUtils.removeLineBreaks;
+import static org.apache.commons.lang3.StringUtils.trim;
 import static org.slf4j.helpers.MessageFormatter.format;
 
 /**
@@ -50,7 +52,7 @@ public final class QueryUtils {
      * Builds composite query ID ith next structure "collectionName.id".
      *
      * @param collectionName collection name
-     * @param id             query id
+     * @param id query id
      * @return composite ID - { [collectionName].[id] }
      */
     public static String buildCompositeId(String collectionName, String id) {
@@ -98,10 +100,10 @@ public final class QueryUtils {
      * @param querySet {@link com.mingo.query.QuerySet}
      */
     public static void createCompositeIdForQueries(QuerySet querySet) {
-        if (MapUtils.isEmpty(querySet.getQueryMap())) {
+        if(MapUtils.isEmpty(querySet.getQueryMap())) {
             return;
         }
-        for (Query query : querySet.getQueryMap().values()) {
+        for(Query query : querySet.getQueryMap().values()) {
             query.setCompositeId(buildCompositeId(querySet.getCollectionName(), query.getId()));
         }
     }
@@ -117,16 +119,18 @@ public final class QueryUtils {
     public static void validateCompositeId(String compositeId) throws NullPointerException, IllegalArgumentException {
         Validate.notBlank(compositeId, "compositeId cannot be null or empty");
         String[] elements = StringUtils.split(compositeId, ".");
-        Validate.isTrue(elements.length == NUMBER_OF_ELEMENTS, "composite id should consist of " + NUMBER_OF_ELEMENTS + " parts: " +
-                "([collection-name].[query-id]). current value: " + compositeId);
-        for (int index = 0; index < elements.length; index++) {
+        Validate.isTrue(elements.length == NUMBER_OF_ELEMENTS,
+            "composite id should consist of " + NUMBER_OF_ELEMENTS + " parts: " +
+                "([collection-name].[query-id]). current value: " + compositeId
+        );
+        for(int index = 0; index < elements.length; index++) {
             Validate.notBlank(elements[index], "element with position: " + (index + 1) +
-                    " in composite id is empty. current value: " + compositeId);
+                " in composite id is empty. current value: " + compositeId);
         }
     }
 
     private static String getElementByPosition(String[] elements, int numberOfElements, int pos) {
-        if (elements != null && elements.length == numberOfElements && pos < numberOfElements) {
+        if(elements != null && elements.length == numberOfElements && pos < numberOfElements) {
             return elements[pos];
         } else {
             return null;
@@ -143,11 +147,11 @@ public final class QueryUtils {
         boolean valid = false;
         try {
             final JsonParser parser = new MongoMapper().getFactory()
-                    .createParser(json);
-            while (parser.nextToken() != null) {
+                .createParser(json);
+            while(parser.nextToken() != null) {
             }
             valid = true;
-        } catch (IOException e) {
+        } catch(IOException e) {
             e.printStackTrace();
         }
 
@@ -173,5 +177,7 @@ public final class QueryUtils {
     public static String wrapInBracket(String query) {
         return format(OPERATION_TEMPLATE, query).getMessage();
     }
+
+
 
 }

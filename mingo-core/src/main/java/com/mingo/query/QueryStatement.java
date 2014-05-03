@@ -121,7 +121,6 @@ public class QueryStatement {
      */
     private void prepare(ELEngine elEngine, Query pQuery, Map<String, Object> parameters) {
         preparedQuery = pQuery.build(elEngine, parameters);
-        preparedQuery = QueryType.AGGREGATION.equals(pQuery.getQueryType()) ? pipeline(preparedQuery) : preparedQuery;
         converterClass = pQuery.getConverter();
         converterMethod = pQuery.getConverterMethod();
         queryType = pQuery.getQueryType();

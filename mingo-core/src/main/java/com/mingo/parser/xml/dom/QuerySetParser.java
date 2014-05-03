@@ -38,6 +38,8 @@ import static com.mingo.parser.xml.dom.util.DomUtil.getChildNodes;
 import static com.mingo.parser.xml.dom.util.DomUtil.getFirstNecessaryTagOccurrence;
 import static com.mingo.parser.xml.dom.util.DomUtil.isNotEmpty;
 import static com.mingo.util.QueryUtils.isValidJSON;
+import static com.mingo.util.StringUtils.removeLineBreaks;
+import static org.apache.commons.lang3.StringUtils.trim;
 
 /**
  * Copyright 2012-2013 The Mingo Team
@@ -87,11 +89,11 @@ public class QuerySetParser implements Parser<QuerySet> {
      * Constructor with parameters.
      *
      * @param parserConfiguration parser configuration
-     * @param parseErrorHandler   parser error handler
+     * @param parseErrorHandler parser error handler
      * @throws ParserConfigurationException {@link ParserConfigurationException}
      */
     public QuerySetParser(ParserConfiguration parserConfiguration, ErrorHandler parseErrorHandler)
-            throws ParserConfigurationException {
+        throws ParserConfigurationException {
         this.documentBuilderFactory = createDocumentBuilderFactory(parserConfiguration);
         this.parseErrorHandler = parseErrorHandler;
     }
@@ -112,7 +114,7 @@ public class QuerySetParser implements Parser<QuerySet> {
             parseConfigTag(root, querySet);
             parseQueryFragments(root, querySet);
             parseQueries(root, querySet);
-        } catch (Exception e) {
+        } catch(Exception e) {
             throw new MingoParserException(e);
         }
         return querySet;
@@ -122,7 +124,7 @@ public class QuerySetParser implements Parser<QuerySet> {
     /**
      * parse <config/> tag and add parsed information to querySet.
      *
-     * @param element  element of XML document
+     * @param element element of XML document
      * @param querySet {@link QuerySet}
      */
     private void parseConfigTag(Element element, QuerySet querySet) throws MingoParserException {
@@ -137,9 +139,9 @@ public class QuerySetParser implements Parser<QuerySet> {
     private void parseQueryFragments(Element root, QuerySet querySet) {
         Set<QueryFragment> queryFragments = Collections.emptySet();
         NodeList fragmentNodeList = root.getElementsByTagName(QUERY_FRAGMENT);
-        if (isNotEmpty(fragmentNodeList)) {
+        if(isNotEmpty(fragmentNodeList)) {
             queryFragments = Sets.newHashSet();
-            for (int i = 0; i < fragmentNodeList.getLength(); i++) {
+            for(int i = 0; i < fragmentNodeList.getLength(); i++) {
                 queryFragments.add(parseQueryFragment(fragmentNodeList.item(i)));
             }
         }
@@ -153,7 +155,7 @@ public class QuerySetParser implements Parser<QuerySet> {
      */
     private QueryFragment parseQueryFragment(Node fragmentNode) {
         String fragmentId = getAttributeString(fragmentNode, ID);
-        String fragmentBody = processString(fragmentNode.getTextContent());
+        String fragmentBody = parseTextNode(fragmentNode);
         return new QueryFragment(fragmentId, fragmentBody);
     }
 
@@ -165,8 +167,8 @@ public class QuerySetParser implements Parser<QuerySet> {
      */
     private void parseQueries(Element root, QuerySet querySet) throws MingoParserException {
         NodeList queryNodeList = root.getElementsByTagName(QUERY_TAG);
-        if (isNotEmpty(queryNodeList)) {
-            for (int i = 0; i < queryNodeList.getLength(); i++) {
+        if(isNotEmpty(queryNodeList)) {
+            for(int i = 0; i < queryNodeList.getLength(); i++) {
                 parseQueryTag(queryNodeList.item(i), querySet);
             }
         }
@@ -179,7 +181,7 @@ public class QuerySetParser implements Parser<QuerySet> {
      * @return {@link Query}
      */
     private void parseQueryTag(Node node, QuerySet querySet) throws MingoParserException {
-        if (node == null || !QUERY_TAG.equals(node.getNodeName())) {
+        if(node == null || !QUERY_TAG.equals(node.getNodeName())) {
             return;
         }
         Map<String, String> attributes = getAttributes(node);
@@ -190,29 +192,29 @@ public class QuerySetParser implements Parser<QuerySet> {
         query.setEscapeNullParameters(getAttributeBoolean(node, ESCAPE_NULL_PARAMETERS));
 
         getChildNodes(node).forEach(child -> {
-            if (child.getNodeType() == Node.TEXT_NODE) {
+            if(child.getNodeType() == Node.TEXT_NODE) {
                 String text = parseTextNode(child);
-                if (StringUtils.isNotBlank(text)) {
+                if(StringUtils.isNotBlank(text)) {
                     query.addTextElement(text);
                 }
             }
             // parse <fragment> tag
-            if (FRAGMENT_TAG.equals(child.getNodeName())) {
+            if(FRAGMENT_TAG.equals(child.getNodeName())) {
                 QueryFragment queryFragment = querySet.getQueryFragmentById(getFragmentRef(child));
-                if (queryFragment != null) {
+                if(queryFragment != null) {
                     query.addTextElement(queryFragment.getBody());
                 }
             }
             // parse <if> tag
-            if (IF_TAG.equals(child.getNodeName())) {
+            if(IF_TAG.equals(child.getNodeName())) {
                 QueryElement ifStatement = parseIfElseTag(child);
                 query.add(ifStatement);
             }
         });
 
-        if (!isValidJSON(query.getText())) {
+        if(!isValidJSON(query.getText())) {
             throw new MingoParserException(MessageFormatter.format(INVALID_QUERY_ERROR_MSG,
-                    query.getId(), query).getMessage());
+                query.getId(), query).getMessage());
         }
         querySet.addQuery(query);
     }
@@ -228,20 +230,20 @@ public class QuerySetParser implements Parser<QuerySet> {
         String ifCondition = getAttributeString(node, CONDITION);
         StringBuilder clauseBuilder = new StringBuilder();
         getChildNodes(node).forEach(child -> {
-            if (child.getNodeType() == Node.TEXT_NODE) {
+            if(child.getNodeType() == Node.TEXT_NODE) {
                 clauseBuilder.append(parseTextNode(child));
             }
-            if (child.getNodeType() == Node.ELEMENT_NODE) {
-                if (ELSE_IF_TAG.equals(child.getNodeName())) {
+            if(child.getNodeType() == Node.ELEMENT_NODE) {
+                if(ELSE_IF_TAG.equals(child.getNodeName())) {
                     conditionalConstruct.elseIf(parseElseIfTag(child));
                 }
-                if (ELSE_TAG.equals(child.getNodeName())) {
+                if(ELSE_TAG.equals(child.getNodeName())) {
                     conditionalConstruct.withElse(parseElseTag(child));
                 }
             }
         });
 
-        conditionalConstruct.withIf(ifCondition, processString(clauseBuilder.toString()));
+        conditionalConstruct.withIf(ifCondition, clauseBuilder.toString());
         return conditionalConstruct;
     }
 
@@ -249,7 +251,7 @@ public class QuerySetParser implements Parser<QuerySet> {
         String condition = getAttributeString(elseIfNode, CONDITION);
         final StringBuilder clause = new StringBuilder();
         getChildNodes(elseIfNode).forEach(child -> {
-            if (child.getNodeType() == Node.TEXT_NODE) {
+            if(child.getNodeType() == Node.TEXT_NODE) {
                 clause.append(parseTextNode(child));
             }
         });
@@ -259,7 +261,7 @@ public class QuerySetParser implements Parser<QuerySet> {
     private String parseElseTag(Node elseIfNode) {
         final StringBuilder clause = new StringBuilder();
         getChildNodes(elseIfNode).forEach(child -> {
-            if (child.getNodeType() == Node.TEXT_NODE) {
+            if(child.getNodeType() == Node.TEXT_NODE) {
                 clause.append(parseTextNode(child));
             }
         });
@@ -268,19 +270,10 @@ public class QuerySetParser implements Parser<QuerySet> {
 
     private String parseTextNode(Node node) throws MingoParserException {
         String body = node.getNodeValue();
-        return processString(body);
+        return removeLineBreaks(trim(body));
     }
 
     private String getFragmentRef(Node child) {
         return getAttributeString(child, FRAGMENT_REF_ATTR);
     }
-
-    private String processString(String source) {
-        if (StringUtils.isNotBlank(source)) {
-            source = StringUtils.strip(source);
-            source = source.replace("(?m)^[ \t]*\r?\n", "");
-        }
-        return source;
-    }
-
 }

@@ -3,8 +3,9 @@ package com.mingo.query;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-
 import java.util.List;
+
+import static com.mingo.util.StringUtils.appendIfAbsent;
 
 public class IfElseConditionalConstruct implements QueryElement {
 
@@ -47,17 +48,20 @@ public class IfElseConditionalConstruct implements QueryElement {
 
     @Override
     public void accept(QBuilder visitor) {
-        if (visitor.append(ifStatement)) {
+        if(visitor.append(ifStatement)) {
+            visitor.appendIfAbsent(",");
             return;
         }
-        for (ConditionElement el : elseIf) {
-            if (visitor.append(el)) {
+        for(ConditionElement el : elseIf) {
+            if(visitor.append(el)) {
+                visitor.appendIfAbsent(",");
                 return;
             }
         }
 
-        if (elseStatement != null) {
+        if(elseStatement != null) {
             visitor.append(elseStatement);
+            visitor.appendIfAbsent(",");
         }
     }
 
@@ -71,18 +75,16 @@ public class IfElseConditionalConstruct implements QueryElement {
     }
 
     private void append(StringBuilder builder, List<? extends QueryElement> queryElements) {
-        for (QueryElement queryElement : queryElements) {
+        for(QueryElement queryElement : queryElements) {
             append(builder, queryElement);
         }
     }
 
     private void append(StringBuilder builder, QueryElement queryElement) {
-        if (queryElement != null) {
+        if(queryElement != null) {
             String elText = queryElement.asString();
             builder.append(elText);
-            if (!elText.endsWith(",")) {
-                builder.append(",");
-            }
+            appendIfAbsent(builder, ",");
         }
     }
 
@@ -90,4 +92,5 @@ public class IfElseConditionalConstruct implements QueryElement {
     public String toString() {
         return asString();
     }
+
 }

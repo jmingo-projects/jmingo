@@ -3,12 +3,11 @@ package com.mingo.query;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.mingo.query.el.ELEngine;
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 
-import static com.mingo.util.QueryUtils.pipeline;
+import static com.mingo.query.QueryType.PLAIN;
 
 /**
  * Copyright 2012-2013 The Mingo Team
@@ -38,7 +37,7 @@ public class Query {
     /* escape null parameters*/
     private boolean escapeNullParameters = true;
 
-    private QueryType queryType = QueryType.PLAIN;
+    private QueryType queryType = PLAIN;
 
     private List<QueryElement> queryElements = Lists.newArrayList();
 
@@ -60,20 +59,7 @@ public class Query {
     }
 
     public String getText() {
-        StringBuilder builder = new StringBuilder();
-        queryElements.forEach(el -> {
-            String elText = el.asString();
-            builder.append(elText);
-            if (!elText.endsWith(",")) {
-                builder.append(",");
-            }
-        });
-        String text = replaceLast(builder.toString(), ",", "");
-        return QueryType.PLAIN.equals(queryType) ? text : pipeline(text);
-    }
-
-    private static String replaceLast(String text, String regex, String replacement) {
-        return text.replaceFirst("(?s)(.*)" + regex, "$1" + replacement);
+        return QueryBuilder.getFullQueryText(queryType, queryElements);
     }
 
     /**
@@ -109,7 +95,7 @@ public class Query {
      * @param converter converter
      */
     public void setConverter(String converter) {
-        if (StringUtils.isNotBlank(converter)) {
+        if(StringUtils.isNotBlank(converter)) {
             this.converter = converter;
         }
 
@@ -130,7 +116,7 @@ public class Query {
      * @param converterMethod converter method
      */
     public void setConverterMethod(String converterMethod) {
-        if (StringUtils.isNotBlank(converterMethod)) {
+        if(StringUtils.isNotBlank(converterMethod)) {
             this.converterMethod = converterMethod;
         }
     }
@@ -150,11 +136,10 @@ public class Query {
      * @param queryType query type
      */
     public void setQueryType(QueryType queryType) {
-        if (queryType != null) {
+        if(queryType != null) {
             this.queryType = queryType;
         }
     }
-
 
     /**
      * Gets escape null parameters mode.
@@ -194,9 +179,10 @@ public class Query {
     }
 
     public String build(ELEngine elEngine, Map<String, Object> parameters) {
-        QBuilder queryBuilder = new QueryBuilder(elEngine, parameters);
+        QBuilder queryBuilder = new QueryBuilder(queryType, elEngine, parameters);
         queryElements.forEach(element -> element.accept(queryBuilder));
         return queryBuilder.buildQuery();
+
     }
 
 }

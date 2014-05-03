@@ -16,7 +16,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.Assert.assertEquals;
 
 public class QueryTest {
 
@@ -31,29 +31,29 @@ public class QueryTest {
     public Object[][] testBuildQueryProvider() {
         return new Object[][]{
                 {
-                        Arrays.asList(new TextElement("start,"), ifElseConstruct, new TextElement(",end")),
+                        Arrays.asList(new TextElement("start,"), ifElseConstruct, new TextElement("end")),
                         ImmutableMap.<String, Object>builder()
                                 .put("a", 2)
                                 .put("b", 1).build(),
-                        "start,a gt b,end"
+                        "{start,a gt b,end}"
                 },
                 {
-                        Arrays.asList(new TextElement("start,"), ifElseConstruct, new TextElement(",end")),
+                        Arrays.asList(new TextElement("start,"), ifElseConstruct, new TextElement("end")),
                         ImmutableMap.<String, Object>builder()
                                 .put("a", 1)
                                 .put("b", 2).build(),
-                        "start,a lt b,end"
+                        "{start,a lt b,end}"
                 },
                 {
                         Arrays.asList(new TextElement("start,"), new IfElseConditionalConstruct()
                                         .withIf("#a > #b", "a gt b")
                                         .elseIf("#a < #b", "a lt b"),
-                                new TextElement(",end")
+                                new TextElement("end")
                         ),
                         ImmutableMap.<String, Object>builder()
                                 .put("a", 1)
                                 .put("b", 1).build(),
-                        "start,,end"
+                        "{start,end}"
                 },
         };
     }
@@ -62,23 +62,18 @@ public class QueryTest {
     public Object[][] testBuildQueryWithMissingParamsProvider() {
         return new Object[][]{
                 {
-                        Arrays.asList(new TextElement("start,"), ifElseConstruct, new TextElement(",end")),
+                        Arrays.asList(new TextElement("start,"), ifElseConstruct, new TextElement("end")),
                         Collections.emptyMap(),
-                        "start,a eq b,end"
-                },
-                {
-                        Arrays.asList(new TextElement("start,"), ifElseConstruct, new TextElement(",end")),
-                        Collections.emptyMap(),
-                        "start,a eq b,end"
+                        "{start,a eq b,end}"
                 },
                 {
                         Arrays.asList(new TextElement("start,"), new IfElseConditionalConstruct()
                                         .withIf("#a > #b", "a gt b")
                                         .elseIf("#a < #b", "a lt b"),
-                                new TextElement(",end")
+                                new TextElement("end")
                         ),
                         Collections.emptyMap(),
-                        "start,,end"
+                        "{start,end}"
                 }
 
         };
