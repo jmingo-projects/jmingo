@@ -37,6 +37,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * source: {$match : { "field1": { $in: [value1, value2]}, "field2": { "$gt" : ""}}}
  * after build:[ {$match : { "field1": { $in: [value1, value2]}}} ]
  */
+@Deprecated
 @ThreadSafe
 public class EscapeParser implements JsonParser {
 

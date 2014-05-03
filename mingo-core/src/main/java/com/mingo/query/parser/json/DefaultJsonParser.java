@@ -22,6 +22,7 @@ import org.apache.commons.lang3.Validate;
  * <p/>
  * This class is implementation of {@link com.mingo.query.parser.json.JsonParser} interface.
  */
+@Deprecated
 @ThreadSafe
 public class DefaultJsonParser implements JsonParser {
 

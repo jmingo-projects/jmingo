@@ -28,6 +28,7 @@ import static com.mingo.util.QueryUtils.pipeline;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@Deprecated
 public class QueryParser {
 
     private static final String DEFAULT_QUERY = "{$match : {}}";

@@ -83,6 +83,12 @@ public class MingoTemplate {
         insert(objectToInsert, collectionName);
     }
 
+    public void insert(Object... objectsToInsert) {
+        for(Object objectToInsert : objectsToInsert) {
+            insert(objectToInsert);
+        }
+    }
+
     /**
      * Inserts the object to the collection for the entity type of the object to save.
      *

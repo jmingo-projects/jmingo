@@ -30,6 +30,10 @@ public abstract class AbstractRepository<T extends BaseDocument> implements IBas
         return object.getId();
     }
 
+    public void insert(T ...objects) {
+        mingoTemplate.insert(objects);
+    }
+
     @Override
     public T findById(String id) {
         return mingoTemplate.findById(id, getDocumentType());

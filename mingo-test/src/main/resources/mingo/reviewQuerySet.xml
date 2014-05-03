@@ -26,6 +26,10 @@
             { "author.name": "#name", "author.email": "#email"}
         </query>-->
 
+    <query id="getByStatuses">
+        { "moderationStatus": { $in: "#statuses" } }
+    </query>
+
     <query id="getTagsCount" type="aggregation"
            converter-class="com.mingo.mapping.converter.custom.ReviewSpecificConverter"
            converter-method="convertTagsCount">

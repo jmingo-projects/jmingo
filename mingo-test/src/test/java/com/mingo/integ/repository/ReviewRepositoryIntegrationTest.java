@@ -1,10 +1,12 @@
 package com.mingo.integ.repository;
 
 
+import com.google.common.collect.Sets;
 import com.mingo.domain.Item;
 import com.mingo.domain.ModerationStatus;
 import com.mingo.domain.Review;
 import com.mingo.repository.impl.ReviewRepository;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -69,5 +71,24 @@ public class ReviewRepositoryIntegrationTest extends CommonIntegrationTest {
         assertEquals(null, count.get("scala"));
         assertEquals(Integer.valueOf(1), count.get("java"));
 
+    }
+    @Test(groups = "integration")
+    public void testFindByModerationStatuses(){
+        //given
+        Review reviewNotModerated1 = new Review();
+        reviewNotModerated1.setModerationStatus(ModerationStatus.STATUS_NOT_MODERATED);
+        Review reviewNotModerated2 = new Review();
+        reviewNotModerated2.setModerationStatus(ModerationStatus.STATUS_NOT_MODERATED);
+        Review reviewStatusPassed = new Review();
+        reviewStatusPassed.setModerationStatus(ModerationStatus.STATUS_PASSED);
+        Review reviewStatusRejected = new Review();
+        reviewStatusRejected.setModerationStatus(ModerationStatus.STATUS_REJECTED);
+        reviewRepository.insert(reviewNotModerated1, reviewNotModerated2,reviewStatusPassed, reviewStatusRejected );
+
+        //then
+        List<Review> reviews = reviewRepository.findByModerationStatuses(
+            Sets.newHashSet(ModerationStatus.STATUS_PASSED, ModerationStatus.STATUS_NOT_MODERATED));
+        assertNotNull(reviews);
+        assertEquals(3, reviews.size());
     }
 }
