@@ -1,10 +1,7 @@
-package com.mingo;
+package com.mingo.mapping.marshall.mongo.callback;
 
 import com.google.common.collect.Maps;
-import com.mingo.query.aggregation.PipelineBuilder;
-import org.testng.Assert;
-import org.testng.annotations.Test;
-
+import com.mongodb.util.JSON;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -13,12 +10,15 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 
 /**
- * Unit test for {@link PipelineBuilder}.
+ * Unit test for {@link EscapeEmptyCallback}.
  */
-public class PipelineBuilderTest {
-    private PipelineBuilder pipelineBuilder = new PipelineBuilder();
+public class EscapeEmptyCallbackTest {
+
+    private EscapeEmptyCallback escapeEmptyCallback = new EscapeEmptyCallback();
 
     @Test
     public void testBuild() {
@@ -28,9 +28,11 @@ public class PipelineBuilderTest {
         queries.put("{$match : { \"moderationStatus\": { $in: \"\"}, \"tags\": { $in: \"['test']\"}}}",
             "[ { \"$match\" : { \"tags\" : { \"$in\" : \"['test']\"}}}]");
         queries.put("{$match : { \"moderationStatus\": { $in: \"\"}, \"tags\": { $in: \"\"}}}",
-            "[ { \"$match\" : { }}]");
-        for (Map.Entry<String, String> entry : queries.entrySet()) {
-            Assert.assertEquals(pipelineBuilder.serialize(pipelineBuilder.buildAggregation(entry.getKey())), entry.getValue());
+            "[ ]");
+
+        for(Map.Entry<String, String> entry : queries.entrySet()) {
+            Assert.assertEquals(JSON.parse("[" + entry.getKey() + "]", escapeEmptyCallback).toString(),
+                entry.getValue());
         }
     }
 
@@ -42,7 +44,7 @@ public class PipelineBuilderTest {
         queries.put("{$match : { \"moderationStatus\": { $in: \"\"}, \"tags\": { $in: \"['test']\"}}}",
             "[ { \"$match\" : { \"tags\" : { \"$in\" : \"['test']\"}}}]");
         queries.put("{$match : { \"moderationStatus\": { $in: \"\"}, \"tags\": { $in: \"\"}}}",
-            "[ { \"$match\" : { }}]");
+            "[ ]");
 
         int countOfThreads = 1000;
         ExecutorService executor = Executors.newFixedThreadPool(countOfThreads);
@@ -50,14 +52,14 @@ public class PipelineBuilderTest {
         List<Future<Integer>> tasks = new ArrayList<>(countOfThreads);
 
         Integer totalCheck = 0;
-        for (long i = 0; i < countOfThreads; i++) {
+        for(long i = 0; i < countOfThreads; i++) {
             Callable<Integer> worker = createWorker(queries);
             Future<Integer> submit = executor.submit(worker);
             tasks.add(submit);
         }
 
-        for (Future<Integer> task : tasks) {
-                totalCheck += task.get();
+        for(Future<Integer> task : tasks) {
+            totalCheck += task.get();
         }
 
         executor.shutdown();
@@ -72,8 +74,8 @@ public class PipelineBuilderTest {
             @Override
             public Integer call() throws Exception {
                 int succeed = 0;
-                for (Map.Entry<String, String> entry : queries.entrySet()) {
-                    Assert.assertEquals(pipelineBuilder.serialize(pipelineBuilder.buildAggregation(entry.getKey())), entry.getValue());
+                for(Map.Entry<String, String> entry : queries.entrySet()) {
+                    Assert.assertEquals(JSON.parse("[" + entry.getKey() + "]", new EscapeEmptyCallback()).toString(), entry.getValue());
                     succeed++;
                 }
                 return succeed;
