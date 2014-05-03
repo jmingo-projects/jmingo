@@ -121,6 +121,10 @@ public class Context {
 
     }
 
+    public void shutdown(){
+        queryManager.shutdown();
+    }
+
     /**
      * Parses xml file which managing by schema: context.xsd and creates {@link ContextConfiguration} object.
      */

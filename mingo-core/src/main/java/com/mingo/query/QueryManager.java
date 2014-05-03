@@ -25,11 +25,16 @@ import com.google.common.collect.Sets;
 import com.mingo.exceptions.ContextInitializationException;
 import com.mingo.parser.Parser;
 import com.mingo.parser.xml.dom.ParserFactory;
+import com.mingo.query.watch.QuerySetWatchService;
 import com.mingo.util.QueryUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.helpers.MessageFormatter;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -50,6 +55,8 @@ public class QueryManager {
             "duplicated query composite id: '{}'. please check: '{}' and '{}' query sets.";
 
     private static final String QUERY_NOT_FOUND_ERROR_MSG = "not found query with composite id: '{}'";
+
+    private QuerySetWatchService querySetWatchService = new QuerySetWatchService();
 
     private List<QuerySet> querySetRegistry = Lists.newArrayList();
     /**
@@ -103,7 +110,19 @@ public class QueryManager {
     private QuerySet loadQuerySet(String path) {
         QuerySet querySet = QUERY_PARSER.parse(getAsInputStream(path));
         querySet.setPath(path);
+        URI uri = null;
+        try {
+            uri = QueryManager.class.getResource("/xml/testQuerySet.xml" ).toURI();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+        Path dir = Paths.get(uri).getParent();
+        querySetWatchService.regiser(dir);
         return querySet;
+    }
+
+    public void shutdown(){
+        querySetWatchService.shutdown();
     }
 
     /**
