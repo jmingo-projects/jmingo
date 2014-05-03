@@ -1,4 +1,3 @@
-<<<<<<< HEAD:mingo-core/src/main/java/com/mingo/marshall/BsonMarshallingFactory.java
 /**
  * Copyright 2012-2013 The Mingo Team
  * <p/>
@@ -14,11 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.mingo.marshall;
-=======
 package com.mingo.mapping.marshall;
->>>>>>> iss4:mingo-core/src/main/java/com/mingo/mapping/marshall/BsonMarshallingFactory.java
-
 
 public interface BsonMarshallingFactory {
 
