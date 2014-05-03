@@ -3,6 +3,7 @@ package com.mingo.repository.impl;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
+import com.mingo.domain.Author;
 import com.mingo.domain.ModerationStatus;
 import com.mingo.domain.Review;
 import com.mingo.repository.api.IBaseRepository;
@@ -27,6 +28,19 @@ public class ReviewRepository extends AbstractRepository<Review> implements IBas
         Map<String, Object> parameters = Maps.newHashMap();
         parameters.put("statuses", Iterables.transform(statuses, Enum::name));
         return mingoTemplate.queryForList(Review.COLLECTION_NAME + ".getByStatuses", Review.class, parameters);
+    }
+
+    public List<Review> getByAuthor(String name, String email) {
+        Map<String, Object> parameters = Maps.newHashMap();
+        parameters.put("name", name);
+        parameters.put("email", email);
+        return mingoTemplate.queryForList(Review.COLLECTION_NAME + ".getByAuthor", Review.class, parameters);
+    }
+
+    public Review getByIdentifier(String identifier) {
+        Map<String, Object> parameters = Maps.newHashMap();
+        parameters.put("identifier", identifier);
+        return mingoTemplate.queryForObject(Review.COLLECTION_NAME + ".getByIdentifier", Review.class, parameters);
     }
 
     public Map<String, Integer> getTagsCount(ModerationStatus moderationStatus) {

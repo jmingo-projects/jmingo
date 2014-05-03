@@ -26,6 +26,14 @@
             { "author.name": "#name", "author.email": "#email"}
         </query>-->
 
+    <query id="getByAuthor">
+        { "author.name": "#name", "author.email": "#email"}
+    </query>
+
+    <query id="getByIdentifier">
+        { "identifier": "#identifier" }
+    </query>
+
     <query id="getByStatuses">
         { "moderationStatus": { $in: "#statuses" } }
     </query>

@@ -2,6 +2,7 @@ package com.mingo.integ.repository;
 
 
 import com.google.common.collect.Sets;
+import com.mingo.domain.Author;
 import com.mingo.domain.Item;
 import com.mingo.domain.ModerationStatus;
 import com.mingo.domain.Review;
@@ -88,7 +89,36 @@ public class ReviewRepositoryIntegrationTest extends CommonIntegrationTest {
         //then
         List<Review> reviews = reviewRepository.findByModerationStatuses(
             Sets.newHashSet(ModerationStatus.STATUS_PASSED, ModerationStatus.STATUS_NOT_MODERATED));
+        //when
         assertNotNull(reviews);
         assertEquals(3, reviews.size());
     }
+
+    @Test(groups = "integration")
+    public void testGetByAuthor(){
+        // given
+        Review review= new Review();
+        review.setAuthor(new Author("jeff", "mail@gmail.com"));
+
+        Review review2= new Review();
+        review2.setAuthor(new Author("jeff", "mail@gmail.com"));
+
+        // then
+        reviewRepository.insert(review);
+        reviewRepository.insert(review2);
+        // when
+        List<Review> reviews = reviewRepository.getByAuthor("jeff", "mail@gmail.com");
+        assertNotNull(reviews);
+        assertEquals(2, reviews.size());
+    }
+
+    @Test(groups = "integration")
+    public void testGetByIdentifier(){
+        Review review= new Review();
+        reviewRepository.insert(review, new Review(), new Review());
+        Review saved =  reviewRepository.getByIdentifier(review.getIdentifier());
+        assertNotNull(saved);
+        assertEquals(review.getId(), saved.getId());
+    }
+
 }
