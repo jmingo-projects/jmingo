@@ -16,28 +16,34 @@
 package com.mingo.query;
 
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.common.eventbus.AsyncEventBus;
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
 import com.mingo.exceptions.ContextInitializationException;
 import com.mingo.parser.Parser;
 import com.mingo.parser.xml.dom.ParserFactory;
+import com.mingo.query.watch.QuerySetUpdateEvent;
 import com.mingo.query.watch.QuerySetWatchService;
 import com.mingo.util.QueryUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slf4j.helpers.MessageFormatter;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Executors;
 
 import static com.mingo.parser.xml.dom.ParserFactory.ParseComponent.QUERY;
 import static com.mingo.util.FileUtils.getAsInputStream;
@@ -56,15 +62,16 @@ public class QueryManager {
 
     private static final String QUERY_NOT_FOUND_ERROR_MSG = "not found query with composite id: '{}'";
 
-    private QuerySetWatchService querySetWatchService = new QuerySetWatchService();
+    private EventBus eventBus = new AsyncEventBus(Executors.newSingleThreadExecutor());
+    private QuerySetWatchService querySetWatchService = new QuerySetWatchService(eventBus);
 
-    private List<QuerySet> querySetRegistry = Lists.newArrayList();
     /**
      * key - composite id, value - query.
      */
-    private Map<String, Query> queries = Maps.newHashMap();
+    private Map<String, Query> queries = Maps.newConcurrentMap();
     // parser for query sets
     private static final Parser<QuerySet> QUERY_PARSER = ParserFactory.createParser(QUERY);
+    private static final Logger LOGGER = LoggerFactory.getLogger(QuerySetWatchService.class);
 
     /**
      * Creates manager and initializes query sets for specified paths.
@@ -80,60 +87,83 @@ public class QueryManager {
     }
 
     private void initialize(Set<String> querySetPath) {
-        querySetPath.forEach(path -> querySetRegistry.add(loadQuerySet(path)));
-        querySetRegistry.forEach(querySet -> {
-            querySet.getQueries().forEach(query -> {
-                String compositeId = QueryUtils.buildCompositeId(querySet.getCollectionName(), query.getId());
-                if (queries.containsKey(compositeId)) {
-                    throw new ContextInitializationException(arrayFormat(DUPLICATED_COMPOSITE_ID_ERROR,
-                            new Object[]{compositeId, query.getId(), querySet.getPath()}).getMessage());
-                } else {
-                    validateConverter(query, querySet);
-                    queries.put(compositeId, query);
-                }
-            });
+        //register in bus
+        eventBus.register(this);
+
+        List<QuerySet> querySets = Lists.newArrayList();
+
+        querySetPath.forEach(path -> querySets.add(loadQuerySet(path)));
+        querySets.forEach(querySet -> {
+
+            registerInWatchService(querySet.getPath());
+            putQueries(querySet);
         });
     }
 
-    public List<QuerySet> getQuerySets() {
-        return ImmutableList.copyOf(querySetRegistry);
-    }
 
     public Map<String, Query> getQueries() {
         return ImmutableMap.copyOf(queries);
     }
 
-    public void reload(String querySetPath) {
-        // todo implement this method
+    @Subscribe
+    public void onChange(QuerySetUpdateEvent event) {
+        LOGGER.debug("query set was changed: {}", event);
+        reload(event.getPath().toString());
+    }
+
+    private void putQueries(QuerySet querySet) {
+        querySet.getQueries().forEach(query -> {
+            String compositeId = QueryUtils.buildCompositeId(querySet.getCollectionName(), query.getId());
+            if (queries.containsKey(compositeId)) {
+                throw new ContextInitializationException(arrayFormat(DUPLICATED_COMPOSITE_ID_ERROR,
+                        new Object[]{compositeId, query.getId(), querySet.getPath()}).getMessage());
+            } else {
+                validateConverter(query, querySet);
+                queries.put(compositeId, query);
+            }
+        });
+    }
+
+    private void updateQueries(QuerySet querySet) {
+        querySet.getQueries().forEach(query -> {
+            String compositeId = QueryUtils.buildCompositeId(querySet.getCollectionName(), query.getId());
+            validateConverter(query, querySet);
+            queries.replace(compositeId, query);
+        });
+    }
+
+    private void reload(String querySetPath) {
+        LOGGER.debug("reload query set: {}", querySetPath);
+        QuerySet querySet = loadQuerySet(querySetPath);
+        updateQueries(querySet);
     }
 
     private QuerySet loadQuerySet(String path) {
         QuerySet querySet = QUERY_PARSER.parse(getAsInputStream(path));
         querySet.setPath(path);
-        URI uri = null;
-        try {
-            uri = QueryManager.class.getResource("/xml/testQuerySet.xml" ).toURI();
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
-        Path dir = Paths.get(uri).getParent();
-        querySetWatchService.regiser(dir);
+        LOGGER.debug("'{}' query set was successfully loaded", path);
         return querySet;
     }
 
-    public void shutdown(){
-        querySetWatchService.shutdown();
+    private void registerInWatchService(String path) {
+        try {
+            Path fullPath = Paths.get(path);
+            if (!Paths.get(path).isAbsolute()) {
+                URI uri = QueryManager.class.getResource(path).toURI();
+                fullPath = Paths.get(uri);
+            }
+            if (!Files.exists(fullPath)) {
+                throw new RuntimeException("file '" + fullPath + "' is not exists" );
+            }
+            querySetWatchService.regiser(fullPath);
+        } catch (URISyntaxException e) {
+            throw Throwables.propagate(e);
+        }
+
     }
 
-    /**
-     * Gets query set by path.
-     *
-     * @param path path
-     * @return {@link QuerySet}
-     */
-    public QuerySet getQuerySetByPath(String path) {
-        Validate.notBlank(path, "query set path cannot be null.");
-        return Iterables.find(querySetRegistry, input -> StringUtils.equalsIgnoreCase(input.getPath(), path));
+    public void shutdown() {
+        querySetWatchService.shutdown();
     }
 
     /**
