@@ -16,11 +16,13 @@
 package com.mingo.query;
 
 
-import com.google.common.base.Throwables;
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.AsyncEventBus;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
@@ -29,24 +31,23 @@ import com.mingo.parser.Parser;
 import com.mingo.parser.xml.dom.ParserFactory;
 import com.mingo.query.watch.QuerySetUpdateEvent;
 import com.mingo.query.watch.QuerySetWatchService;
+import com.mingo.util.FileUtils;
 import com.mingo.util.QueryUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.helpers.MessageFormatter;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static com.mingo.parser.xml.dom.ParserFactory.ParseComponent.QUERY;
-import static com.mingo.util.FileUtils.getAsInputStream;
 import static org.slf4j.helpers.MessageFormatter.arrayFormat;
 
 /**
@@ -62,13 +63,18 @@ public class QueryManager {
 
     private static final String QUERY_NOT_FOUND_ERROR_MSG = "not found query with composite id: '{}'";
 
-    private EventBus eventBus = new AsyncEventBus(Executors.newSingleThreadExecutor());
+    private ExecutorService eventBusThreadPool = Executors.newFixedThreadPool(10);
+    private EventBus eventBus = new AsyncEventBus("EventBus_" + getClass().getSimpleName(), eventBusThreadPool);
     private QuerySetWatchService querySetWatchService = new QuerySetWatchService(eventBus);
+
+    private List<AtomicReference<QuerySet>> querySetRegistry = Lists.newArrayList();
 
     /**
      * key - composite id, value - query.
+     * Query should be unique with multiple query sets.
      */
     private Map<String, Query> queries = Maps.newConcurrentMap();
+
     // parser for query sets
     private static final Parser<QuerySet> QUERY_PARSER = ParserFactory.createParser(QUERY);
     private static final Logger LOGGER = LoggerFactory.getLogger(QuerySetWatchService.class);
@@ -87,14 +93,17 @@ public class QueryManager {
     }
 
     private void initialize(Set<String> querySetPath) {
-        //register in bus
+        //register in event bus
         eventBus.register(this);
 
-        List<QuerySet> querySets = Lists.newArrayList();
 
-        querySetPath.forEach(path -> querySets.add(loadQuerySet(path)));
-        querySets.forEach(querySet -> {
+        querySetPath.forEach(path -> {
+            QuerySet qs = loadQuerySet(path);
+            querySetRegistry.add(new AtomicReference<>(qs));
+        });
 
+        querySetRegistry.forEach(qsRef -> {
+            QuerySet querySet = qsRef.get();
             registerInWatchService(querySet.getPath());
             putQueries(querySet);
         });
@@ -106,9 +115,10 @@ public class QueryManager {
     }
 
     @Subscribe
+    @AllowConcurrentEvents
     public void onChange(QuerySetUpdateEvent event) {
         LOGGER.debug("query set was changed: {}", event);
-        reload(event.getPath().toString());
+        reload(event.getPath());
     }
 
     private void putQueries(QuerySet querySet) {
@@ -124,46 +134,73 @@ public class QueryManager {
         });
     }
 
-    private void updateQueries(QuerySet querySet) {
-        querySet.getQueries().forEach(query -> {
-            String compositeId = QueryUtils.buildCompositeId(querySet.getCollectionName(), query.getId());
-            validateConverter(query, querySet);
-            queries.replace(compositeId, query);
-        });
-    }
+    /**
+     * The entire method invocation is performed atomically.
+     * Some attempted update operations on this map by other threads
+     * may be blocked while computation is in progress, so the
+     * computation should be short and simple.
+     */
+    private void reload(Path path) {
+        LOGGER.debug("reload query set: {}", path);
+        QuerySet newQuerySet = loadQuerySet(path);
+        AtomicReference<QuerySet> currentQuerySetRef = getQuerySetRef(path);
+        QuerySet currQusQuerySet = currentQuerySetRef.get();
 
-    private void reload(String querySetPath) {
-        LOGGER.debug("reload query set: {}", querySetPath);
-        QuerySet querySet = loadQuerySet(querySetPath);
-        updateQueries(querySet);
+        if (newQuerySet.getQueries().size() > currQusQuerySet.getQueries().size()) {
+            LOGGER.warn("new queries was added in query set: {}. " +
+                    "Operations 'add' and 'remove' on query set isn't supported." );
+        }
+
+        if (newQuerySet.getQueries().size() < currQusQuerySet.getQueries().size()) {
+            LOGGER.warn("new queries was removed from query set: {}. " +
+                    "Operations 'add' and 'remove' on query set isn't supported." );
+        }
+
+        if (currentQuerySetRef.compareAndSet(currQusQuerySet, newQuerySet)) {
+            for (Query updatedQuery : newQuerySet.getQueries()) {
+                String compositeId = QueryUtils.buildCompositeId(newQuerySet.getCollectionName(), updatedQuery.getId());
+                queries.computeIfPresent(compositeId, (key, currentQuery) -> {
+                    LOGGER.debug("query with composite id:'{}' was refreshed. query set: '{}'",
+                            compositeId, newQuerySet.getPath());
+                    return updatedQuery;
+                });
+            }
+            LOGGER.debug("query set: {} was successfully refreshed", path);
+        } else {
+            LOGGER.error("query set with path: {} was changed by someone before the actual update operation ended, " +
+                    "please refresh file {} and try again", path, path);
+        }
     }
 
     private QuerySet loadQuerySet(String path) {
-        QuerySet querySet = QUERY_PARSER.parse(getAsInputStream(path));
+        Path absolutePath = FileUtils.getAbsolutePath(path);
+        return loadQuerySet(absolutePath);
+    }
+
+    private QuerySet loadQuerySet(Path path) {
+        QuerySet querySet = QUERY_PARSER.parse(path);
         querySet.setPath(path);
         LOGGER.debug("'{}' query set was successfully loaded", path);
         return querySet;
     }
 
-    private void registerInWatchService(String path) {
-        try {
-            Path fullPath = Paths.get(path);
-            if (!Paths.get(path).isAbsolute()) {
-                URI uri = QueryManager.class.getResource(path).toURI();
-                fullPath = Paths.get(uri);
-            }
-            if (!Files.exists(fullPath)) {
-                throw new RuntimeException("file '" + fullPath + "' is not exists" );
-            }
-            querySetWatchService.regiser(fullPath);
-        } catch (URISyntaxException e) {
-            throw Throwables.propagate(e);
+    private void registerInWatchService(Path path) {
+        if (!Files.exists(path)) {
+            throw new RuntimeException("query set with path'" + path + "' is not exists" );
         }
-
+        querySetWatchService.regiser(path);
     }
 
     public void shutdown() {
         querySetWatchService.shutdown();
+        eventBus.unregister(this);
+        eventBusThreadPool.shutdown();
+    }
+
+    private AtomicReference<QuerySet> getQuerySetRef(Path path) {
+        Optional<AtomicReference<QuerySet>> result = Iterables.tryFind(querySetRegistry, querySet ->
+                querySet.get().getPath().equals(path));
+        return result.or(new AtomicReference<>(null));
     }
 
     /**

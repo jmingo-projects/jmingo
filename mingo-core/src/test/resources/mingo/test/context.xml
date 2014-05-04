@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<context xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="../../../../main/resources/xml-schema/context.xsd">
+
+
+    <querySetConfig>
+        <querySet path="/mingo/test/testQuerySet.xml"/>
+        <querySet path="e:/DEVELOP/java/workspace/selfpro/mingo-git/mingo/mingo-core/target/test-classes/mingo/test/second/testQuerySet2.xml"/>
+    </querySetConfig>
+
+
+    <queryExecutor type="MongoDriver"/>
+    <queryAnalyzer type="jexl"/>
+
+    <mongo port="27017" host="localhost" dbName="dbTest">
+        <options>
+            <option name="connectTimeout" value="100"/>
+        </options>
+    </mongo>
+
+    <defaultConverter class="com.mingo.mapping.convert.DefaultConverter"/>
+
+    <converters package="com.mingo.mapping.converter.custom"/>
+</context>

@@ -19,7 +19,13 @@ import com.google.common.base.Throwables;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * Created by dmgcodevil on 19.04.2014.
@@ -45,4 +51,25 @@ public class FileUtils {
             throw Throwables.propagate(e);
         }
     }
+
+    /**
+     * Gets absolute path for specified original path. Handles relative and absolute.
+     *
+     * @param original the original path
+     * @return the absolute path
+     */
+    public static Path getAbsolutePath(String original) {
+        Path path;
+        try {
+            path = Paths.get(original);
+            if (!path.isAbsolute()) {
+                URI uri = FileUtils.class.getResource(original).toURI();
+                path = Paths.get(uri);
+            }
+        } catch (URISyntaxException e) {
+            throw Throwables.propagate(e);
+        }
+        return path;
+    }
+
 }
