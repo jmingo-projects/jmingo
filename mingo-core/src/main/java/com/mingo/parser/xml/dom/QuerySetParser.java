@@ -58,7 +58,7 @@ import static org.apache.commons.lang3.StringUtils.trim;
  * <p>
  * This class is implementation of {@link Parser} interface for parsing QuerySet xml.
  */
-public class QuerySetParser implements Parser<QuerySet> {
+public class QuerySetParser extends AbstractParser<QuerySet> implements Parser<QuerySet> {
 
     private DocumentBuilderFactory documentBuilderFactory;
 

@@ -3,6 +3,7 @@ package com.mingo.parser;
 import com.mingo.exceptions.MingoParserException;
 
 import java.io.InputStream;
+import java.nio.file.Path;
 
 /**
  * Copyright 2012-2013 The Mingo Team
@@ -33,4 +34,13 @@ public interface Parser<T> {
      * @throws MingoParserException {@link MingoParserException}
      */
     T parse(InputStream is) throws MingoParserException;
+
+    /**
+     * Parse data from file with specified path.
+     *
+     * @param path the path to file to parse
+     * @return specific domain object as result of parsing
+     * @throws MingoParserException {@link MingoParserException}
+     */
+    T parse(Path path) throws MingoParserException;
 }

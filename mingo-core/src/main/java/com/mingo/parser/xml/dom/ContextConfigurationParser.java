@@ -47,7 +47,7 @@ import static com.mingo.parser.xml.dom.util.DomUtil.*;
  * This class is implementation of {@link Parser} interface.
  * XML parser for context configuration. See  context.xsd schema for details.
  */
-public class ContextConfigurationParser implements Parser<ContextConfiguration> {
+public class ContextConfigurationParser extends AbstractParser<ContextConfiguration> implements Parser<ContextConfiguration> {
 
     private DocumentBuilderFactory documentBuilderFactory;
 

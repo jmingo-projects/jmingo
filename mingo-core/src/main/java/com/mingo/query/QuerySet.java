@@ -12,6 +12,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.Validate;
 
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +35,7 @@ import java.util.Set;
  */
 public class QuerySet {
 
-    private String path;
+    private Path path;
 
     private String dbName;
 
@@ -46,21 +47,11 @@ public class QuerySet {
 
     private static final String DUPLICATED_QUERY_ID = "duplicated query id: '{}'";
 
-    /**
-     * Gets path.
-     *
-     * @return path
-     */
-    public String getPath() {
+    public Path getPath() {
         return path;
     }
 
-    /**
-     * Sets path.
-     *
-     * @param path path
-     */
-    public void setPath(String path) {
+    public void setPath(Path path) {
         this.path = path;
     }
 
