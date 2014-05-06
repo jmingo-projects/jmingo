@@ -1,8 +1,6 @@
 package com.mingo.parser;
 
 import com.mingo.exceptions.MingoParserException;
-
-import java.io.InputStream;
 import java.nio.file.Path;
 
 /**
@@ -25,15 +23,6 @@ import java.nio.file.Path;
  * @param <T> The type of object which will be create after data.
  */
 public interface Parser<T> {
-
-    /**
-     * Parse data from input stream.
-     *
-     * @param is {@link InputStream}
-     * @return specific domain object as result of parsing
-     * @throws MingoParserException {@link MingoParserException}
-     */
-    T parse(InputStream is) throws MingoParserException;
 
     /**
      * Parse data from file with specified path.

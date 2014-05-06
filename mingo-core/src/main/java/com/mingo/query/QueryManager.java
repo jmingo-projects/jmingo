@@ -142,33 +142,40 @@ public class QueryManager {
      */
     private void reload(Path path) {
         LOGGER.debug("reload query set: {}", path);
-        QuerySet newQuerySet = loadQuerySet(path);
         AtomicReference<QuerySet> currentQuerySetRef = getQuerySetRef(path);
-        QuerySet currQusQuerySet = currentQuerySetRef.get();
-
-        if (newQuerySet.getQueries().size() > currQusQuerySet.getQueries().size()) {
-            LOGGER.warn("new queries was added in query set: {}. " +
-                    "Operations 'add' and 'remove' on query set isn't supported." );
+        QuerySet currQuerySet = currentQuerySetRef.get();
+        String checksum = FileUtils.checksum(path.toFile());
+        if(StringUtils.equals(checksum, currQuerySet.getChecksum())) {
+            LOGGER.debug("query set: {} wasn't changed, content remains the same", path);
+            return;
+        }
+        QuerySet newQuerySet = loadQuerySet(path);
+        if(newQuerySet.getQueries().size() > currQuerySet.getQueries().size()) {
+            LOGGER.warn("{} queries was added in query set: {}. " +
+                "Operations 'add' and 'remove' on query set aren't supported.",
+                newQuerySet.getQueries().size() - currQuerySet.getQueries().size(), path);
         }
 
-        if (newQuerySet.getQueries().size() < currQusQuerySet.getQueries().size()) {
-            LOGGER.warn("new queries was removed from query set: {}. " +
-                    "Operations 'add' and 'remove' on query set isn't supported." );
+        if(newQuerySet.getQueries().size() < currQuerySet.getQueries().size()) {
+            LOGGER.warn("{} queries was removed from query set: {}. " +
+                    "Operations 'add' and 'remove' on query set aren't supported.",
+                currQuerySet.getQueries().size() - newQuerySet.getQueries().size(), path
+            );
         }
 
-        if (currentQuerySetRef.compareAndSet(currQusQuerySet, newQuerySet)) {
-            for (Query updatedQuery : newQuerySet.getQueries()) {
+        if(currentQuerySetRef.compareAndSet(currQuerySet, newQuerySet)) {
+            for(Query updatedQuery : newQuerySet.getQueries()) {
                 String compositeId = QueryUtils.buildCompositeId(newQuerySet.getCollectionName(), updatedQuery.getId());
                 queries.computeIfPresent(compositeId, (key, currentQuery) -> {
                     LOGGER.debug("query with composite id:'{}' was refreshed. query set: '{}'",
-                            compositeId, newQuerySet.getPath());
+                        compositeId, newQuerySet.getPath());
                     return updatedQuery;
                 });
             }
             LOGGER.debug("query set: {} was successfully refreshed", path);
         } else {
             LOGGER.error("query set with path: {} was changed by someone before the actual update operation ended, " +
-                    "please refresh file {} and try again", path, path);
+                "please refresh file {} and try again", path, path);
         }
     }
 

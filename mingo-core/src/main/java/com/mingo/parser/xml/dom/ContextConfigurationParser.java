@@ -4,11 +4,18 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.mingo.config.ContextConfiguration;
 import com.mingo.config.MongoConfig;
+import com.mingo.config.QuerySetConfiguration;
 import com.mingo.exceptions.MingoParserException;
 import com.mingo.parser.Parser;
 import com.mingo.query.ELEngineType;
 import com.mingo.query.QueryExecutorType;
-import com.mingo.config.QuerySetConfiguration;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.nio.file.Path;
+import java.util.Set;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
@@ -20,14 +27,13 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.InputStream;
-import java.util.Set;
-
 import static com.mingo.parser.xml.dom.DocumentBuilderFactoryCreator.createDocumentBuilderFactory;
-import static com.mingo.parser.xml.dom.util.DomUtil.*;
+import static com.mingo.parser.xml.dom.util.DomUtil.assertPositive;
+import static com.mingo.parser.xml.dom.util.DomUtil.getAllChildNodes;
+import static com.mingo.parser.xml.dom.util.DomUtil.getAttributeInt;
+import static com.mingo.parser.xml.dom.util.DomUtil.getAttributeString;
+import static com.mingo.parser.xml.dom.util.DomUtil.getFirstNecessaryTagOccurrence;
+import static com.mingo.parser.xml.dom.util.DomUtil.getFirstTagOccurrence;
 
 /**
  * Copyright 2012-2013 The Mingo Team
@@ -47,7 +53,7 @@ import static com.mingo.parser.xml.dom.util.DomUtil.*;
  * This class is implementation of {@link Parser} interface.
  * XML parser for context configuration. See  context.xsd schema for details.
  */
-public class ContextConfigurationParser extends AbstractParser<ContextConfiguration> implements Parser<ContextConfiguration> {
+public class ContextConfigurationParser implements Parser<ContextConfiguration> {
 
     private DocumentBuilderFactory documentBuilderFactory;
 
@@ -95,13 +101,13 @@ public class ContextConfigurationParser extends AbstractParser<ContextConfigurat
      * {@inheritDoc}
      */
     @Override
-    public ContextConfiguration parse(InputStream xml) throws MingoParserException {
-        LOGGER.debug("ContextConfiguration:: START PARSING");
+    public ContextConfiguration parse(Path path) throws MingoParserException {
+        LOGGER.debug("parse context configuration: {}", path);
         ContextConfiguration contextConfiguration;
-        try {
+        try (InputStream is = new FileInputStream(path.toFile())) {
             DocumentBuilder builder = documentBuilderFactory.newDocumentBuilder();
             builder.setErrorHandler(parseErrorHandler);
-            Document document = builder.parse(new InputSource(xml));
+            Document document = builder.parse(new InputSource(is));
             contextConfiguration = new ContextConfiguration();
             Element element = document.getDocumentElement();
             contextConfiguration.setQuerySetConfiguration(parseQuerySetConfigTag(element));
@@ -110,7 +116,7 @@ public class ContextConfigurationParser extends AbstractParser<ContextConfigurat
             contextConfiguration.setMongoConfig(parseMongoTag(element));
             parseConvertersTag(contextConfiguration, element);
             contextConfiguration.setDefaultConverter(parseDefaultConverterTag(element));
-        } catch (Exception e) {
+        } catch(Exception e) {
             throw new MingoParserException(e);
         }
         return contextConfiguration;

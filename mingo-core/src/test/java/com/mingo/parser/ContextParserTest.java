@@ -4,6 +4,7 @@ import com.mingo.config.ContextConfiguration;
 import com.mingo.exceptions.MingoParserException;
 import com.mingo.parser.xml.dom.ParserFactory;
 import com.mingo.query.QueryExecutorType;
+import com.mingo.util.FileUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.testng.Assert;
@@ -20,7 +21,7 @@ public class ContextParserTest {
         String contextXml = "/xml/context.xml";
         Parser<ContextConfiguration> xmlParser = ParserFactory.createParser(ParserFactory.ParseComponent.CONTEXT);
         //when
-        ContextConfiguration contextConfiguration = xmlParser.parse(getClass().getResourceAsStream(contextXml));
+        ContextConfiguration contextConfiguration = xmlParser.parse(FileUtils.getAbsolutePath(contextXml));
         //then
         Assert.assertTrue(CollectionUtils.isNotEmpty(contextConfiguration.getQuerySetConfiguration().getQuerySets()));
         int countOfQuerySets = 1;

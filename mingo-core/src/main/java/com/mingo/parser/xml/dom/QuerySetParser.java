@@ -10,6 +10,16 @@ import com.mingo.query.QueryElement;
 import com.mingo.query.QueryFragment;
 import com.mingo.query.QuerySet;
 import com.mingo.query.QueryType;
+import com.mingo.util.FileUtils;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.nio.file.Path;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
@@ -21,14 +31,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.InputStream;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
 
 import static com.mingo.parser.xml.dom.DocumentBuilderFactoryCreator.createDocumentBuilderFactory;
 import static com.mingo.parser.xml.dom.util.DomUtil.getAttributeBoolean;
@@ -58,7 +60,7 @@ import static org.apache.commons.lang3.StringUtils.trim;
  * <p>
  * This class is implementation of {@link Parser} interface for parsing QuerySet xml.
  */
-public class QuerySetParser extends AbstractParser<QuerySet> implements Parser<QuerySet> {
+public class QuerySetParser implements Parser<QuerySet> {
 
     private DocumentBuilderFactory documentBuilderFactory;
 
@@ -98,19 +100,22 @@ public class QuerySetParser extends AbstractParser<QuerySet> implements Parser<Q
         this.parseErrorHandler = parseErrorHandler;
     }
 
+
     /**
      * {@inheritDoc}
      */
     @Override
-    public QuerySet parse(InputStream xml) throws MingoParserException {
-        LOGGER.debug("QuerySetParser:: START PARSING");
+    public QuerySet parse(Path path) throws MingoParserException {
+        LOGGER.debug("parse query set: {}", path);
         QuerySet querySet;
-        try {
+        try (InputStream is = new FileInputStream(path.toFile())) {
+            String checksum = FileUtils.checksum(path.toFile());
+            querySet = new QuerySet();
+            querySet.setChecksum(checksum);
             DocumentBuilder builder = documentBuilderFactory.newDocumentBuilder();
             builder.setErrorHandler(parseErrorHandler);
-            Document document = builder.parse(new InputSource(xml));
+            Document document = builder.parse(new InputSource(is));
             Element root = document.getDocumentElement();
-            querySet = new QuerySet();
             parseConfigTag(root, querySet);
             parseQueryFragments(root, querySet);
             parseQueries(root, querySet);

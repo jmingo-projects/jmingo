@@ -27,7 +27,7 @@ public class QueryParserTest {
         //given
         String queryXml = "/xml/testQuerySet.xml";
         Parser<QuerySet> xmlParser = ParserFactory.createParser(ParserFactory.ParseComponent.QUERY);
-        QuerySet querySet = xmlParser.parse(FileUtils.getAsInputStream(queryXml));
+        QuerySet querySet = xmlParser.parse(FileUtils.getAbsolutePath(queryXml));
         createCompositeIdForQueries(querySet);
         Assert.assertEquals(querySet.getCollectionName(), COLLECTION_ONE);
         Assert.assertNotNull(querySet);

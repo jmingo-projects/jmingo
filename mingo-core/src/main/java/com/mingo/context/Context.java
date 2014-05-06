@@ -28,6 +28,7 @@ import com.mingo.parser.xml.dom.ParserFactory;
 import com.mingo.query.QueryExecutorType;
 import com.mingo.query.el.ELEngine;
 import com.mingo.query.el.ELEngineFactory;
+import com.mingo.util.FileUtils;
 import com.mongodb.Mongo;
 import org.apache.commons.lang3.StringUtils;
 
@@ -129,6 +130,6 @@ public class Context {
      * Parses xml file which managing by schema: context.xsd and creates {@link ContextConfiguration} object.
      */
     private ContextConfiguration loadContextConfiguration(String contextPath) {
-        return CONTEXT_CONFIGURATION_PARSER.parse(getAsInputStream(contextPath));
+        return CONTEXT_CONFIGURATION_PARSER.parse(FileUtils.getAbsolutePath(contextPath));
     }
 }

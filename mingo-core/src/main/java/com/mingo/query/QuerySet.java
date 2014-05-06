@@ -45,6 +45,8 @@ public class QuerySet {
 
     private Set<QueryFragment> queryFragments = Collections.emptySet();
 
+    private String checksum;
+
     private static final String DUPLICATED_QUERY_ID = "duplicated query id: '{}'";
 
     public Path getPath() {
@@ -53,6 +55,14 @@ public class QuerySet {
 
     public void setPath(Path path) {
         this.path = path;
+    }
+
+    public String getChecksum() {
+        return checksum;
+    }
+
+    public void setChecksum(String checksum) {
+        this.checksum = checksum;
     }
 
     /**

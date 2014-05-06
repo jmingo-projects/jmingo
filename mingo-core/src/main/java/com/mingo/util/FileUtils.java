@@ -17,6 +17,8 @@ package com.mingo.util;
 
 import com.google.common.base.Throwables;
 
+import com.google.common.hash.Hashing;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -70,6 +72,16 @@ public class FileUtils {
             throw Throwables.propagate(e);
         }
         return path;
+    }
+
+    public static String checksum(File file) {
+        String checksum;
+        try {
+            checksum = com.google.common.io.Files.hash(file, Hashing.md5()).toString();
+        } catch(IOException e) {
+            throw Throwables.propagate(e);
+        }
+        return checksum;
     }
 
 }
