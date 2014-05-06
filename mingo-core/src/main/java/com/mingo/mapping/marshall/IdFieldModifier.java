@@ -18,17 +18,13 @@ package com.mingo.mapping.marshall;
 
 import com.google.common.base.Throwables;
 import com.mingo.annotation.AutoGenerate;
-import com.mingo.annotation.Document;
-import com.mingo.annotation.Id;
-import org.apache.commons.lang3.Validate;
-import org.bson.types.ObjectId;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.UUID;
 import java.util.function.Predicate;
+import org.bson.types.ObjectId;
 
 import static com.mingo.util.DocumentUtils.isId;
 
