@@ -20,6 +20,7 @@ import com.google.common.base.Throwables;
 import com.mingo.annotation.AutoGenerate;
 import com.mingo.annotation.Document;
 import com.mingo.annotation.Id;
+import org.apache.commons.lang3.Validate;
 import org.bson.types.ObjectId;
 
 import java.lang.reflect.Field;
@@ -29,46 +30,38 @@ import java.util.Collection;
 import java.util.UUID;
 import java.util.function.Predicate;
 
+import static com.mingo.util.DocumentUtils.isId;
+
 
 /**
- * Modifies fields that is annotated with @Id.
+ * Modifies fields that is annotated with @Id and @AutoGenerate.
  */
 public class IdFieldModifier {
 
     /**
-     * Generates ids values for all pojo's fields including
+     * Generates values for all pojo's ids fields including
      * inherited fields that annotated with {@link com.mingo.annotation.Id} and with {@link com.mingo.annotation.AutoGenerate}.
      * <p>
-     * If {@code pojo} isn't annotated with {@link com.mingo.annotation.Document} then it will be skipped.
      * Generation depends on type of field:
      * to generate value for {@code String} field the {@link java.util.UUID} is used.
-     * If type of id field is {@code ObjectId} then the new instance of {@code ObjectId}
+     * If type of an id field is {@code ObjectId} then the new instance of {@code ObjectId}
      * will be created using default constructor {@code new ObjectId()}.
      * <p>
-     * Generates values for nested fields that also have an id field, for instance if the pojo has collection of mingo
-     * documents then for each document form collection will be generated new value.
+     * Generates values for nested fields that also have an id field, for instance if the pojo has collection of objects
+     * of a type that has a field that annotated with @Id and @AutoGenerate then for each object form a collection will
+     * be generated new id value.
      * It applies for {@code Collection} and {@code Array} types,
-     * exception case for {@code Map}.
+     * exception case is {@code Map}.
      * <p>
-     * If an id field is final, Synthetic or static then new value will not be generated.
+     * If an id field is final, synthetic or static then new value will not be generated.
      *
      * @param pojo the pojo for that the id field should be generated
      */
     public void generateId(Object pojo) {
-        if (!isDocument(pojo)) {
-            return;
-        }
-
-        doWithFields(pojo, pojo.getClass(), generateId, skipSyntheticField,
+        if(pojo != null) {
+            doWithFields(pojo, pojo.getClass(), generateId, skipSyntheticField,
                 skipFinalField, skipStaticField);
-    }
-
-    private boolean isDocument(Object pojo) {
-        return pojo.getClass().isAnnotationPresent(Document.class);
-    }
-
-    private boolean isId(Field field) {
-        return field.isAnnotationPresent(Id.class);
+        }
     }
 
     private void generateIdForArray(Object[] objects) {

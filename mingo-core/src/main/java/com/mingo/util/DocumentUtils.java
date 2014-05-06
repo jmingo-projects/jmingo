@@ -73,4 +73,8 @@ public class DocumentUtils {
         return documentType != null && documentType.isAnnotationPresent(Document.class);
     }
 
+    public static boolean isId(Field field) {
+        return field != null && field.isAnnotationPresent(Id.class);
+    }
+
 }
