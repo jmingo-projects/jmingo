@@ -15,54 +15,80 @@
  */
 package com.mingo.context;
 
-import com.mingo.query.ELEngineType;
-import com.mingo.query.QueryManager;
-import com.mingo.config.ContextConfiguration;
-import com.mingo.mapping.convert.ConverterService;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import com.mingo.MingoTemplate;
+import com.mingo.benchmark.BenchmarkService;
+import com.mingo.config.ContextConfiguration;
 import com.mingo.exceptions.ContextInitializationException;
 import com.mingo.executor.MongoQueryExecutor;
+import com.mingo.mapping.convert.ConverterService;
 import com.mingo.mongo.MongoDBFactory;
 import com.mingo.parser.Parser;
 import com.mingo.parser.xml.dom.ParserFactory;
+import com.mingo.query.ELEngineType;
 import com.mingo.query.QueryExecutorType;
+import com.mingo.query.QueryManager;
 import com.mingo.query.el.ELEngine;
 import com.mingo.query.el.ELEngineFactory;
 import com.mingo.util.FileUtils;
 import com.mongodb.Mongo;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.List;
+
 import static com.mingo.parser.xml.dom.ParserFactory.ParseComponent.CONTEXT;
-import static com.mingo.util.FileUtils.getAsInputStream;
 
 
 public class Context {
 
-
     private ELEngine queryAnalyzer;
-
     private ConverterService converterService;
-
     private QueryManager queryManager;
 
+    private ContextConfiguration config;
     private MongoDBFactory mongoDBFactory;
     private MongoQueryExecutor mongoQueryExecutor;
     private MingoTemplate mingoTemplate;
-    private ELEngineType queryAnalyzerType;
-
-    private ContextConfiguration config;
+    private List<BenchmarkService> benchmarkServices = Lists.newCopyOnWriteArrayList();
 
     private static final String CONTEXT_PATH_ERROR = "path to context configuration cannot be empty or null";
 
     private static final Parser<ContextConfiguration> CONTEXT_CONFIGURATION_PARSER =
             ParserFactory.createParser(CONTEXT);
 
+    private static ThreadLocal<Context> currentContext = new InheritableThreadLocal<>();
+
+    @Deprecated
     public Context(String contextPath) {
         initialize(contextPath, null);
+        currentContext.set(this);
     }
 
+    @Deprecated
     public Context(String contextPath, Mongo mongo) {
         initialize(contextPath, mongo);
+        currentContext.set(this);
+    }
+
+    public static Context create(String contextPath) {
+        Context context = new Context(contextPath);
+        currentContext.set(context);
+        return context;
+    }
+
+    public static Context create(String contextPath, Mongo mongo) {
+        Context context = new Context(contextPath, mongo);
+        currentContext.set(context);
+        return context;
+    }
+
+    public void addBenchmarkService(BenchmarkService service) {
+        benchmarkServices.add(service);
+    }
+
+    public static Context getCurrent() {
+        return currentContext.get();
     }
 
     public ELEngine getQueryAnalyzer() {
@@ -101,6 +127,10 @@ public class Context {
         return config.getQueryExecutorType();
     }
 
+    public List<BenchmarkService> getBenchmarkServices() {
+        return ImmutableList.copyOf(benchmarkServices);
+    }
+
     private void initialize(String contextPath, Mongo mongo) {
         Context context;
         try {
@@ -122,7 +152,7 @@ public class Context {
 
     }
 
-    public void shutdown(){
+    public void shutdown() {
         queryManager.shutdown();
     }
 

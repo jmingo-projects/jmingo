@@ -3,6 +3,7 @@ package com.mingo.config;
 import com.mingo.MingoTemplate;
 import com.mingo.context.Context;
 import com.mingo.exceptions.ContextInitializationException;
+import com.mingo.performance.BenchmarkLoggerService;
 import com.mongodb.Mongo;
 import org.springframework.util.Assert;
 
@@ -33,7 +34,8 @@ public class MingoTemplateFactory {
         Assert.hasText(contextPath, "contextPath must not be null or empty.");
         Context context;
         try {
-            context = new Context(contextPath, mongo);
+            context = Context.create(contextPath, mongo);
+            context.addBenchmarkService(new BenchmarkLoggerService());
         } catch (ContextInitializationException e) {
             throw new RuntimeException("Failed to load mingo context. context path: " + contextPath, e);
         }
