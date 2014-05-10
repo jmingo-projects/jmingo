@@ -1,11 +1,21 @@
 package com.git.mingo.dashboard;
 
+import com.git.mingo.benchmark.client.BenchmarkClient;
+import com.git.mingo.dashboard.benchmark.QueryPerformanceChart;
+import com.git.mingo.dashboard.util.SpringContextHelper;
 import com.vaadin.addon.charts.Chart;
 import com.vaadin.addon.charts.model.ChartType;
 import com.vaadin.addon.charts.model.Configuration;
+import com.vaadin.addon.charts.model.DataSeries;
+import com.vaadin.addon.charts.model.DataSeriesItem;
 import com.vaadin.addon.charts.model.ListSeries;
+import com.vaadin.addon.charts.model.PlotOptionsSpline;
 import com.vaadin.addon.charts.model.XAxis;
 import com.vaadin.addon.charts.model.YAxis;
+
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
+import javax.servlet.annotation.WebListener;
 import javax.servlet.annotation.WebServlet;
 
 import com.vaadin.annotations.Theme;
@@ -18,6 +28,8 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
+import java.util.Random;
+
 @Theme("mytheme")
 @SuppressWarnings("serial")
 public class MyVaadinUI extends UI {
@@ -28,52 +40,30 @@ public class MyVaadinUI extends UI {
     public static class Servlet extends VaadinServlet {
     }
 
+
+
+
+
+    Chart chart;
+
+    final Random random = new Random();
     @Override
     protected void init(VaadinRequest request) {
-        final VerticalLayout layout = new VerticalLayout();
+        SpringContextHelper helper = new SpringContextHelper(VaadinServlet.getCurrent().getServletContext());
+        BenchmarkClient client = (BenchmarkClient) helper.getBean("benchmarkClient");
+        final QueryPerformanceChart layout =  new QueryPerformanceChart(client);
         layout.setMargin(true);
         setContent(layout);
 
-        Button button = new Button("Click Me");
+        Button button = new Button("Click Me new1");
         button.addClickListener(new Button.ClickListener() {
             public void buttonClick(ClickEvent event) {
                 layout.addComponent(new Label("Thank you for clicking"));
+
+
             }
         });
-        Chart chart = new Chart(ChartType.BAR);
-        chart.setWidth("400px");
-        chart.setHeight("300px");
 
-// Modify the default configuration a bit
-        Configuration conf = chart.getConfiguration();
-        conf.setTitle("Planets");
-        conf.setSubTitle("The bigger they are the harder they pull");
-        conf.getLegend().setEnabled(false); // Disable legend
-
-// The data
-        ListSeries series = new ListSeries("Diameter");
-        series.setData(4900, 12100, 12800,
-            6800, 143000, 125000,
-            51100, 49500);
-        conf.addSeries(series);
-
-// Set the category labels on the axis correspondingly
-        XAxis xaxis = new XAxis();
-        xaxis.setCategories("Mercury", "Venus", "Earth",
-            "Mars", "Jupiter", "Saturn",
-            "Uranus", "Neptune");
-        xaxis.setTitle("Planet");
-        conf.addxAxis(xaxis);
-
-// Set the Y axis title
-        YAxis yaxis = new YAxis();
-        yaxis.setTitle("Diameter");
-        yaxis.getLabels().setFormatter(
-            "function() {return Math.floor(this.value/1000) + \'Mm\';}");
-        yaxis.getLabels().setStep(2);
-        conf.addyAxis(yaxis);
-
-        layout.addComponent(chart);
 
         layout.addComponent(button);
     }

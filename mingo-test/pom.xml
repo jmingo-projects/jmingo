@@ -26,7 +26,11 @@
             <artifactId>mingo-core</artifactId>
             <version>1.0.0</version>
         </dependency>
-
+        <dependency>
+            <groupId>com.git.mingo</groupId>
+            <artifactId>mingo-benchmark</artifactId>
+            <version>1.0.0</version>
+        </dependency>
         <!-- spring dependencies-->
         <dependency>
             <groupId>org.springframework</groupId>

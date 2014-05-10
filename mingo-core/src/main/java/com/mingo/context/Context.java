@@ -60,15 +60,13 @@ public class Context {
     private static ThreadLocal<Context> currentContext = new InheritableThreadLocal<>();
 
     @Deprecated
-    public Context(String contextPath) {
+    private Context(String contextPath) {
         initialize(contextPath, null);
-        currentContext.set(this);
     }
 
     @Deprecated
-    public Context(String contextPath, Mongo mongo) {
+    private Context(String contextPath, Mongo mongo) {
         initialize(contextPath, mongo);
-        currentContext.set(this);
     }
 
     public static Context create(String contextPath) {
@@ -84,6 +82,7 @@ public class Context {
     }
 
     public void addBenchmarkService(BenchmarkService service) {
+        service.init(this);
         benchmarkServices.add(service);
     }
 

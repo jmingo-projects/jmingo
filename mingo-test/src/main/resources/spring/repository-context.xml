@@ -11,4 +11,6 @@
     <import resource="mingo-context-config.xml"/>
     <context:component-scan base-package="com.mingo.repository"/>
 
+    <import resource="classpath:META-INF/spring/benchmark-context.xml"/>
+
 </beans>

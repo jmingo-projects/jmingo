@@ -268,7 +268,10 @@ public class MingoTemplate {
      * @return list of objects
      */
     public <T> List<T> queryForList(String queryName, Class<T> type, Map<String, Object> parameters) {
-        return queryExecutor.queryForList(queryName, type, parameters);
+        Profiler profiler = Profilers.newQueryProfiler(queryName).start();
+        List<T> result = queryExecutor.queryForList(queryName, type, parameters);
+        profiler.stop();
+        return result;
     }
 
     /**

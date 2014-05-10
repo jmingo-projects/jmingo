@@ -16,7 +16,11 @@
 package com.mingo.benchmark;
 
 
+import com.mingo.context.Context;
+
 public interface BenchmarkService {
 
+    void init(Context context);
     void submit(Metrics metric);
+    void destroy();
 }

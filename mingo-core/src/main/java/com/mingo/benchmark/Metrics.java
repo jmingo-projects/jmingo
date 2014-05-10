@@ -18,9 +18,10 @@ package com.mingo.benchmark;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+import java.io.Serializable;
 import java.util.concurrent.TimeUnit;
 
-public class Metrics {
+public class Metrics implements Serializable{
     private final String name;
     private final long startTime;
     private final long executionTime;

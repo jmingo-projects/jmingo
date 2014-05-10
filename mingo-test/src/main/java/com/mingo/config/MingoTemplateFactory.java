@@ -1,21 +1,24 @@
 package com.mingo.config;
 
 import com.mingo.MingoTemplate;
+import com.mingo.benchmark.BenchmarkService;
 import com.mingo.context.Context;
 import com.mingo.exceptions.ContextInitializationException;
 import com.mingo.performance.BenchmarkLoggerService;
 import com.mongodb.Mongo;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.util.Assert;
 
 /**
  * Copyright 2012-2013 The Mingo Team
- * <p/>
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * <p/>
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- * <p/>
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,6 +26,10 @@ import org.springframework.util.Assert;
  * limitations under the License.
  */
 public class MingoTemplateFactory {
+
+    @Autowired
+    @Qualifier("nettyBenchmarkService")
+    private BenchmarkService benchmarkService;
 
     /**
      * Creates mingo template.
@@ -36,6 +43,7 @@ public class MingoTemplateFactory {
         try {
             context = Context.create(contextPath, mongo);
             context.addBenchmarkService(new BenchmarkLoggerService());
+            context.addBenchmarkService(benchmarkService);
         } catch (ContextInitializationException e) {
             throw new RuntimeException("Failed to load mingo context. context path: " + contextPath, e);
         }
