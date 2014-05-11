@@ -22,6 +22,8 @@ import com.mingo.benchmark.BenchmarkService;
 import com.mingo.config.ContextConfiguration;
 import com.mingo.exceptions.ContextInitializationException;
 import com.mingo.executor.MongoQueryExecutor;
+import com.mingo.executor.QueryExecutor;
+import com.mingo.executor.QueryExecutorBenchmark;
 import com.mingo.mapping.convert.ConverterService;
 import com.mingo.mongo.MongoDBFactory;
 import com.mingo.parser.Parser;
@@ -48,7 +50,7 @@ public class Context {
 
     private ContextConfiguration config;
     private MongoDBFactory mongoDBFactory;
-    private MongoQueryExecutor mongoQueryExecutor;
+    private QueryExecutor queryExecutor;
     private MingoTemplate mingoTemplate;
     private List<BenchmarkService> benchmarkServices = Lists.newCopyOnWriteArrayList();
 
@@ -106,8 +108,8 @@ public class Context {
         return mongoDBFactory;
     }
 
-    public MongoQueryExecutor getMongoQueryExecutor() {
-        return mongoQueryExecutor;
+    public QueryExecutor getQueryExecutor() {
+        return queryExecutor;
     }
 
     public MingoTemplate getMingoTemplate() {
@@ -143,8 +145,14 @@ public class Context {
             mongoDBFactory = mongo != null ? new MongoDBFactory(config.getMongoConfig(), mongo)
                     : new MongoDBFactory(config.getMongoConfig());
             queryAnalyzer = ELEngineFactory.create(config.getQueryAnalyzerType());
-            mongoQueryExecutor = new MongoQueryExecutor(mongoDBFactory, queryManager, queryAnalyzer, converterService);
-            mingoTemplate = new MingoTemplate(mongoQueryExecutor, mongoDBFactory, converterService);
+            queryExecutor = new MongoQueryExecutor(mongoDBFactory, queryManager, queryAnalyzer, converterService);
+
+            //todo add factory for executors
+            if (config.getMingoContextConfig().isBenchmarkEnabled()) {
+                queryExecutor = new QueryExecutorBenchmark(queryExecutor);
+            }
+
+            mingoTemplate = new MingoTemplate(queryExecutor, mongoDBFactory, converterService);
         } catch (Throwable e) {
             throw new ContextInitializationException(e);
         }

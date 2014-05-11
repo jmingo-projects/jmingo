@@ -15,10 +15,8 @@
  */
 package com.mingo;
 
-import com.mingo.benchmark.Profiler;
-import com.mingo.benchmark.Profilers;
-import com.mingo.mapping.convert.ConverterService;
 import com.mingo.executor.QueryExecutor;
+import com.mingo.mapping.convert.ConverterService;
 import com.mingo.mapping.marshall.BsonMarshaller;
 import com.mingo.mapping.marshall.jackson.JacksonBsonMarshallingFactory;
 import com.mingo.mongo.MongoDBFactory;
@@ -239,10 +237,7 @@ public class MingoTemplate {
      * @return object
      */
     public <T> T queryForObject(String queryName, Class<T> type, Map<String, Object> parameters) {
-        Profiler profiler = Profilers.newQueryProfiler(queryName).start();
-        T result = queryExecutor.queryForObject(queryName, type, parameters);
-        profiler.stop();
-        return result;
+        return queryExecutor.queryForObject(queryName, type, parameters);
     }
 
     /**
@@ -268,10 +263,7 @@ public class MingoTemplate {
      * @return list of objects
      */
     public <T> List<T> queryForList(String queryName, Class<T> type, Map<String, Object> parameters) {
-        Profiler profiler = Profilers.newQueryProfiler(queryName).start();
-        List<T> result = queryExecutor.queryForList(queryName, type, parameters);
-        profiler.stop();
-        return result;
+        return queryExecutor.queryForList(queryName, type, parameters);
     }
 
     /**

@@ -3,6 +3,7 @@ package com.mingo.parser.xml.dom;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.mingo.config.ContextConfiguration;
+import com.mingo.config.MingoContextConfig;
 import com.mingo.config.MongoConfig;
 import com.mingo.config.QuerySetConfiguration;
 import com.mingo.exceptions.MingoParserException;
@@ -30,8 +31,10 @@ import org.xml.sax.InputSource;
 import static com.mingo.parser.xml.dom.DocumentBuilderFactoryCreator.createDocumentBuilderFactory;
 import static com.mingo.parser.xml.dom.util.DomUtil.assertPositive;
 import static com.mingo.parser.xml.dom.util.DomUtil.getAllChildNodes;
+import static com.mingo.parser.xml.dom.util.DomUtil.getAttributeBoolean;
 import static com.mingo.parser.xml.dom.util.DomUtil.getAttributeInt;
 import static com.mingo.parser.xml.dom.util.DomUtil.getAttributeString;
+import static com.mingo.parser.xml.dom.util.DomUtil.getChildNodes;
 import static com.mingo.parser.xml.dom.util.DomUtil.getFirstNecessaryTagOccurrence;
 import static com.mingo.parser.xml.dom.util.DomUtil.getFirstTagOccurrence;
 
@@ -62,6 +65,11 @@ public class ContextConfigurationParser implements Parser<ContextConfiguration> 
     private static final Logger LOGGER = LoggerFactory.getLogger(ContextConfigurationParser.class);
 
     private static final String CONTEXT_TAG = "context";
+
+    private static final String CONFIG_TAG = "config";
+    private static final String BENCHMARK_TAG = "benchmark";
+    private static final String BENCHMARK_ENABLED_ATTR = "enabled";
+
     private static final String QUERY_SET_CONFIG_TAG = "querySetConfig";
     private static final String QUERY_SET_TAG = "querySet";
     private static final String QUERY_EXECUTOR_TAG = "queryExecutor";
@@ -110,6 +118,7 @@ public class ContextConfigurationParser implements Parser<ContextConfiguration> 
             Document document = builder.parse(new InputSource(is));
             contextConfiguration = new ContextConfiguration();
             Element element = document.getDocumentElement();
+            contextConfiguration.setMingoContextConfig(parseConfigTag(element));
             contextConfiguration.setQuerySetConfiguration(parseQuerySetConfigTag(element));
             contextConfiguration.setQueryExecutorType(parseQueryExecutorTag(element));
             contextConfiguration.setQueryAnalyzerType(parseQueryAnalyzerTag(element));
@@ -120,6 +129,25 @@ public class ContextConfigurationParser implements Parser<ContextConfiguration> 
             throw new MingoParserException(e);
         }
         return contextConfiguration;
+    }
+
+    /**
+     * Parse <config/> tag.
+     *
+     * @param element element of XML document
+     * @return MingoContextConfig
+     */
+    private MingoContextConfig parseConfigTag(Element element) throws MingoParserException {
+        MingoContextConfig mingoContextConfig = new MingoContextConfig();
+        Node configNode = getFirstTagOccurrence(element, CONFIG_TAG);
+        if (configNode != null && configNode.hasChildNodes()) {
+            getChildNodes(configNode).forEach((childNode) -> {
+                if (BENCHMARK_TAG.equals(childNode.getNodeName())) {
+                    mingoContextConfig.setBenchmarkEnabled(getAttributeBoolean(childNode, BENCHMARK_ENABLED_ATTR));
+                }
+            });
+        }
+        return mingoContextConfig;
     }
 
     /**

@@ -4,6 +4,10 @@
          xsi:noNamespaceSchemaLocation="../../../../main/resources/xml-schema/context.xsd">
 
 
+    <config>
+        <benchmark enabled="false"/>
+    </config>
+
     <querySetConfig>
         <querySet path="/mingo/test/testQuerySet.xml"/>
         <querySet path="/mingo/test/second/testQuerySet2.xml"/>

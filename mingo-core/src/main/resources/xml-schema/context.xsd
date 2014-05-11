@@ -45,6 +45,18 @@
         </xs:complexType>
     </xs:element>
 
+    <xs:element name="config">
+        <xs:complexType mixed="true">
+            <xs:sequence>
+                <xs:element ref="benchmark" minOccurs="0" maxOccurs="1"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="benchmark">
+        <xs:complexType>
+            <xs:attribute name="enabled" use="optional" default="false" type="xs:boolean"/>
+        </xs:complexType>
+    </xs:element>
 
     <xs:element name="defaultConverter">
         <xs:complexType>
@@ -103,6 +115,7 @@
     <xs:element name="context">
         <xs:complexType mixed="true">
             <xs:sequence>
+                <xs:element ref="config" minOccurs="0" maxOccurs="1"/>
                 <xs:element ref="querySetConfig" minOccurs="1" maxOccurs="1"/>
                 <xs:element ref="queryExecutor" minOccurs="0" maxOccurs="1"/>
                 <!--todo remove it, redundant conf-->

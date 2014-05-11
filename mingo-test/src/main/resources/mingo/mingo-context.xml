@@ -2,6 +2,10 @@
 
 <context>
 
+    <config>
+        <benchmark enabled="true"/>
+    </config>
+
     <querySetConfig>
         <querySet path="/mingo/reviewQuerySet.xml"/>
     </querySetConfig>

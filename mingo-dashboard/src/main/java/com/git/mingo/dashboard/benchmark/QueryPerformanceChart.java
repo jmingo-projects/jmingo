@@ -60,12 +60,12 @@ public class QueryPerformanceChart extends AbstractVaadinChartExample {
         //yAxis.setPlotLines(new PlotLine(0, 1, new SolidColor("#808080")));
 
         configuration.getTooltip().setEnabled(true);
-        //configuration.getLegend().setEnabled(false);
+       //configuration.getLegend().setEnabled(false);
 
         configuration
                 .getTooltip()
                 .setFormatter(
-                        "''+ this.series.name +''+ Highcharts.dateFormat('%e. %b', this.x) +': '+ this.y +' ms'");
+                        "''+ this.series.name +''+ ': '+ this.y +' ms'");
 
         List<DataSeries> dataSeriesList = new ArrayList<>();
         client.getQueriesNames().forEach(queryName -> {

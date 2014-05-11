@@ -20,6 +20,8 @@ import com.mingo.query.QueryExecutorType;
  */
 public class ContextConfiguration {
 
+    private MingoContextConfig mingoContextConfig;
+
     private QuerySetConfiguration querySetConfiguration;
 
     private QueryExecutorType queryExecutorType = QueryExecutorType.MONGO_DRIVER;
@@ -39,6 +41,14 @@ public class ContextConfiguration {
     private String parameterPrefix;
 
     private MongoConfig mongoConfig;
+
+    public MingoContextConfig getMingoContextConfig() {
+        return mingoContextConfig;
+    }
+
+    public void setMingoContextConfig(MingoContextConfig mingoContextConfig) {
+        this.mingoContextConfig = mingoContextConfig;
+    }
 
     /**
      * Gets query set configuration.
