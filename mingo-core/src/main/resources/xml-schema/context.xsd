@@ -21,6 +21,24 @@
         </xs:restriction>
     </xs:simpleType>
 
+    <xs:simpleType name="writeConcern">
+        <xs:restriction base="xs:normalizedString">
+            <xs:enumeration value="ACKNOWLEDGED"/>
+            <xs:enumeration value="ERRORS_IGNORED"/> <!-- Deprecated. -->
+            <xs:enumeration value="FSYNC_SAFE"/>
+            <xs:enumeration value="FSYNCED"/>
+            <xs:enumeration value="JOURNAL_SAFE"/>
+            <xs:enumeration value="JOURNALED"/>
+            <xs:enumeration value="MAJORITY"/>
+            <xs:enumeration value="NONE"/> <!-- Deprecated. -->
+            <xs:enumeration value="NORMAL"/>
+            <xs:enumeration value="REPLICA_ACKNOWLEDGED"/>
+            <xs:enumeration value="REPLICAS_SAFE"/>
+            <xs:enumeration value="SAFE"/>
+            <xs:enumeration value="UNACKNOWLEDGED"/>
+        </xs:restriction>
+    </xs:simpleType>
+
     <!-- definition of attributes -->
     <xs:attribute name="id" type="xs:ID"/>
 
@@ -108,7 +126,7 @@
             <xs:attribute name="host" type="xs:string" use="optional" default="localhost"/>
             <xs:attribute name="port" type="xs:integer" use="optional" default="27017"/>
             <xs:attribute name="dbName" type="xs:string" use="required"/>
-            <xs:attribute name="writeConcern" type="xs:string" use="optional" default="NORMAL"/>
+            <xs:attribute name="writeConcern" type="writeConcern" use="optional" default="NORMAL"/>
             <!-- todo iss5-->
         </xs:complexType>
     </xs:element>

@@ -12,7 +12,7 @@
     <queryExecutor type="MongoDriver"/>
     <queryAnalyzer type="jexl"/>
 
-    <mongo port="27017" host="localhost" dbName="dbTest">
+    <mongo port="27017" host="localhost" dbName="dbTest" writeConcern="ACKNOWLEDGED">
         <options>
             <option name="connectTimeout" value="100"/>
         </options>
