@@ -88,7 +88,7 @@ public class ContextConfigurationParser implements Parser<ContextConfiguration> 
     private static final String CONVERTERS_TAG = "converters";
     private static final String CONVERTERS_PACKAGE_ATTR = "package";
     private static final String CONVERTER_CLASS_ATTR = "class";
-
+    private static final String WRITE_CONCERN_ATTR = "writeConcern";
     private static final String OPTIONS_TAG = "options";
     private static final String OPTION_TAG = "option";
 
@@ -247,11 +247,12 @@ public class ContextConfigurationParser implements Parser<ContextConfiguration> 
             String databaseHost = getAttributeString(mongoNode, MONGO_HOST_ATTR, MongoConfig.DEF_HOST);
             int databasePort = getAttributeInt(mongoNode, MONGO_PORT_ATTR, MongoConfig.DEF_PORT);
             String dbName = getAttributeString(mongoNode, "dbName");
+            String writeConcern = getAttributeString(mongoNode, WRITE_CONCERN_ATTR);
             Validate.notBlank(dbName, "attribute 'dbName' is required");
             assertPositive(databasePort, "wrong value for database port. database port must be gt 0");
             Validate.notBlank(databaseHost, "database host cannot be null or empty");
             MongoConfig.Builder mongoConfigBuilder = MongoConfig.builder().dbPort(databasePort)
-                    .dbHost(databaseHost).dbName(dbName);
+                    .dbHost(databaseHost).dbName(dbName).writeConcern(writeConcern);
             // parse options
             getAllChildNodes(mongoNode, OPTION_TAG).forEach(optNode -> {
                 if (OPTION_TAG.equals(optNode.getNodeName())) {

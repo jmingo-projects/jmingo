@@ -29,6 +29,7 @@ public class MongoConfig {
     private String databaseHost;
     private int databasePort;
     private String dbName;
+    private String writeConcern;
 
     private Map<String, String> options;
 
@@ -52,6 +53,10 @@ public class MongoConfig {
         return dbName;
     }
 
+    public String getWriteConcern() {
+        return writeConcern;
+    }
+
     public Map<String, String> getOptions() {
         return options;
     }
@@ -61,12 +66,14 @@ public class MongoConfig {
         this.databasePort = builder.databasePort;
         this.dbName = builder.dbName;
         this.options = builder.options;
+        this.writeConcern = builder.writeConcern;
     }
 
     public static class Builder {
         private String databaseHost = DEF_HOST;
         private int databasePort = DEF_PORT;
         private String dbName;
+        private String writeConcern;
         private Map<String, String> options = new HashMap<>();
 
         public Builder dbHost(String host) {
@@ -81,6 +88,11 @@ public class MongoConfig {
 
         public Builder dbName(String db) {
             this.dbName = db;
+            return this;
+        }
+
+        public Builder writeConcern(String writeConcern) {
+            this.writeConcern = writeConcern;
             return this;
         }
 

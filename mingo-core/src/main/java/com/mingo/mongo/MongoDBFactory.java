@@ -24,6 +24,7 @@ import com.mongodb.Mongo;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
 import com.mongodb.ServerAddress;
+import com.mongodb.WriteConcern;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -70,7 +71,7 @@ public class MongoDBFactory {
             MongoClientOptions options = options(config);
 
             mongo = new MongoClient(new ServerAddress(config.getDatabaseHost(), config.getDatabasePort()), options);
-
+            mongo.setWriteConcern(WriteConcern.valueOf(config.getWriteConcern()));
         } catch (UnknownHostException | InvocationTargetException | IllegalAccessException e) {
             throw Throwables.propagate(e);
         }
