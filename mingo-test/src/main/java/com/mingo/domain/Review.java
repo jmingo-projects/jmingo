@@ -1,7 +1,7 @@
 package com.mingo.domain;
 
 
-import com.mingo.annotation.Document;
+import com.mingo.document.annotation.Document;
 
 import java.util.ArrayList;
 import java.util.List;

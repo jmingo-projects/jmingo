@@ -1,7 +1,7 @@
 package com.mingo.mapping.marshall;
 
-import com.mingo.annotation.Document;
-import com.mingo.annotation.Id;
+import com.mingo.document.annotation.Document;
+import com.mingo.document.annotation.Id;
 
 @Document
 public class Property {

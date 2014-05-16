@@ -1,6 +1,8 @@
 package com.mingo.mapping.marshall;
 
 
+import com.mingo.document.id.IdFieldModifier;
+import com.mingo.document.id.generator.factory.DefaultIdGeneratorFactory;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
@@ -14,7 +16,7 @@ public class IdFieldModifierTest {
 
     @Test
     public void testGenerateId() {
-        IdFieldModifier idFieldModifier = new IdFieldModifier();
+        IdFieldModifier idFieldModifier = new IdFieldModifier(new DefaultIdGeneratorFactory());
         //given
         Folder folder = new Folder("root");
         Property[] rootFolderProperties = new Property[]{new Property("readOnly", "true")};

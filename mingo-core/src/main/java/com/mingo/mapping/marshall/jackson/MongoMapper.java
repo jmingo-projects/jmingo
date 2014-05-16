@@ -15,30 +15,26 @@
  */
 package com.mingo.mapping.marshall.jackson;
 
-import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Maps;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.mingo.mapping.convert.mongo.type.deserialize.MongoDateDeserializer;
+import com.mingo.mapping.convert.mongo.type.deserialize.ObjectIdDeserializer;
+import com.mingo.mapping.convert.mongo.type.serialize.BsonDateSerializer;
+import com.mingo.mapping.convert.mongo.type.serialize.ObjectIdSerializer;
+import com.mingo.mapping.marshall.jackson.mixin.DBObjectMixIn;
 import com.mongodb.BasicDBObject;
-import org.bson.BSONObject;
+import org.bson.types.ObjectId;
 
-import java.util.Map;
+import java.util.Date;
 
 public class MongoMapper extends ObjectMapper {
 
-    private Map<Class<? extends BSONObject>, Class<?>> bsonObjectMixIns = Maps.newHashMap();
-
-    protected void _defineMixIns() {
-        bsonObjectMixIns.put(BasicDBObject.class, DBObjectMixIn.class);
-    }
-
     public MongoMapper() {
-        _defineMixIns();
-        //register mix in
-        bsonObjectMixIns.forEach(this::addMixInAnnotations);
+        addMixInAnnotations();
         getSerializationConfig().getDefaultVisibilityChecker()
                 .withFieldVisibility(JsonAutoDetect.Visibility.ANY)
                 .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
@@ -47,17 +43,17 @@ public class MongoMapper extends ObjectMapper {
         configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
         configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
+        configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+        SimpleModule mongoModule = new SimpleModule();
+        mongoModule.addDeserializer(ObjectId.class, new ObjectIdDeserializer());
+        mongoModule.addSerializer(ObjectId.class, new ObjectIdSerializer());
+        mongoModule.addDeserializer(Date.class, new MongoDateDeserializer());
+        mongoModule.addSerializer(Date.class, new BsonDateSerializer());
+        registerModule(mongoModule);
     }
 
-    public MongoMapper(Module module) {
-        this();
-        registerModule(module);
-    }
-
-
-    public interface DBObjectMixIn {
-        @JsonAnySetter
-        void put(String key, Object value);
+    private void addMixInAnnotations() {
+        addMixInAnnotations(BasicDBObject.class, DBObjectMixIn.class);
     }
 
 }

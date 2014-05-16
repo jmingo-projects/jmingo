@@ -13,22 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.mingo.annotation;
+package com.mingo.document.id.generator.factory;
 
-import com.fasterxml.jackson.annotation.JacksonAnnotationsInside;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
+import com.mingo.document.id.generator.IdGenerator;
 
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
+public interface IdGeneratorFactory {
 
-@Retention(RUNTIME)
-@JacksonAnnotationsInside
-
-@JsonProperty("_id")
-@Inherited
-public @interface Id {
+    IdGenerator create(String strategy, Class<?> type);
 }
-
-

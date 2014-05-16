@@ -13,24 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.mingo.mapping.marshall.jackson;
+package com.mingo.mapping.marshall.jackson.mixin;
 
-import com.mingo.mapping.marshall.BsonMarshaller;
-import org.bson.BSONObject;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
 
-/**
- * Jackson implementation of {@link BsonMarshaller}.
- */
-public class JacksonBsonMarshaller implements BsonMarshaller {
-
-    private MongoMapper mongoMapper;
-
-    public JacksonBsonMarshaller(MongoMapper mongoMapper) {
-        this.mongoMapper = mongoMapper;
-    }
-
-    @Override
-    public <T extends BSONObject> T marshall(Class<T> type, Object pojo) throws RuntimeException {
-        return mongoMapper.convertValue(pojo, type);
-    }
+public interface DBObjectMixIn {
+    @JsonAnySetter
+    void put(String key, Object value);
 }

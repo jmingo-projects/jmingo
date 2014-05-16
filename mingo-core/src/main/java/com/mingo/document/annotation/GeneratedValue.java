@@ -13,24 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.mingo.mapping.marshall.jackson;
+package com.mingo.document.annotation;
 
-import com.mingo.mapping.marshall.BsonMarshaller;
-import org.bson.BSONObject;
+
+import com.mingo.document.id.generator.IdGeneratorStrategy;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * Jackson implementation of {@link BsonMarshaller}.
+ * Used to mark fields which should be set with new identifier generated value.
  */
-public class JacksonBsonMarshaller implements BsonMarshaller {
-
-    private MongoMapper mongoMapper;
-
-    public JacksonBsonMarshaller(MongoMapper mongoMapper) {
-        this.mongoMapper = mongoMapper;
-    }
-
-    @Override
-    public <T extends BSONObject> T marshall(Class<T> type, Object pojo) throws RuntimeException {
-        return mongoMapper.convertValue(pojo, type);
-    }
+@Retention(RUNTIME)
+@Target(ElementType.FIELD)
+@Inherited
+public @interface GeneratedValue {
+    String strategy() default IdGeneratorStrategy.TYPE;
 }

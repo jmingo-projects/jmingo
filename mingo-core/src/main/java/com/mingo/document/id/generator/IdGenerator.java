@@ -13,19 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.mingo.mapping.marshall;
+package com.mingo.document.id.generator;
 
-public class MarshallPreProcessor {
 
-    private IdFieldModifier idFieldModifier = new IdFieldModifier();
+import java.io.Serializable;
 
-    public Object process(Object pojo) {
-        generateId(pojo);
-        return pojo;
-    }
+public interface IdGenerator {
 
-    private void generateId(Object pojo) {
-        idFieldModifier.generateId(pojo);
-    }
-
+    Serializable generate();
 }

@@ -13,19 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.mingo.annotation;
+package com.mingo.document.id.generator;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
 
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import java.util.UUID;
 
-@Retention(RUNTIME)
-@Target(ElementType.TYPE)
-@Inherited
-public @interface Document {
-
-    String collectionName() default "";
+public class UUIDGenerator implements IdGenerator {
+    @Override
+    public String generate() {
+        return UUID.randomUUID().toString();
+    }
 }

@@ -8,9 +8,9 @@ import static org.testng.Assert.assertEquals;
 
 public class JacksonMongoMarshallingTest {
 
-    private BsonMarshaller mongoBsonMarshaller = JacksonBsonMarshallingFactory.getInstance().createMarshaller();
+    private BsonMarshaller mongoBsonMarshaller = new JacksonBsonMarshallingFactory().createMarshaller();
 
-    private BsonUnmarshaller mongoBsonUnmarshaller = JacksonBsonMarshallingFactory.getInstance().createUnmarshaller();
+    private BsonUnmarshaller mongoBsonUnmarshaller = new JacksonBsonMarshallingFactory().createUnmarshaller();
 
     @Test
     public void testMarshall() {

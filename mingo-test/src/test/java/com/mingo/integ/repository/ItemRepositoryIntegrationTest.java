@@ -65,7 +65,7 @@ public class ItemRepositoryIntegrationTest extends CommonIntegrationTest {
 
         Set<Item> expected = Sets.newHashSet(item1);
         Set<Item> saved = Sets.newHashSet(itemRepository.findAfterDate(DateUtils.addDays(new Date(), -2)));
-        assertEquals(expected, saved);
+        assertEquals(saved, expected);
     }
 
     @Test(groups = "integration")

@@ -55,15 +55,9 @@ public class MongoQueryExecutor extends AbstractQueryExecutor implements QueryEx
             .put(QueryType.PLAIN, new PlainQueryStrategy())
             .build();
 
-    private JsonToDBObjectMarshaller jsonToDBObjectMarshaller;
-
-    {
-        jsonToDBObjectMarshaller = MongoBsonMarshallingFactory.getInstance()
-            .createJsonToDbObjectMarshaller();
-    }
+    private static final JsonToDBObjectMarshaller JSON_TO_DB_OBJECT_MARSHALLER = new MongoBsonMarshallingFactory().createJsonToDbObjectMarshaller();
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoQueryExecutor.class);
-
 
     public MongoQueryExecutor(MongoDBFactory mongoDBFactory, QueryManager queryManager, ELEngine queryAnalyzer,
                               ConverterService converterService) {
@@ -147,7 +141,7 @@ public class MongoQueryExecutor extends AbstractQueryExecutor implements QueryEx
         @Override
         <T> List<T> queryForList(QueryStatement queryStatement, Class<T> type) {
             DBCollection dbCollection = getDbCollection(queryStatement.getCollectionName());
-            BasicDBList query = (BasicDBList) jsonToDBObjectMarshaller.marshall(queryStatement.getPreparedQuery(),
+            BasicDBList query = (BasicDBList) JSON_TO_DB_OBJECT_MARSHALLER.marshall(queryStatement.getPreparedQuery(),
                 queryStatement.getParameters());
             AggregationOutput aggregationOutput = performAggregationQuery(dbCollection, query);
             BasicDBList source = getAsBasicDBList(aggregationOutput);
@@ -159,7 +153,7 @@ public class MongoQueryExecutor extends AbstractQueryExecutor implements QueryEx
         @Override
         <T> T queryForObject(QueryStatement queryStatement, Class<T> type) {
             DBCollection dbCollection = getDbCollection(queryStatement.getCollectionName());
-            BasicDBList query = (BasicDBList) jsonToDBObjectMarshaller.marshall(queryStatement.getPreparedQuery(),
+            BasicDBList query = (BasicDBList) JSON_TO_DB_OBJECT_MARSHALLER.marshall(queryStatement.getPreparedQuery(),
                 queryStatement.getParameters());
             AggregationOutput aggregationOutput = performAggregationQuery(dbCollection, query);
             BasicDBList result = getAsBasicDBList(aggregationOutput);
@@ -175,7 +169,7 @@ public class MongoQueryExecutor extends AbstractQueryExecutor implements QueryEx
         @Override
         <T> List<T> queryForList(QueryStatement queryStatement, Class<T> type) {
             DBCollection dbCollection = getDbCollection(queryStatement.getCollectionName());
-            DBObject query = jsonToDBObjectMarshaller.marshall(queryStatement.getPreparedQuery(),
+            DBObject query = JSON_TO_DB_OBJECT_MARSHALLER.marshall(queryStatement.getPreparedQuery(),
                 queryStatement.getParameters());
             DBCursor source = dbCollection.find(query);
             List<T> result = convertList(type, source, queryStatement.getConverterClass(),
@@ -186,7 +180,7 @@ public class MongoQueryExecutor extends AbstractQueryExecutor implements QueryEx
         @Override
         <T> T queryForObject(QueryStatement queryStatement, Class<T> type) {
             DBCollection dbCollection = getDbCollection(queryStatement.getCollectionName());
-            DBObject query = jsonToDBObjectMarshaller.marshall(queryStatement.getPreparedQuery(),
+            DBObject query = JSON_TO_DB_OBJECT_MARSHALLER.marshall(queryStatement.getPreparedQuery(),
                 queryStatement.getParameters());
             DBObject result = dbCollection.findOne(query);
             return convertOne(type, result, queryStatement.getConverterClass(), queryStatement.getConverterMethod());

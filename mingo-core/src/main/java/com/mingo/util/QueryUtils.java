@@ -13,8 +13,6 @@ import org.apache.commons.lang3.Validate;
 
 import java.io.IOException;
 
-import static com.mingo.util.StringUtils.removeLineBreaks;
-import static org.apache.commons.lang3.StringUtils.trim;
 import static org.slf4j.helpers.MessageFormatter.format;
 
 /**

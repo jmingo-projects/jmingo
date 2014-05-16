@@ -15,9 +15,12 @@
  */
 package com.mingo;
 
+import com.mingo.document.id.IdFieldModifier;
+import com.mingo.document.id.generator.factory.IdGeneratorFactory;
 import com.mingo.executor.QueryExecutor;
 import com.mingo.mapping.convert.ConverterService;
 import com.mingo.mapping.marshall.BsonMarshaller;
+import com.mingo.mapping.marshall.BsonMarshallingFactory;
 import com.mingo.mapping.marshall.jackson.JacksonBsonMarshallingFactory;
 import com.mingo.mongo.MongoDBFactory;
 import com.mingo.query.Criteria;
@@ -44,12 +47,17 @@ public class MingoTemplate {
     private QueryExecutor queryExecutor;
     private MongoDBFactory mongoDBFactory;
     private ConverterService converterService;
-    private BsonMarshaller bsonMarshaller = JacksonBsonMarshallingFactory.getInstance().createMarshaller();
+    private BsonMarshallingFactory bsonMarshallingFactory = new JacksonBsonMarshallingFactory();
+    private BsonMarshaller bsonMarshaller = bsonMarshallingFactory.createMarshaller();
 
-    public MingoTemplate(QueryExecutor queryExecutor, MongoDBFactory mongoDBFactory, ConverterService converterService) {
+    private IdFieldModifier idFieldModifier;
+
+    public MingoTemplate(QueryExecutor queryExecutor, MongoDBFactory mongoDBFactory, ConverterService converterService,
+                         IdGeneratorFactory idGeneratorFactory) {
         this.queryExecutor = queryExecutor;
         this.mongoDBFactory = mongoDBFactory;
         this.converterService = converterService;
+        this.idFieldModifier = new IdFieldModifier(idGeneratorFactory);
     }
 
     /**
@@ -72,19 +80,18 @@ public class MingoTemplate {
 
     /**
      * Inserts the object to the collection for the entity type of the object to save.
-     * as the collection name is the {@link com.mingo.annotation.Document#collectionName()} or simple class name
+     * as the collection name is the {@link com.mingo.document.annotation.Document#collectionName()} or simple class name
      * of stored object if collection name isn't explicitly defined in @Document annotation.
      *
      * @param objectToInsert the object to store in the collection
      */
     public void insert(Object objectToInsert) {
-        assertDocument(objectToInsert);
         String collectionName = getCollectionName(objectToInsert);
         insert(objectToInsert, collectionName);
     }
 
     public void insert(Object... objectsToInsert) {
-        for(Object objectToInsert : objectsToInsert) {
+        for (Object objectToInsert : objectsToInsert) {
             insert(objectToInsert);
         }
     }
@@ -98,6 +105,7 @@ public class MingoTemplate {
     public void insert(Object objectToInsert, String collectionName) {
         assertDocument(objectToInsert);
         Validate.notBlank(collectionName, "collectionName cannot be null or empty");
+        idFieldModifier.generateId(objectToInsert);
         DBObject dbObject = bsonMarshaller.marshall(BasicDBObject.class, objectToInsert);
         mongoDBFactory.getDB().getCollection(collectionName).insert(dbObject);
     }
@@ -195,10 +203,10 @@ public class MingoTemplate {
     /**
      * Removes the object from the collection.
      *
-     * @param object the object to remove
+     * @param object     the object to remove
      * @param collection the collection name
      */
-    public WriteResult remove(Object object, String collection){
+    public WriteResult remove(Object object, String collection) {
         assertDocument(object);
         Object idValue = getIdValue(object);
         Criteria criteria = Criteria.whereId(idValue);
@@ -219,10 +227,10 @@ public class MingoTemplate {
     /**
      * Removes all documents from the collection that is used to store the instances of documentClass.
      *
-     * @param criteria the query criteria
+     * @param criteria      the query criteria
      * @param documentClass the document class
      */
-    public <T> void remove(Criteria criteria, Class<T> documentClass){
+    public <T> void remove(Criteria criteria, Class<T> documentClass) {
         WriteResult writeResult = remove(criteria.query(), getCollectionName(documentClass));
         writeResult.getField("");
     }

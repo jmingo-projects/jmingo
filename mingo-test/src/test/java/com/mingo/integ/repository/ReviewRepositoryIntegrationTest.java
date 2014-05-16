@@ -76,7 +76,7 @@ public class ReviewRepositoryIntegrationTest extends CommonIntegrationTest {
         assertEquals(Integer.valueOf(1), count.get("java"));
     }
 
-    @Test(groups = "integration")
+    //@Test(groups = "benchmark")
     public void testBenchmark() throws InterruptedException {
         //given
         Review reviewNotModerated1 = new Review();

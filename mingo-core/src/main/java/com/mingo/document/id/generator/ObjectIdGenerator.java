@@ -13,24 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.mingo.mapping.marshall.jackson;
+package com.mingo.document.id.generator;
 
-import com.mingo.mapping.marshall.BsonMarshaller;
-import org.bson.BSONObject;
 
-/**
- * Jackson implementation of {@link BsonMarshaller}.
- */
-public class JacksonBsonMarshaller implements BsonMarshaller {
+import org.bson.types.ObjectId;
 
-    private MongoMapper mongoMapper;
-
-    public JacksonBsonMarshaller(MongoMapper mongoMapper) {
-        this.mongoMapper = mongoMapper;
-    }
-
+public class ObjectIdGenerator implements IdGenerator {
     @Override
-    public <T extends BSONObject> T marshall(Class<T> type, Object pojo) throws RuntimeException {
-        return mongoMapper.convertValue(pojo, type);
+    public ObjectId generate() {
+        return new ObjectId();
     }
 }

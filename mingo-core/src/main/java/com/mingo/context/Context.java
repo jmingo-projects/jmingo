@@ -20,6 +20,8 @@ import com.google.common.collect.Lists;
 import com.mingo.MingoTemplate;
 import com.mingo.benchmark.BenchmarkService;
 import com.mingo.config.ContextConfiguration;
+import com.mingo.document.id.generator.factory.DefaultIdGeneratorFactory;
+import com.mingo.document.id.generator.factory.IdGeneratorFactory;
 import com.mingo.exceptions.ContextInitializationException;
 import com.mingo.executor.MongoQueryExecutor;
 import com.mingo.executor.QueryExecutor;
@@ -49,6 +51,7 @@ public class Context {
     private QueryManager queryManager;
 
     private ContextConfiguration config;
+    private IdGeneratorFactory idGeneratorFactory = new DefaultIdGeneratorFactory();
     private MongoDBFactory mongoDBFactory;
     private QueryExecutor queryExecutor;
     private MingoTemplate mingoTemplate;
@@ -90,6 +93,10 @@ public class Context {
 
     public static Context getCurrent() {
         return currentContext.get();
+    }
+
+    public IdGeneratorFactory getIdGeneratorFactory() {
+        return idGeneratorFactory;
     }
 
     public ELEngine getQueryAnalyzer() {
@@ -152,7 +159,7 @@ public class Context {
                 queryExecutor = new QueryExecutorBenchmark(queryExecutor);
             }
 
-            mingoTemplate = new MingoTemplate(queryExecutor, mongoDBFactory, converterService);
+            mingoTemplate = new MingoTemplate(queryExecutor, mongoDBFactory, converterService, idGeneratorFactory);
         } catch (Throwable e) {
             throw new ContextInitializationException(e);
         }

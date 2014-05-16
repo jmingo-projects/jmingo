@@ -65,6 +65,4 @@ public class MongoJsonToDBObjectMarshaller extends AbstractJsonToBsonMarshaller<
             return simpleObjectReplacementCallback.doReplace(source);
         }
     }
-
-
 }

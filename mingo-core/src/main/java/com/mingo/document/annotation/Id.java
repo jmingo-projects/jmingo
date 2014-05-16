@@ -13,20 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.mingo.mapping.marshall.jackson;
+package com.mingo.document.annotation;
 
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.mingo.mapping.convert.mongo.type.deserialize.ObjectIdDeserializer;
-import com.mingo.mapping.convert.mongo.type.serialize.ObjectIdSerializer;
-import org.bson.types.ObjectId;
+import com.fasterxml.jackson.annotation.JacksonAnnotationsInside;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class MongoBsonModel extends SimpleModule {
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
 
-    @Override
-    public void setupModule(SetupContext context) {
-        super.setupModule(context);
-        addDeserializer(ObjectId.class, new ObjectIdDeserializer());
-        addSerializer(ObjectId.class, new ObjectIdSerializer());
-    }
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
+@Retention(RUNTIME)
+@JacksonAnnotationsInside
+
+@JsonProperty("_id")
+@Inherited
+public @interface Id {
 }
+
+

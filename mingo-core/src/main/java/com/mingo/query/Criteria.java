@@ -29,7 +29,8 @@ public class Criteria {
     private boolean multi;
     private boolean upsert;
     private Map<String, Object> parameters = Maps.newHashMap();
-    private JsonToDBObjectMarshaller jsonToDBObjectMarshaller = MongoBsonMarshallingFactory.getInstance().createJsonToDbObjectMarshaller();
+    private static final JsonToDBObjectMarshaller JSON_TO_DB_OBJECT_MARSHALLER = new MongoBsonMarshallingFactory()
+            .createJsonToDbObjectMarshaller();
 
     public Criteria(String queryTemplate) {
         this.queryTemplate = queryTemplate;
@@ -72,7 +73,7 @@ public class Criteria {
     }
 
     public DBObject query(){
-       return jsonToDBObjectMarshaller.marshall(queryTemplate, parameters);
+       return JSON_TO_DB_OBJECT_MARSHALLER.marshall(queryTemplate, parameters);
     }
 
 }

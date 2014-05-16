@@ -1,13 +1,3 @@
-package com.mingo.mapping.convert;
-
-import com.mingo.mapping.marshall.BsonUnmarshaller;
-import com.mingo.mapping.marshall.jackson.JacksonBsonMarshallingFactory;
-import com.mongodb.DBObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import static com.mingo.mapping.convert.ConversionUtils.getFirstElement;
-
 /**
  * Copyright 2012-2013 The Mingo Team
  * <p>
@@ -22,16 +12,26 @@ import static com.mingo.mapping.convert.ConversionUtils.getFirstElement;
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * <p>
+ */
+package com.mingo.mapping.convert;
+
+import com.mingo.mapping.marshall.BsonUnmarshaller;
+import com.mingo.mapping.marshall.jackson.JacksonBsonMarshallingFactory;
+import com.mongodb.DBObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import static com.mingo.mapping.convert.ConversionUtils.getFirstElement;
+
+/**
  * Default implementation of {@link Converter} interface.
  *
  * @param <T> the type of the class modeled by this {@code Class} object.
  */
 public class DefaultConverter<T> implements Converter<T> {
 
-    private BsonUnmarshaller mongoBsonUnmarshaller = JacksonBsonMarshallingFactory.getInstance().createUnmarshaller();
+    private static final BsonUnmarshaller BSON_UNMARSHALLER = new JacksonBsonMarshallingFactory().createUnmarshaller();
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultConverter.class);
-
 
     /**
      * {@inheritDoc}
@@ -41,7 +41,7 @@ public class DefaultConverter<T> implements Converter<T> {
         LOGGER.debug("converts {} in {}", source, type);
         T result;
         source = getFirstElement(source);
-        result = mongoBsonUnmarshaller.unmarshall(type, source);
+        result = BSON_UNMARSHALLER.unmarshall(type, source);
         return result;
     }
 

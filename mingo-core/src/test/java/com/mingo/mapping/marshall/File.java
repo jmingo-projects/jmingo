@@ -1,15 +1,16 @@
 package com.mingo.mapping.marshall;
 
-import com.mingo.annotation.AutoGenerate;
-import com.mingo.annotation.Document;
-import com.mingo.annotation.Id;
+import com.mingo.document.annotation.Document;
+import com.mingo.document.annotation.GeneratedValue;
+import com.mingo.document.annotation.Id;
+import com.mingo.document.id.generator.IdGeneratorStrategy;
 import org.bson.types.ObjectId;
 
 @Document
 public class File {
 
     @Id
-    @AutoGenerate
+    @GeneratedValue(strategy = IdGeneratorStrategy.OBJECT_ID)
     private ObjectId id;
 
     private String name;
