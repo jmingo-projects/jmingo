@@ -34,16 +34,16 @@ public class DefaultIdGeneratorFactory implements IdGeneratorFactory {
     private void register() {
         IdGenerator uuidGenerator = new UUIDGenerator();
         IdGenerator objectIdGenerator = new ObjectIdGenerator();
-        IdGenerator snowflakeGenerator = SnowflakeGenerator.getInstance();
+        //IdGenerator snowflakeGenerator = SnowflakeGenerator.getInstance();
         register(IdGeneratorStrategy.OBJECT_ID, objectIdGenerator);
         register(IdGeneratorStrategy.UUID, uuidGenerator);
-        register(IdGeneratorStrategy.SNOWFLAKE, snowflakeGenerator);
+        //register(IdGeneratorStrategy.SNOWFLAKE, snowflakeGenerator);
         //don't register IdGeneratorStrategy.TYPE because it's used to find generator by field type
 
         register(ObjectId.class, objectIdGenerator);
         register(String.class, uuidGenerator);
-        register(Long.class, snowflakeGenerator);
-        register(Long.TYPE, snowflakeGenerator);
+        //register(Long.class, snowflakeGenerator);
+        //register(Long.TYPE, snowflakeGenerator);
     }
 
     public DefaultIdGeneratorFactory() {

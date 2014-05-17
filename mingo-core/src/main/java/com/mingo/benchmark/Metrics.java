@@ -21,10 +21,27 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import java.io.Serializable;
 import java.util.concurrent.TimeUnit;
 
-public class Metrics implements Serializable{
+/**
+ * Represents information about profiling.
+ */
+public class Metrics implements Serializable {
+    /**
+     * name of metrics, for example name of method or query name.
+     */
     private final String name;
+    /**
+     * profiling start time.
+     */
     private final long startTime;
+    /**
+     * execution time.
+     */
     private final long executionTime;
+
+    /**
+     * Represents time durations at a given unit of
+     * granularity.
+     */
     private final TimeUnit timeUnit;
 
     public Metrics(Builder builder) {
@@ -50,29 +67,32 @@ public class Metrics implements Serializable{
         return timeUnit;
     }
 
+    /**
+     * Simple builder for {@link Metrics}.
+     */
     public static class Builder {
         private String name = "";
         private long startTime = 0L;
         private long executionTime = 0L;
         private TimeUnit timeUnit = TimeUnit.MILLISECONDS;
 
-        public Builder name(String name) {
-            this.name = name;
+        public Builder name(String pName) {
+            this.name = pName;
             return this;
         }
 
-        public Builder startTime(long startTime) {
-            this.startTime = startTime;
+        public Builder startTime(long pStartTime) {
+            this.startTime = pStartTime;
             return this;
         }
 
-        public Builder executionTime(long executionTime) {
-            this.executionTime = executionTime;
+        public Builder executionTime(long pExecutionTime) {
+            this.executionTime = pExecutionTime;
             return this;
         }
 
-        public Builder timeUnit(TimeUnit timeUnit) {
-            this.timeUnit = timeUnit;
+        public Builder timeUnit(TimeUnit pTimeUnit) {
+            this.timeUnit = pTimeUnit;
             return this;
         }
 

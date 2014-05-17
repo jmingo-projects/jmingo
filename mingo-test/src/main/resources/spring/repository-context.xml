@@ -10,7 +10,7 @@
     <import resource="repository-mongo-config.xml"/>
     <import resource="mingo-context-config.xml"/>
     <context:component-scan base-package="com.mingo.repository"/>
-
+    <context:component-scan base-package="com.mingo.performance"/>
     <import resource="classpath:META-INF/spring/benchmark-context.xml"/>
 
 </beans>

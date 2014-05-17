@@ -18,9 +18,30 @@ package com.mingo.benchmark;
 
 import com.mingo.context.Context;
 
+/**
+ * This interface provides necessary methods that are allowed to
+ * react as needed when some code was profiled, for instance save metrics in a file or display it as graphic.
+ */
 public interface BenchmarkService {
 
+    /**
+     * This method invokes immediately after {@link com.mingo.context.Context#addBenchmarkService(BenchmarkService)}
+     * methods invocation.
+     *
+     * @param context the mingo context
+     */
     void init(Context context);
+
+    /**
+     * Mingo invokes this method each time when some code was profiled,
+     * for instance it can be metering method execution time and etc.
+     *
+     * @param metric
+     */
     void submit(Metrics metric);
+
+    /**
+     * This method is called when {@link Context#shutdown()} is invoked.
+     */
     void destroy();
 }

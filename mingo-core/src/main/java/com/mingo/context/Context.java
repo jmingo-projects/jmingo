@@ -37,8 +37,10 @@ import com.mingo.query.el.ELEngine;
 import com.mingo.query.el.ELEngineFactory;
 import com.mingo.util.FileUtils;
 import com.mongodb.Mongo;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Collections;
 import java.util.List;
 
 import static com.mingo.parser.xml.dom.ParserFactory.ParseComponent.CONTEXT;
@@ -64,30 +66,28 @@ public class Context {
 
     private static ThreadLocal<Context> currentContext = new InheritableThreadLocal<>();
 
-    @Deprecated
-    private Context(String contextPath) {
-        initialize(contextPath, null);
-    }
-
-    @Deprecated
-    private Context(String contextPath, Mongo mongo) {
-        initialize(contextPath, mongo);
-    }
-
     public static Context create(String contextPath) {
-        Context context = new Context(contextPath);
-        currentContext.set(context);
-        return context;
+        return create(contextPath, null);
     }
 
     public static Context create(String contextPath, Mongo mongo) {
-        Context context = new Context(contextPath, mongo);
+        return create(contextPath, mongo, Collections.emptyList());
+    }
+
+    public static Context create(String contextPath, Mongo mongo, List<BenchmarkService> benchmarkServices) {
+        Context context = new Context();
+        context.initialize(contextPath, mongo);
         currentContext.set(context);
+        if (CollectionUtils.isNotEmpty(benchmarkServices)) {
+            benchmarkServices.forEach(service -> {
+                context.addBenchmarkService(service);
+                service.init(context);
+            });
+        }
         return context;
     }
 
     public void addBenchmarkService(BenchmarkService service) {
-        service.init(this);
         benchmarkServices.add(service);
     }
 

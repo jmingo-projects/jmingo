@@ -7,11 +7,20 @@
 
     <!--Mingo configuration-->
 
-    <bean id="mingoContextFactory" class="com.mingo.config.MingoTemplateFactory"/>
-
-    <bean id="mingoTemplate" class="com.mingo.MingoTemplate" depends-on="mongo" factory-bean="mingoContextFactory" factory-method="createMingoTemplate">
+    <bean id="mingoContext" class="com.mingo.context.Context" factory-method="create">
         <constructor-arg value="/mingo/mingo-context.xml"/>
         <constructor-arg ref="mongo"/>
+        <constructor-arg>
+            <list>
+                <ref bean="nettyBenchmarkService"/>
+                <ref bean="benchmarkLoggerService"/>
+            </list>
+        </constructor-arg>
     </bean>
+
+    <bean id="mingoTemplate" class="com.mingo.MingoTemplate" depends-on="mingoContext"
+          factory-bean="mingoContext" factory-method="getMingoTemplate">
+    </bean>
+
 
 </beans>
