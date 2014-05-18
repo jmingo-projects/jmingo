@@ -26,7 +26,7 @@ public class ReviewRepository extends AbstractRepository<Review> implements IBas
 
     public List<Review> findByModerationStatuses(Set<ModerationStatus> statuses) {
         Map<String, Object> parameters = Maps.newHashMap();
-        parameters.put("statuses", Iterables.transform(statuses, Enum::name));
+        parameters.put("statuses", statuses);
         return mingoTemplate.queryForList(Review.COLLECTION_NAME + ".getByStatuses", Review.class, parameters);
     }
 

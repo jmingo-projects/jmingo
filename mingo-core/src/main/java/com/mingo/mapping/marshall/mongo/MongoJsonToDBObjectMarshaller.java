@@ -27,10 +27,23 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.mongodb.util.JSON;
 import com.mongodb.util.JSONCallback;
+import org.bson.BSON;
 
 import java.util.Map;
 
 public class MongoJsonToDBObjectMarshaller extends AbstractJsonToBsonMarshaller<DBObject> implements JsonToDBObjectMarshaller {
+
+    public MongoJsonToDBObjectMarshaller() {
+
+        // fix for https://jira.mongodb.org/browse/JAVA-268
+        BSON.addEncodingHook(Enum.class, (val) -> {
+            if (val != null) {
+                return ((Enum) val).name();
+            } else {
+                return val;
+            }
+        });
+    }
 
     @Override
     public DBObject marshall(String json, Map<String, Object> parameters) throws MarshallingException {
