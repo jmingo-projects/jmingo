@@ -16,21 +16,20 @@
 package com.mingo.query;
 
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-import com.mingo.mapping.marshall.JsonToDBObjectMarshaller;
-import com.mingo.mapping.marshall.mongo.MongoBsonMarshallingFactory;
-import com.mongodb.DBObject;
 
 import java.util.Map;
 
+/**
+ * This class is used to configure a request for mongodb.
+ */
 public class Criteria {
 
     private String queryTemplate;
     private boolean multi;
     private boolean upsert;
     private Map<String, Object> parameters = Maps.newHashMap();
-    private static final JsonToDBObjectMarshaller JSON_TO_DB_OBJECT_MARSHALLER = new MongoBsonMarshallingFactory()
-            .createJsonToDbObjectMarshaller();
 
     public Criteria(String queryTemplate) {
         this.queryTemplate = queryTemplate;
@@ -49,12 +48,12 @@ public class Criteria {
         return this;
     }
 
-    public  Criteria updateMulti() {
+    public Criteria updateMulti() {
         multi = true;
         return this;
     }
 
-    public  Criteria updateFirst() {
+    public Criteria updateFirst() {
         multi = false;
         return this;
     }
@@ -72,8 +71,11 @@ public class Criteria {
         return upsert;
     }
 
-    public DBObject query(){
-       return JSON_TO_DB_OBJECT_MARSHALLER.marshall(queryTemplate, parameters);
+    public String query() {
+        return queryTemplate;
     }
 
+    public Map<String, Object> getParameters() {
+        return ImmutableMap.copyOf(parameters);
+    }
 }

@@ -21,7 +21,9 @@ import com.mingo.executor.QueryExecutor;
 import com.mingo.mapping.convert.ConverterService;
 import com.mingo.mapping.marshall.BsonMarshaller;
 import com.mingo.mapping.marshall.BsonMarshallingFactory;
+import com.mingo.mapping.marshall.JsonToDBObjectMarshaller;
 import com.mingo.mapping.marshall.jackson.JacksonBsonMarshallingFactory;
+import com.mingo.mapping.marshall.mongo.MongoBsonMarshallingFactory;
 import com.mingo.mongo.MongoDBFactory;
 import com.mingo.query.Criteria;
 import com.mongodb.BasicDBObject;
@@ -39,7 +41,7 @@ import static com.mingo.util.DocumentUtils.getCollectionName;
 import static com.mingo.util.DocumentUtils.getIdValue;
 
 /**
- * Interface that specifies a basic set of Mingo operations.
+ * Class that specifies a basic set of Mingo operations.
  */
 public class MingoTemplate {
 
@@ -48,7 +50,9 @@ public class MingoTemplate {
     private MongoDBFactory mongoDBFactory;
     private ConverterService converterService;
     private BsonMarshallingFactory bsonMarshallingFactory = new JacksonBsonMarshallingFactory();
-    private BsonMarshaller bsonMarshaller = bsonMarshallingFactory.createMarshaller();
+    private BsonMarshallingFactory mongoBsonMarshallingFactory = new MongoBsonMarshallingFactory();
+    private BsonMarshaller jacksonBsonMarshaller = bsonMarshallingFactory.createMarshaller();
+    private JsonToDBObjectMarshaller mongoBsonMarshaller = mongoBsonMarshallingFactory.createJsonToDbObjectMarshaller();
 
     private IdFieldGenerator idFieldModifier;
 
@@ -63,14 +67,15 @@ public class MingoTemplate {
     /**
      * Drops specified collection by name.
      *
-     * @param collectionName the collection name
+     * @param collectionName the collection name to drop
      */
     public void dropCollection(String collectionName) {
         mongoDBFactory.getDB().getCollection(collectionName).drop();
     }
 
     /**
-     * Drops specified collection by name.
+     * Drops specified collection by collection name which is taken from {@link com.mingo.document.annotation.Document#collectionName()}.
+     * If collection name isn't specified in annotation then the simple class name of the given type is used.
      *
      * @param type the type
      */
@@ -79,7 +84,7 @@ public class MingoTemplate {
     }
 
     /**
-     * Inserts the object to the collection for the entity type of the object to save.
+     * Inserts the object to the collection for the document type of the object to save.
      * as the collection name is the {@link com.mingo.document.annotation.Document#collectionName()} or simple class name
      * of stored object if collection name isn't explicitly defined in @Document annotation.
      *
@@ -90,6 +95,11 @@ public class MingoTemplate {
         insert(objectToInsert, collectionName);
     }
 
+    /**
+     * Inserts array of different objects in necessary collections. Method {@link #insert(Object)} is used for each object from array.
+     *
+     * @param objectsToInsert the objects to insert
+     */
     public void insert(Object... objectsToInsert) {
         for (Object objectToInsert : objectsToInsert) {
             insert(objectToInsert);
@@ -97,7 +107,7 @@ public class MingoTemplate {
     }
 
     /**
-     * Inserts the object to the collection for the entity type of the object to save.
+     * Inserts the object to the collection for the document type of the object to save.
      *
      * @param objectToInsert the object to store in the collection
      * @param collectionName the collection name
@@ -106,28 +116,73 @@ public class MingoTemplate {
         assertDocument(objectToInsert);
         Validate.notBlank(collectionName, "collectionName cannot be null or empty");
         idFieldModifier.generateId(objectToInsert);
-        DBObject dbObject = bsonMarshaller.marshall(BasicDBObject.class, objectToInsert);
+        DBObject dbObject = jacksonBsonMarshaller.marshall(BasicDBObject.class, objectToInsert);
         mongoDBFactory.getDB().getCollection(collectionName).insert(dbObject);
     }
 
-    public WriteResult update(Object objectToUpdate, Criteria criteria, Class<?> entityClass) {
+    /**
+     * Updates one or multiple objects from collection that satisfy selection criteria.
+     *
+     * @param objectToUpdate the object to update
+     * @param criteria       the criteria to find objects in the collection that should be updated
+     * @return the result of the operation
+     */
+    public WriteResult update(Object objectToUpdate, Criteria criteria) {
         assertDocument(objectToUpdate);
-        assertDocument(entityClass);
-        DBObject updateDocument = bsonMarshaller.marshall(BasicDBObject.class, objectToUpdate);
-        DBObject queryObject = criteria.query();
-        return update(updateDocument, queryObject, entityClass, criteria.isUpsert(), criteria.isMulti());
+        DBObject updateDocument = jacksonBsonMarshaller.marshall(BasicDBObject.class, objectToUpdate);
+        DBObject queryObject = buildQuery(criteria);
+        return update(updateDocument, queryObject, objectToUpdate.getClass(), criteria.isUpsert(), criteria.isMulti());
     }
 
-    public WriteResult update(DBObject update, DBObject query, Class<?> entityClass, boolean upsert, boolean multi) {
-        assertDocument(entityClass);
-        String collectionName = getCollectionName(entityClass);
+    /**
+     * Updates one or multiple objects from collection that satisfy selection criteria.
+     *
+     * @param objectToUpdate the object to update
+     * @param criteria       the criteria to find objects in the collection that should be updated. the parameters 'multi' and 'upsert' are taken from criteria.
+     * @param collectionName the collection name
+     * @return the result of the operation
+     */
+    public WriteResult update(Object objectToUpdate, Criteria criteria, String collectionName) {
+        assertDocument(objectToUpdate);
+        DBObject updateDocument = jacksonBsonMarshaller.marshall(BasicDBObject.class, objectToUpdate);
+        DBObject queryObject = buildQuery(criteria);
+        return update(updateDocument, queryObject, collectionName, criteria.isUpsert(), criteria.isMulti());
+    }
+
+    /**
+     * Updates one or multiple objects (depends on 'multi' value) from collection that satisfy selection criteria (query).
+     *
+     * @param update        the modifications to apply
+     * @param query         the query that specifies criteria used to update documents
+     * @param documentClass the type of document
+     * @param upsert        if true - inserts document in collection if no documents that satisfy given criteria
+     * @param multi         if true then all documents that satisfy condition will be updated otherwise only first matched
+     * @return the result of the operation
+     */
+    public WriteResult update(DBObject update, DBObject query, Class<?> documentClass, boolean upsert, boolean multi) {
+        assertDocument(documentClass);
+        String collectionName = getCollectionName(documentClass);
         return mongoDBFactory.getDB().getCollection(collectionName).update(query, update, upsert, multi);
     }
 
     /**
-     * Gets list of objects of specified T type from the collection.
+     * Updates one or multiple objects (depends on 'multi' value) from collection that satisfy selection criteria (query).
      *
-     * @param type           the type
+     * @param update         the modifications to apply
+     * @param query          the query that specifies criteria used to update documents
+     * @param collectionName the collection name
+     * @param upsert         if true - inserts document in collection if no documents that satisfy given criteria
+     * @param multi          if true then all documents that satisfy condition will be updated otherwise only first matched
+     * @return the result of the operation
+     */
+    public WriteResult update(DBObject update, DBObject query, String collectionName, boolean upsert, boolean multi) {
+        return mongoDBFactory.getDB().getCollection(collectionName).update(query, update, upsert, multi);
+    }
+
+    /**
+     * Finds all documents from the given collection.
+     *
+     * @param type           the type of document
      * @param collectionName the collection name
      * @return the list of objects of type
      */
@@ -143,49 +198,64 @@ public class MingoTemplate {
     }
 
     /**
-     * Gets list of objects of specified T type from the collection.
+     * Finds all documents from the given collection.
      *
-     * @param type the type
+     * @param type the type of document
      * @return the list of objects of type
      */
     public <T> List<T> findAll(Class<T> type) {
-        String collectionName = getCollectionName(type);
+        assertDocument(type);
+        return findAll(type, getCollectionName(type));
+    }
+
+    /**
+     * Finds document by id.
+     *
+     * @param id   the id value
+     * @param type the document type
+     * @param <T>  type of document
+     * @return document
+     */
+    public <T> T findById(Object id, Class<T> type) {
+        assertDocument(type);
+        Criteria criteria = Criteria.whereId(id);
+        return findOne(criteria, type);
+    }
+
+    /**
+     * Finds first matched document which satisfies the given criteria.
+     *
+     * @param criteria the criteria to find document in the collection
+     * @param type     the document type
+     * @return matched document of type
+     */
+    public <T> T findOne(Criteria criteria, Class<T> type) {
+        T result = null;
+        assertDocument(type);
+        DBObject query = buildQuery(criteria);
+        DBCursor cursor = mongoDBFactory.getDB().getCollection(getCollectionName(type)).find(query);
+        if (cursor.hasNext()) {
+            DBObject dbObject = cursor.iterator().next();
+            result = converterService.lookupConverter(type).convert(type, dbObject);
+        }
+        return result;
+    }
+
+    /**
+     * Finds documents which satisfies given criteria.
+     *
+     * @param criteria the criteria to find documents in the collection
+     * @param type     the document type
+     * @return list of found documents of type
+     */
+    public <T> List<T> find(Criteria criteria, Class<T> type) {
         List<T> result = new ArrayList<>();
-        DBCursor cursor = mongoDBFactory.getDB().getCollection(collectionName).find();
+        assertDocument(type);
+        DBObject query = buildQuery(criteria);
+        DBCursor cursor = mongoDBFactory.getDB().getCollection(getCollectionName(type)).find(query);
         while (cursor.hasNext()) {
             DBObject object = cursor.next();
             T item = converterService.lookupConverter(type).convert(type, object);
-            result.add(item);
-        }
-        return result;
-    }
-
-    public <T> T findById(Object id, Class<T> documentType) {
-        assertDocument(documentType);
-        Criteria criteria = Criteria.whereId(id);
-        return findOne(criteria, documentType);
-    }
-
-    public <T> T findOne(Criteria criteria, Class<T> documentType) {
-        T result = null;
-        assertDocument(documentType);
-        DBObject query = criteria.query();
-        DBCursor cursor = mongoDBFactory.getDB().getCollection(getCollectionName(documentType)).find(query);
-        if (cursor.hasNext()) {
-            DBObject dbObject = cursor.iterator().next();
-            result = converterService.lookupConverter(documentType).convert(documentType, dbObject);
-        }
-        return result;
-    }
-
-    public <T> List<T> find(Criteria criteria, Class<T> documentType) {
-        List<T> result = new ArrayList<>();
-        assertDocument(documentType);
-        DBObject query = criteria.query();
-        DBCursor cursor = mongoDBFactory.getDB().getCollection(getCollectionName(documentType)).find(query);
-        while (cursor.hasNext()) {
-            DBObject object = cursor.next();
-            T item = converterService.lookupConverter(documentType).convert(documentType, object);
             result.add(item);
         }
         return result;
@@ -210,15 +280,16 @@ public class MingoTemplate {
         assertDocument(object);
         Object idValue = getIdValue(object);
         Criteria criteria = Criteria.whereId(idValue);
-        DBObject query = criteria.query();
+        DBObject query = buildQuery(criteria);
         return remove(query, collection);
     }
 
     /**
-     * Removes all documents from the collection that satisfies a given query criteria.
+     * Removes all documents from the collection that satisfies the given query criteria.
      *
      * @param query          the query that specifies criteria used to remove documents
      * @param collectionName the collection name
+     * @return result of operation
      */
     public WriteResult remove(DBObject query, String collectionName) {
         return mongoDBFactory.getDB().getCollection(collectionName).remove(query);
@@ -229,62 +300,64 @@ public class MingoTemplate {
      *
      * @param criteria      the query criteria
      * @param documentClass the document class
+     * @return result of operation
      */
-    public <T> void remove(Criteria criteria, Class<T> documentClass) {
-        WriteResult writeResult = remove(criteria.query(), getCollectionName(documentClass));
-        writeResult.getField("");
+    public <T> WriteResult remove(Criteria criteria, Class<T> documentClass) {
+        return remove(criteria.query(), getCollectionName(documentClass));
     }
 
     /**
-     * Perform query with parameters and return instance with specified type as result.
+     * Performs query with parameters and returns one document which satisfies the given criteria.
      *
-     * @param queryName  query name
-     * @param type       type of object
+     * @param queryName  the query name
+     * @param type       type of document
      * @param <T>        the type of the class modeled by this {@code Class} object.
      * @param parameters query parameters
-     * @return object
+     * @return found document or null if no documents in collection which satisfy the criteria
      */
     public <T> T queryForObject(String queryName, Class<T> type, Map<String, Object> parameters) {
         return queryExecutor.queryForObject(queryName, type, parameters);
     }
 
     /**
-     * Perform query without parameters and return instance with specified type as result.
+     * Performs query without parameters and returns one document which satisfies the given criteria.
      *
-     * @param queryName query name
+     * @param queryName the query name
      * @param type      type of object
      * @param <T>       the type of the class modeled by this {@code Class} object.
-     * @return object
+     * @return found document or null if no documents in collection which satisfy the criteria
      */
     public <T> T queryForObject(String queryName, Class<T> type) {
         return queryExecutor.queryForObject(queryName, type);
     }
 
     /**
-     * Perform query with parameters and return list of objects.
-     * Default implementation of list is {@link java.util.ArrayList}.
+     * Performs query with parameters and returns list of objects of type.
      *
-     * @param queryName  query name
-     * @param type       type of object
-     * @param parameters query parameters
+     * @param queryName  the query name
+     * @param type       the type of object
+     * @param parameters the query parameters
      * @param <T>        the type of the class modeled by this {@code Class} object.
-     * @return list of objects
+     * @return list of objects, implementation of list is {@link java.util.ArrayList}.
      */
     public <T> List<T> queryForList(String queryName, Class<T> type, Map<String, Object> parameters) {
         return queryExecutor.queryForList(queryName, type, parameters);
     }
 
     /**
-     * Perform query without parameters and return list of objects.
-     * Default implementation of list is {@link java.util.ArrayList}.
+     * Performs query with parameters and returns list of objects of type.
      *
-     * @param queryName query name
-     * @param type      type of object
+     * @param queryName the query name
+     * @param type      the type of document
      * @param <T>       the type of the class modeled by this {@code Class} object.
-     * @return list of objects
+     * @return list of found documents, implementation of list is {@link java.util.ArrayList}.
      */
     public <T> List<T> queryForList(String queryName, Class<T> type) {
         return queryExecutor.queryForList(queryName, type);
+    }
+
+    private DBObject buildQuery(Criteria criteria) {
+        return mongoBsonMarshaller.marshall(criteria.query(), criteria.getParameters());
     }
 
 }
