@@ -18,6 +18,7 @@ package com.mingo.query;
 
 import com.mingo.query.el.ELEngine;
 import com.mingo.query.el.ELEngineFactory;
+import com.mingo.query.el.ELEngineType;
 import com.mingo.util.StringUtils;
 import java.util.Collections;
 import java.util.List;

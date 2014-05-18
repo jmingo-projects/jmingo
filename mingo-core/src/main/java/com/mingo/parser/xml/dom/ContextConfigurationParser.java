@@ -8,7 +8,7 @@ import com.mingo.config.MongoConfig;
 import com.mingo.config.QuerySetConfiguration;
 import com.mingo.exceptions.MingoParserException;
 import com.mingo.parser.Parser;
-import com.mingo.query.ELEngineType;
+import com.mingo.query.el.ELEngineType;
 import com.mingo.query.QueryExecutorType;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -214,7 +214,7 @@ public class ContextConfigurationParser implements Parser<ContextConfiguration> 
      * Gets 'type' attr from <queryAnalyzer/> tag.
      *
      * @param element element of XML document
-     * @return {@link com.mingo.query.ELEngineType}
+     * @return {@link com.mingo.query.el.ELEngineType}
      * @throws MingoParserException {@link MingoParserException}
      */
     private ELEngineType parseQueryAnalyzerTag(Element element) throws MingoParserException {

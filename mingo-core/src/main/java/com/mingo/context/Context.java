@@ -30,7 +30,7 @@ import com.mingo.mapping.convert.ConverterService;
 import com.mingo.mongo.MongoDBFactory;
 import com.mingo.parser.Parser;
 import com.mingo.parser.xml.dom.ParserFactory;
-import com.mingo.query.ELEngineType;
+import com.mingo.query.el.ELEngineType;
 import com.mingo.query.QueryExecutorType;
 import com.mingo.query.QueryManager;
 import com.mingo.query.el.ELEngine;

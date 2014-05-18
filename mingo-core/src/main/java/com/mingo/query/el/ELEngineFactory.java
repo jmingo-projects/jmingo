@@ -1,7 +1,5 @@
 package com.mingo.query.el;
 
-import com.mingo.query.ELEngineType;
-
 /**
  * Copyright 2012-2013 The Mingo Team
  * <p>
@@ -39,6 +37,7 @@ public final class ELEngineFactory {
                 queryAnalyzer = new SpringELEngine();
                 break;
             default:
+                // todo throw an exception instead
                 queryAnalyzer = new JexlELEngine();
         }
         return queryAnalyzer;

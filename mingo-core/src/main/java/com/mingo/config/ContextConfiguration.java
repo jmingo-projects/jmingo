@@ -1,6 +1,6 @@
 package com.mingo.config;
 
-import com.mingo.query.ELEngineType;
+import com.mingo.query.el.ELEngineType;
 import com.mingo.query.QueryExecutorType;
 
 /**

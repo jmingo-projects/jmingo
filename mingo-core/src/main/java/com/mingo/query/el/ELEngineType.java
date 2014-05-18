@@ -1,8 +1,3 @@
-package com.mingo.query;
-
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-
 /**
  * Copyright 2012-2013 The Mingo Team
  * <p>
@@ -17,6 +12,14 @@ import com.google.common.collect.Lists;
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ */
+package com.mingo.query.el;
+
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+
+/**
+ * Represents type of {@link ELEngine} implementation.
  */
 public enum ELEngineType {
 
@@ -43,7 +46,7 @@ public enum ELEngineType {
      * Gets enum by name.
      *
      * @param name name
-     * @return {@link QueryExecutorType}
+     * @return {@link com.mingo.query.QueryExecutorType}
      */
     public static ELEngineType getByName(final String name) {
         return Iterables.find(Lists.newArrayList(values()),
