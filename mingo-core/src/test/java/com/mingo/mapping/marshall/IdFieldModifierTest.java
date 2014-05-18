@@ -3,7 +3,7 @@ package com.mingo.mapping.marshall;
 
 import com.mingo.document.annotation.GeneratedValue;
 import com.mingo.document.annotation.Id;
-import com.mingo.document.id.IdFieldModifier;
+import com.mingo.document.id.IdFieldGenerator;
 import com.mingo.document.id.generator.IdGeneratorStrategy;
 import com.mingo.document.id.generator.factory.DefaultIdGeneratorFactory;
 import com.mingo.exceptions.IdGenerationException;
@@ -20,7 +20,7 @@ import static org.testng.AssertJUnit.assertTrue;
 
 public class IdFieldModifierTest {
 
-    IdFieldModifier idFieldModifier = new IdFieldModifier(new DefaultIdGeneratorFactory());
+    IdFieldGenerator idFieldModifier = new IdFieldGenerator(new DefaultIdGeneratorFactory());
 
     @Test
     public void testGenerateId() {

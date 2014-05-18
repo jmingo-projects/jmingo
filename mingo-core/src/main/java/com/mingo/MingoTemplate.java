@@ -15,7 +15,7 @@
  */
 package com.mingo;
 
-import com.mingo.document.id.IdFieldModifier;
+import com.mingo.document.id.IdFieldGenerator;
 import com.mingo.document.id.generator.factory.IdGeneratorFactory;
 import com.mingo.executor.QueryExecutor;
 import com.mingo.mapping.convert.ConverterService;
@@ -50,14 +50,14 @@ public class MingoTemplate {
     private BsonMarshallingFactory bsonMarshallingFactory = new JacksonBsonMarshallingFactory();
     private BsonMarshaller bsonMarshaller = bsonMarshallingFactory.createMarshaller();
 
-    private IdFieldModifier idFieldModifier;
+    private IdFieldGenerator idFieldModifier;
 
     public MingoTemplate(QueryExecutor queryExecutor, MongoDBFactory mongoDBFactory, ConverterService converterService,
                          IdGeneratorFactory idGeneratorFactory) {
         this.queryExecutor = queryExecutor;
         this.mongoDBFactory = mongoDBFactory;
         this.converterService = converterService;
-        this.idFieldModifier = new IdFieldModifier(idGeneratorFactory);
+        this.idFieldModifier = new IdFieldGenerator(idGeneratorFactory);
     }
 
     /**

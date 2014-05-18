@@ -38,9 +38,9 @@ import static java.text.MessageFormat.format;
 
 
 /**
- * Modifies fields that is annotated with @Id and @GeneratedValue.
+ * Generates and sets new values for the fields that are annotated with @Id and @GeneratedValue.
  */
-public class IdFieldModifier {
+public class IdFieldGenerator {
 
     private IdGeneratorFactory idGeneratorFactory;
 
@@ -56,7 +56,7 @@ public class IdFieldModifier {
         transformers.put(Integer.TYPE, String.class, Object::toString);
     }
 
-    public IdFieldModifier(IdGeneratorFactory idGeneratorFactory) {
+    public IdFieldGenerator(IdGeneratorFactory idGeneratorFactory) {
         this.idGeneratorFactory = idGeneratorFactory;
     }
 
