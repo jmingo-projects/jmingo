@@ -18,7 +18,15 @@ package com.mingo.document.id.generator;
 
 import java.io.Serializable;
 
+/**
+ * Base interface for all generators.
+ */
 public interface IdGenerator {
 
+    /**
+     * Generates new id value.
+     *
+     * @return new id value
+     */
     Serializable generate();
 }

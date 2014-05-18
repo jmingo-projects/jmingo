@@ -16,10 +16,13 @@
 package com.mingo.document.id;
 
 
-import com.google.common.base.Throwables;
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Table;
 import com.mingo.document.annotation.GeneratedValue;
 import com.mingo.document.id.generator.IdGenerator;
 import com.mingo.document.id.generator.factory.IdGeneratorFactory;
+import com.mingo.exceptions.IdGenerationException;
+import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.Validate;
 
 import java.lang.reflect.Field;
@@ -27,9 +30,11 @@ import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static com.mingo.util.DocumentUtils.isId;
+import static java.text.MessageFormat.format;
 
 
 /**
@@ -38,6 +43,18 @@ import static com.mingo.util.DocumentUtils.isId;
 public class IdFieldModifier {
 
     private IdGeneratorFactory idGeneratorFactory;
+
+    private final static Table<Class<?>, Class<?>, Function> transformers = HashBasedTable.create();
+
+    // messages
+    private static final String INCOMPATIBLE_TYPES = "Incompatible types. Failed to set generated value: ''{0}'' (type: {1}) to the field: ''{2}'' (type: {3}) from {4}. Generator strategy: ''{5}''";
+
+    static {
+        transformers.put(Long.class, String.class, Object::toString);
+        transformers.put(Integer.class, String.class, Object::toString);
+        transformers.put(Long.TYPE, String.class, Object::toString);
+        transformers.put(Integer.TYPE, String.class, Object::toString);
+    }
 
     public IdFieldModifier(IdGeneratorFactory idGeneratorFactory) {
         this.idGeneratorFactory = idGeneratorFactory;
@@ -58,8 +75,9 @@ public class IdFieldModifier {
      * If an id field is final, synthetic or static then new value will not be generated.
      *
      * @param pojo the pojo that has identifier field for that new value should be generated
+     * @throws IdGenerationException
      */
-    public void generateId(Object pojo) {
+    public void generateId(Object pojo) throws IdGenerationException {
         if (pojo != null) {
             doWithFields(pojo, pojo.getClass(), generateId, skipSyntheticField, skipFinalField, skipStaticField);
         }
@@ -80,28 +98,40 @@ public class IdFieldModifier {
         });
     }
 
-    private void checkAndGenerateId(Object pojo, Field field) throws IllegalAccessException {
+    private void checkAndGenerateId(Object pojo, Field field) throws IdGenerationException {
         if (field.isAnnotationPresent(GeneratedValue.class)) {
             GeneratedValue generatedValue = field.getAnnotation(GeneratedValue.class);
             IdGenerator idGenerator = idGeneratorFactory.create(generatedValue.strategy(), field.getType());
             Validate.notNull(idGenerator, "wasn't found any generators for strategy: %s and type: %s",
                     generatedValue.strategy(), field.getType());
-            generateAndSet(pojo, field, idGenerator);
+            generateAndSet(pojo, field, idGenerator, generatedValue.strategy());
         }
     }
 
-    private void generateAndSet(Object pojo, Field field, IdGenerator idGenerator) {
-        setValue(pojo, field, idGenerator.generate());
+    private void generateAndSet(Object pojo, Field field, IdGenerator idGenerator, String strategy) {
+        setValue(pojo, field, idGenerator.generate(), strategy);
     }
 
-    private void setValue(Object pojo, Field field, Object val) {
+    private void setValue(Object pojo, Field field, Object val, String strategy) {
         try {
+            if (!instanceOf(val.getClass(), field.getType())) {
+                Function transformer = transformers.get(val.getClass(), field.getType());
+                if (transformer == null) {
+                    throw new IdGenerationException(format(INCOMPATIBLE_TYPES, val, val.getClass(), field.getName(), field.getType(), field.getDeclaringClass(), strategy));
+                }
+                val = transformer.apply(val);
+            }
             field.set(pojo, val);
         } catch (IllegalAccessException e) {
-            throw Throwables.propagate(e);
+            throw new IdGenerationException(e);
         }
     }
 
+    private boolean instanceOf(Class<?> cls, Class<?> toClass) {
+        cls = ClassUtils.primitiveToWrapper(cls);
+        toClass = ClassUtils.primitiveToWrapper(toClass);
+        return ClassUtils.isAssignable(cls, toClass);
+    }
 
     private FieldCallback generateId = (target, field) -> {
         try {
@@ -124,7 +154,7 @@ public class IdFieldModifier {
             }
 
         } catch (Throwable e) {
-            throw Throwables.propagate(e);
+            throw new IdGenerationException(e);
         }
     };
 

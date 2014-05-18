@@ -15,9 +15,12 @@
  */
 package com.mingo.document.id.generator;
 
-
 import org.bson.types.ObjectId;
 
+/**
+ * Implementation of {@link com.mingo.document.id.generator.IdGenerator} that uses
+ * {@link ObjectId} default constructor to generate new value.
+ */
 public class ObjectIdGenerator implements IdGenerator {
     @Override
     public ObjectId generate() {

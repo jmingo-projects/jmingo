@@ -18,24 +18,29 @@ package com.mingo.document.id.generator;
 public class IdGeneratorStrategy {
 
     /**
-     * Using this strategy allows Mingo decide which implementation should be used based on id field value.
-     * Recommended to specify concrete generator strategy and avoid using 'TYPE' strategy everywhere where it  possible
-     * to avoid confusion if the generated value is not expected or acceptable.
-     * Anyway better know which idGenerator implementation is used in current case.
+     * Using this strategy allows Mingo decide which implementation of {@link com.mingo.document.id.generator.IdGenerator}
+     * should be used based on id field value. You can register your own generator for specified type using {@link com.mingo.document.id.generator.factory.IdGeneratorFactory#register(String, IdGenerator)}.
+     * You should make sure that all necessary generators are registered for all id types that you're using in your code.
+     * Recommended to avoid using 'TYPE' strategy everywhere where it's possible and specify concrete generator strategy
+     * to avoid confusion if the generated value is not expected or acceptable. To know which strategies are registered by default for concrete types you can read javadoc for chosen IdGeneratorFactory implementation.
+     * Anyway we better to know which IdGenerator implementation is used in a certain case.
      */
     public static final String TYPE = "type";
 
     /**
-     * {@link UUIDGenerator} implementation.
+     * This strategy uses {@link UUIDGenerator} implementation of {@link com.mingo.document.id.generator.IdGenerator}.
+     * This strategy is applied only for {@link java.lang.String} fields thus if you try to apply this generator
+     * for Long field then you receive {@link com.mingo.exceptions.IdGenerationException}.
      */
     public static final String UUID = "uuid";
+
     /**
-     * {@link ObjectIdGenerator} implementation.
+     * This strategy uses {@link ObjectIdGenerator} implementation of {@link com.mingo.document.id.generator.IdGenerator}.
      */
     public static final String OBJECT_ID = "object_id";
 
     /**
-     * {@link SnowflakeGenerator} implementation.
+     * This strategy uses {@link SnowflakeGenerator} implementation of {@link com.mingo.document.id.generator.IdGenerator}.
      */
     public static final String SNOWFLAKE = "snowflake";
 }

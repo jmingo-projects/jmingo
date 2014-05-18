@@ -21,4 +21,12 @@ import com.mingo.document.id.generator.IdGenerator;
 public interface IdGeneratorFactory {
 
     IdGenerator create(String strategy, Class<?> type);
+
+    void register(String strategy, IdGenerator idGenerator);
+
+    void register(Class<?> type, IdGenerator idGenerator);
+
+    boolean isRegistered(String strategy);
+
+    boolean isRegistered(Class<?> type);
 }

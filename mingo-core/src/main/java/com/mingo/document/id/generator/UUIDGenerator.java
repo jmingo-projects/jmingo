@@ -18,6 +18,9 @@ package com.mingo.document.id.generator;
 
 import java.util.UUID;
 
+/**
+ * Implementation of {@link IdGenerator} that's based on {@link java.util.UUID}.
+ */
 public class UUIDGenerator implements IdGenerator {
     @Override
     public String generate() {
