@@ -31,7 +31,6 @@ import com.mingo.mongo.MongoDBFactory;
 import com.mingo.parser.Parser;
 import com.mingo.parser.xml.dom.ParserFactory;
 import com.mingo.query.el.ELEngineType;
-import com.mingo.query.QueryExecutorType;
 import com.mingo.query.QueryManager;
 import com.mingo.query.el.ELEngine;
 import com.mingo.query.el.ELEngineFactory;
@@ -129,10 +128,6 @@ public class Context {
 
     public ELEngineType getQueryAnalyzerType() {
         return config.getQueryAnalyzerType();
-    }
-
-    public QueryExecutorType getQueryExecutorType() {
-        return config.getQueryExecutorType();
     }
 
     public List<BenchmarkService> getBenchmarkServices() {

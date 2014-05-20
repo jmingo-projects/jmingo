@@ -1,8 +1,3 @@
-package com.mingo.config;
-
-import com.mingo.query.el.ELEngineType;
-import com.mingo.query.QueryExecutorType;
-
 /**
  * Copyright 2012-2013 The Mingo Team
  * <p>
@@ -18,13 +13,19 @@ import com.mingo.query.QueryExecutorType;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.mingo.config;
+
+import com.mingo.query.el.ELEngineType;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
+
 public class ContextConfiguration {
 
     private MingoContextConfig mingoContextConfig;
 
     private QuerySetConfiguration querySetConfiguration;
 
-    private QueryExecutorType queryExecutorType = QueryExecutorType.MONGO_DRIVER;
+    private MongoConfig mongoConfig;
 
     private ELEngineType queryAnalyzerType = ELEngineType.JEXL;
 
@@ -32,15 +33,10 @@ public class ContextConfiguration {
 
     private int databasePort;
 
-    /* default converter class*/
+    /* default converter class */
     private String defaultConverter;
 
     private String converterPackageScan;
-
-    // TODO add to shema, add parsing and so on
-    private String parameterPrefix;
-
-    private MongoConfig mongoConfig;
 
     public MingoContextConfig getMingoContextConfig() {
         return mingoContextConfig;
@@ -66,27 +62,6 @@ public class ContextConfiguration {
      */
     public void setQuerySetConfiguration(QuerySetConfiguration querySetConfiguration) {
         this.querySetConfiguration = querySetConfiguration;
-    }
-
-    /**
-     * Gets query executor type.
-     * Since was proposed another approach to define executor hence this method returns only MONGO_DRIVER.
-     *
-     * @return query executor type
-     */
-    public QueryExecutorType getQueryExecutorType() {
-        return QueryExecutorType.MONGO_DRIVER;
-    }
-
-    /**
-     * Sets query executor type.
-     *
-     * @param queryExecutorType query executor type
-     */
-    public void setQueryExecutorType(QueryExecutorType queryExecutorType) {
-        if (queryExecutorType != null) {
-            this.queryExecutorType = queryExecutorType;
-        }
     }
 
     /**
@@ -155,7 +130,6 @@ public class ContextConfiguration {
      * @param cClass converter class
      */
     public void setDefaultConverter(String cClass) {
-        //Validate.notBlank(cClass, "converter class cannot be null or empty");
         this.defaultConverter = cClass;
     }
 
@@ -176,14 +150,6 @@ public class ContextConfiguration {
         this.converterPackageScan = converterPackageScan;
     }
 
-    public String getParameterPrefix() {
-        return parameterPrefix;
-    }
-
-    public void setParameterPrefix(String parameterPrefix) {
-        this.parameterPrefix = parameterPrefix;
-    }
-
     public MongoConfig getMongoConfig() {
         return mongoConfig;
     }
@@ -192,20 +158,17 @@ public class ContextConfiguration {
         this.mongoConfig = mongoConfig;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString() {
-        return "ContextConfiguration{" +
-                "querySetConfiguration=" + querySetConfiguration +
-                ", queryExecutorType=" + queryExecutorType +
-                ", queryAnalyzerType=" + queryAnalyzerType +
-                ", databaseHost='" + databaseHost + '\'' +
-                ", databasePort=" + databasePort +
-                ", defaultConverter='" + defaultConverter + '\'' +
-                ", converterPackageScan='" + converterPackageScan + '\'' +
-                '}';
+        return new ToStringBuilder(this)
+                .append("mingoContextConfig", mingoContextConfig)
+                .append("querySetConfiguration", querySetConfiguration)
+                .append("queryAnalyzerType", queryAnalyzerType)
+                .append("databaseHost", databaseHost)
+                .append("databasePort", databasePort)
+                .append("defaultConverter", defaultConverter)
+                .append("converterPackageScan", converterPackageScan)
+                .append("mongoConfig", mongoConfig)
+                .toString();
     }
-
 }

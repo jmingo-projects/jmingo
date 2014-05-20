@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
-<context>
+<context xmlns="http://www.mingo.com/schema/context">
 
     <config>
         <benchmark enabled="true"/>

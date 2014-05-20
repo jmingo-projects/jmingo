@@ -42,7 +42,7 @@ public class ItemRepository extends AbstractRepository<Item> implements IBaseRep
 
     public void updateByName(Item item, String name) {
         Criteria criteria = Criteria.where("{name : '#name'}").with("name", name);
-        mingoTemplate.update(item, criteria, Item.class);
+        mingoTemplate.update(item, criteria);
     }
 
 

@@ -271,7 +271,7 @@ public class MingoTemplate {
     }
 
     /**
-     * Removes the object from the collection.
+     * Removes the object from the collection by document id.
      *
      * @param object     the object to remove
      * @param collection the collection name
@@ -303,7 +303,9 @@ public class MingoTemplate {
      * @return result of operation
      */
     public <T> WriteResult remove(Criteria criteria, Class<T> documentClass) {
-        return remove(criteria.query(), getCollectionName(documentClass));
+        assertDocument(documentClass);
+        DBObject query = buildQuery(criteria);
+        return remove(query, getCollectionName(documentClass));
     }
 
     /**

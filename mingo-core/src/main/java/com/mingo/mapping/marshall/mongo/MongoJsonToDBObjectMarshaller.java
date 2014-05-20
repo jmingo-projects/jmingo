@@ -37,7 +37,7 @@ public class MongoJsonToDBObjectMarshaller extends AbstractJsonToBsonMarshaller<
 
         // fix for https://jira.mongodb.org/browse/JAVA-268
         BSON.addEncodingHook(Enum.class, (val) -> {
-            if (val != null) {
+            if (val != null && val.getClass().isEnum()) {
                 return ((Enum) val).name();
             } else {
                 return val;

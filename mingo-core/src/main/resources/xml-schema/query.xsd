@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://www.mingo.com/schema/query"
+           xmlns="http://www.mingo.com/schema/query"
+           elementFormDefault="qualified">
 
     <!-- QUERY SCHEMA -->
-
-    <!-- definition of simple types -->
-    <xs:simpleType name="ID" id="ID">
-        <xs:restriction base="xs:NCName"/>
-    </xs:simpleType>
 
     <xs:simpleType name="queryType">
         <xs:restriction base="xs:normalizedString">
@@ -16,7 +14,7 @@
     </xs:simpleType>
 
     <!-- definition of attributes -->
-    <xs:attribute name="id" type="xs:ID"/>
+
 
     <xs:element name="config">
         <xs:complexType>
@@ -25,7 +23,7 @@
     </xs:element>
     <xs:element name="queryFragment">
         <xs:complexType mixed="true">
-            <xs:attribute ref="id" use="required"/>
+            <xs:attribute name="id" type="xs:ID" use="required"/>
         </xs:complexType>
     </xs:element>
 
@@ -46,24 +44,25 @@
         <xs:attribute name="condition" type="xs:string" use="required"/>
     </xs:complexType>
 
-    <xs:complexType name="elseIfType">
-        <xs:complexContent mixed="true">
-            <xs:extension base="condition">
-                <xs:sequence>
-                    <xs:element ref="fragment" minOccurs="0" maxOccurs="unbounded"/>
-                </xs:sequence>
-            </xs:extension>
-        </xs:complexContent>
-    </xs:complexType>
-
     <xs:element name="else">
         <xs:complexType mixed="true" >
-
                     <xs:sequence>
                         <xs:element ref="fragment" minOccurs="0" maxOccurs="unbounded"/>
                     </xs:sequence>
         </xs:complexType>
 
+    </xs:element>
+
+    <xs:element name="elseIf" >
+        <xs:complexType>
+            <xs:complexContent mixed="true">
+                <xs:extension base="condition">
+                    <xs:sequence>
+                        <xs:element ref="fragment" minOccurs="0" maxOccurs="unbounded"/>
+                    </xs:sequence>
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
     </xs:element>
 
     <xs:element name="if">
@@ -84,7 +83,7 @@
                 <xs:extension base="condition">
                     <xs:sequence>
                         <xs:element ref="fragment" minOccurs="0" maxOccurs="unbounded"/>
-                        <xs:element name="elseIf" minOccurs="0" maxOccurs="unbounded" type="elseIfType"/>
+                        <xs:element ref="elseIf" minOccurs="0" maxOccurs="unbounded"/>
                         <xs:element ref="else" minOccurs="0" maxOccurs="1"/>
                     </xs:sequence>
                 </xs:extension>
@@ -98,8 +97,7 @@
                 <xs:element ref="if" minOccurs="0" maxOccurs="unbounded"/>
                 <xs:element ref="fragment" minOccurs="0" maxOccurs="unbounded"/>
             </xs:sequence>
-            <xs:attribute ref="id" use="required"/>
-            <!-- <xs:attribute name="extends" type="xs:string"/>-->
+            <xs:attribute name="id" type="xs:ID" use="required"/>
             <xs:attribute name="type" type="queryType" default="plain"/>
             <xs:attribute name="converter-class" type="xs:string"/>
             <xs:attribute name="converter-method" type="xs:string"/>

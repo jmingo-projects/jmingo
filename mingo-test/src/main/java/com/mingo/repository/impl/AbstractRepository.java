@@ -49,7 +49,7 @@ public abstract class AbstractRepository<T extends BaseDocument> implements IBas
     @Override
     public void update(T object) {
         Criteria criteria = Criteria.whereId(object.getId());
-        mingoTemplate.update(object, criteria, getDocumentType());
+        mingoTemplate.update(object, criteria);
     }
 
     @Override

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<querySet xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-          xsi:noNamespaceSchemaLocation="../../../main/resources/xml-schema/query.xsd">
+<querySet xmlns="http://www.mingo.com/schema/query">
 
     <config collectionName="collectionOne"/>
 
@@ -10,7 +9,7 @@
     </queryFragment>
 
     <query id="query-1" type="aggregation" converter-class="simpleDomainConverter"
-           converter-method="customConvertMethod">
+             converter-method="customConvertMethod">
 
         {'query-1_body' : 'start root text'},
 

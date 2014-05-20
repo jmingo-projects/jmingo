@@ -1,3 +1,18 @@
+/**
+ * Copyright 2012-2013 The Mingo Team
+ * <p/>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p/>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p/>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.mingo.parser.xml.dom;
 
 import com.google.common.collect.ImmutableSet;
@@ -9,7 +24,6 @@ import com.mingo.config.QuerySetConfiguration;
 import com.mingo.exceptions.MingoParserException;
 import com.mingo.parser.Parser;
 import com.mingo.query.el.ELEngineType;
-import com.mingo.query.QueryExecutorType;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.nio.file.Path;
@@ -39,20 +53,6 @@ import static com.mingo.parser.xml.dom.util.DomUtil.getFirstNecessaryTagOccurren
 import static com.mingo.parser.xml.dom.util.DomUtil.getFirstTagOccurrence;
 
 /**
- * Copyright 2012-2013 The Mingo Team
- * <p>
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * <p>
  * This class is implementation of {@link Parser} interface.
  * XML parser for context configuration. See  context.xsd schema for details.
  */
@@ -72,11 +72,9 @@ public class ContextConfigurationParser implements Parser<ContextConfiguration> 
 
     private static final String QUERY_SET_CONFIG_TAG = "querySetConfig";
     private static final String QUERY_SET_TAG = "querySet";
-    private static final String QUERY_EXECUTOR_TAG = "queryExecutor";
     private static final String QUERY_ANALYZER_TAG = "queryAnalyzer";
     private static final String QUERY_SET_PATH_ATTR = "path";
     private static final String QUERY_ANALYZER_TYPE_ATTR = "type";
-    private static final String QUERY_EXECUTOR_TYPE_ATTR = "type";
 
     private static final String MONGO_TAG = "mongo";
     private static final String MONGO_HOST_ATTR = "host";
@@ -120,7 +118,6 @@ public class ContextConfigurationParser implements Parser<ContextConfiguration> 
             Element element = document.getDocumentElement();
             contextConfiguration.setMingoContextConfig(parseConfigTag(element));
             contextConfiguration.setQuerySetConfiguration(parseQuerySetConfigTag(element));
-            contextConfiguration.setQueryExecutorType(parseQueryExecutorTag(element));
             contextConfiguration.setQueryAnalyzerType(parseQueryAnalyzerTag(element));
             contextConfiguration.setMongoConfig(parseMongoTag(element));
             parseConvertersTag(contextConfiguration, element);
@@ -189,28 +186,6 @@ public class ContextConfigurationParser implements Parser<ContextConfiguration> 
     }
 
     /**
-     * Gets 'type' attr from <queryExecutor/> tag.
-     * Throws exception if 'queryExecutor' tag was not found.
-     *
-     * @param element element of XML document
-     * @return {@link QueryExecutorType}
-     * @throws MingoParserException {@link MingoParserException}
-     */
-    @Deprecated
-    private QueryExecutorType parseQueryExecutorTag(Element element) throws MingoParserException {
-        QueryExecutorType type = null;
-        Node queryExecutorNode = getFirstTagOccurrence(element, QUERY_EXECUTOR_TAG);
-        if (queryExecutorNode != null) {
-            type = QueryExecutorType.getByName(getAttributeString(queryExecutorNode,
-                    QUERY_EXECUTOR_TYPE_ATTR));
-            if (type == null) {
-                throw new MingoParserException("unsupported query executor type.");
-            }
-        }
-        return type;
-    }
-
-    /**
      * Gets 'type' attr from <queryAnalyzer/> tag.
      *
      * @param element element of XML document
@@ -254,13 +229,14 @@ public class ContextConfigurationParser implements Parser<ContextConfiguration> 
             MongoConfig.Builder mongoConfigBuilder = MongoConfig.builder().dbPort(databasePort)
                     .dbHost(databaseHost).dbName(dbName).writeConcern(writeConcern);
             // parse options
-            getAllChildNodes(mongoNode, OPTION_TAG).forEach(optNode -> {
-                if (OPTION_TAG.equals(optNode.getNodeName())) {
-                    mongoConfigBuilder.option(getAttributeString(optNode, "name"), getAttributeString(optNode, "value"));
-                }
-            });
-
-
+            Node optionsNode = getFirstTagOccurrence(element, OPTIONS_TAG);
+            if (optionsNode != null) {
+                getAllChildNodes(mongoNode, OPTION_TAG).forEach(optNode -> {
+                    if (OPTION_TAG.equals(optNode.getNodeName())) {
+                        mongoConfigBuilder.option(getAttributeString(optNode, "name"), getAttributeString(optNode, "value"));
+                    }
+                });
+            }
             mongoConfig = mongoConfigBuilder.build();
         } else {
             throw new MingoParserException(MONGO_TAG + " is required");

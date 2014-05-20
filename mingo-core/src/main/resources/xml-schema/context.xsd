@@ -1,18 +1,12 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://www.mingo.com/schema/context"
+           xmlns="http://www.mingo.com/schema/context"
+           elementFormDefault="qualified">
 
     <!-- CONTEXT SCHEMA -->
 
     <!-- definition of simple types -->
-    <xs:simpleType name="ID" id="ID">
-        <xs:restriction base="xs:NCName"/>
-    </xs:simpleType>
-
-    <xs:simpleType name="queryExecutorType">
-        <xs:restriction base="xs:normalizedString">
-            <xs:enumeration value="MongoDriver"/>
-        </xs:restriction>
-    </xs:simpleType>
 
     <xs:simpleType name="queryExecutorAnalyzerType">
         <xs:restriction base="xs:normalizedString">
@@ -38,10 +32,6 @@
             <xs:enumeration value="UNACKNOWLEDGED"/>
         </xs:restriction>
     </xs:simpleType>
-
-    <!-- definition of attributes -->
-    <xs:attribute name="id" type="xs:ID"/>
-
 
     <xs:element name="querySet">
         <xs:complexType mixed="true">
@@ -93,28 +83,12 @@
             <xs:sequence>
                 <xs:element ref="querySet" minOccurs="0" maxOccurs="unbounded"/>
             </xs:sequence>
-            <!--<xs:attribute name="dbName" type="xs:string"/>--> <!--todo remove it, redundant conf, mongo el has it-->
-        </xs:complexType>
-    </xs:element>
-
-
-    <!--Deprecated-->
-    <xs:element name="queryExecutor">
-        <xs:annotation>
-            <xs:documentation>
-                This property is deprecated, don't rely on it
-            </xs:documentation>
-        </xs:annotation>
-        <xs:complexType>
-            <xs:attribute name="type" type="queryExecutorType" use="optional"
-                          default="MongoDriver"/>
         </xs:complexType>
     </xs:element>
 
     <xs:element name="queryAnalyzer">
         <xs:complexType>
-            <xs:attribute name="type" type="queryExecutorAnalyzerType" use="optional"
-                          default="jexl"/>
+            <xs:attribute name="type" type="queryExecutorAnalyzerType" use="optional" default="jexl"/>
         </xs:complexType>
     </xs:element>
 
@@ -127,17 +101,14 @@
             <xs:attribute name="port" type="xs:integer" use="optional" default="27017"/>
             <xs:attribute name="dbName" type="xs:string" use="required"/>
             <xs:attribute name="writeConcern" type="writeConcern" use="optional" default="NORMAL"/>
-            <!-- todo iss5-->
         </xs:complexType>
     </xs:element>
 
-    <xs:element name="context">
+    <xs:element name="context" >
         <xs:complexType mixed="true">
             <xs:sequence>
                 <xs:element ref="config" minOccurs="0" maxOccurs="1"/>
                 <xs:element ref="querySetConfig" minOccurs="1" maxOccurs="1"/>
-                <xs:element ref="queryExecutor" minOccurs="0" maxOccurs="1"/>
-                <!--todo remove it, redundant conf-->
                 <xs:element ref="queryAnalyzer" minOccurs="0" maxOccurs="1"/>
                 <xs:element ref="mongo" minOccurs="1" maxOccurs="1"/>
                 <xs:element ref="defaultConverter" minOccurs="0" maxOccurs="1"/>
