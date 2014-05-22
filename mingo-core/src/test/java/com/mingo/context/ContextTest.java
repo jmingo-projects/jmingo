@@ -11,15 +11,17 @@ public class ContextTest {
 
     @Test
     public void testContext() {
-        Context context = Context.create("/xml/context.xml");
-        Mongo mongo = context.getMongoDBFactory().getMongo();
-        assertEquals(WriteConcern.ACKNOWLEDGED, mongo.getWriteConcern());
-        assertEquals(100, mongo.getMongoOptions().getConnectTimeout());
-        context.shutdown();
+        Context context = null;
+        try {
+            context = Context.create("/xml/context.xml");
+            Mongo mongo = context.getMongoDBFactory().getMongo();
+            assertEquals(WriteConcern.ACKNOWLEDGED, mongo.getWriteConcern());
+            assertEquals(100, mongo.getMongoOptions().getConnectTimeout());
+        } finally {
+            if (context != null) {
+                context.shutdown();
+            }
+        }
     }
 
-    public static void main(String[] args) {
-        Context context = Context.create("/xml/context.xml");
-        context.shutdown();
-    }
 }

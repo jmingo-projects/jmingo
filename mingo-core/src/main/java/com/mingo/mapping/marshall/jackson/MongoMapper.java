@@ -35,15 +35,16 @@ public class MongoMapper extends ObjectMapper {
 
     public MongoMapper() {
         addMixInAnnotations();
-        getSerializationConfig().getDefaultVisibilityChecker()
+        setVisibilityChecker(getSerializationConfig().getDefaultVisibilityChecker()
                 .withFieldVisibility(JsonAutoDetect.Visibility.ANY)
                 .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
                 .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
-                .withCreatorVisibility(JsonAutoDetect.Visibility.NONE);
+                .withCreatorVisibility(JsonAutoDetect.Visibility.NONE));
         configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
         configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
         configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+        configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
         SimpleModule mongoModule = new SimpleModule();
         mongoModule.addDeserializer(ObjectId.class, new ObjectIdDeserializer());
         mongoModule.addSerializer(ObjectId.class, new ObjectIdSerializer());

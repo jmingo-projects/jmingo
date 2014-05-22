@@ -91,6 +91,7 @@ public class MingoTemplate {
      * @param objectToInsert the object to store in the collection
      */
     public void insert(Object objectToInsert) {
+        assertDocument(objectToInsert);
         String collectionName = getCollectionName(objectToInsert);
         insert(objectToInsert, collectionName);
     }
@@ -113,7 +114,7 @@ public class MingoTemplate {
      * @param collectionName the collection name
      */
     public void insert(Object objectToInsert, String collectionName) {
-        assertDocument(objectToInsert);
+        Validate.notNull(objectToInsert, "object to insert cannot be null");
         Validate.notBlank(collectionName, "collectionName cannot be null or empty");
         idFieldModifier.generateId(objectToInsert);
         DBObject dbObject = jacksonBsonMarshaller.marshall(BasicDBObject.class, objectToInsert);
@@ -143,7 +144,9 @@ public class MingoTemplate {
      * @return the result of the operation
      */
     public WriteResult update(Object objectToUpdate, Criteria criteria, String collectionName) {
-        assertDocument(objectToUpdate);
+        Validate.notNull(objectToUpdate, "object to update cannot be null");
+        Validate.notNull(criteria, "update criteria should be not null");
+        Validate.notBlank(collectionName, "collectionName cannot be null or empty");
         DBObject updateDocument = jacksonBsonMarshaller.marshall(BasicDBObject.class, objectToUpdate);
         DBObject queryObject = buildQuery(criteria);
         return update(updateDocument, queryObject, collectionName, criteria.isUpsert(), criteria.isMulti());
@@ -162,7 +165,7 @@ public class MingoTemplate {
     public WriteResult update(DBObject update, DBObject query, Class<?> documentClass, boolean upsert, boolean multi) {
         assertDocument(documentClass);
         String collectionName = getCollectionName(documentClass);
-        return mongoDBFactory.getDB().getCollection(collectionName).update(query, update, upsert, multi);
+        return update(query, update, collectionName, upsert, multi);
     }
 
     /**
@@ -176,6 +179,9 @@ public class MingoTemplate {
      * @return the result of the operation
      */
     public WriteResult update(DBObject update, DBObject query, String collectionName, boolean upsert, boolean multi) {
+        Validate.notNull(update, "object to update cannot be null");
+        Validate.notNull(query, "update query cannot be null");
+        Validate.notBlank(collectionName, "collectionName cannot be null or empty");
         return mongoDBFactory.getDB().getCollection(collectionName).update(query, update, upsert, multi);
     }
 
@@ -187,6 +193,7 @@ public class MingoTemplate {
      * @return the list of objects of type
      */
     public <T> List<T> findAll(Class<T> type, String collectionName) {
+        Validate.notBlank(collectionName, "collectionName cannot be null or empty");
         List<T> result = new ArrayList<>();
         DBCursor cursor = mongoDBFactory.getDB().getCollection(collectionName).find();
         while (cursor.hasNext()) {
@@ -230,6 +237,7 @@ public class MingoTemplate {
      * @return matched document of type
      */
     public <T> T findOne(Criteria criteria, Class<T> type) {
+        Validate.notNull(criteria, "criteria to find-one operation cannot be null or empty");
         T result = null;
         assertDocument(type);
         DBObject query = buildQuery(criteria);
@@ -249,6 +257,7 @@ public class MingoTemplate {
      * @return list of found documents of type
      */
     public <T> List<T> find(Criteria criteria, Class<T> type) {
+        Validate.notNull(criteria, "criteria to find operation cannot be null or empty");
         List<T> result = new ArrayList<>();
         assertDocument(type);
         DBObject query = buildQuery(criteria);
@@ -267,6 +276,7 @@ public class MingoTemplate {
      * @param object the object to remove
      */
     public WriteResult remove(Object object) {
+        assertDocument(object);
         return remove(object, getCollectionName(object));
     }
 
@@ -277,7 +287,8 @@ public class MingoTemplate {
      * @param collection the collection name
      */
     public WriteResult remove(Object object, String collection) {
-        assertDocument(object);
+        Validate.notNull(object, "object to remove cannot be null or empty");
+        Validate.notBlank(collection, "collectionName cannot be null or empty");
         Object idValue = getIdValue(object);
         Criteria criteria = Criteria.whereId(idValue);
         DBObject query = buildQuery(criteria);
@@ -292,6 +303,8 @@ public class MingoTemplate {
      * @return result of operation
      */
     public WriteResult remove(DBObject query, String collectionName) {
+        Validate.notNull(query, "remove query cannot be null or empty");
+        Validate.notBlank(collectionName, "collectionName cannot be null or empty");
         return mongoDBFactory.getDB().getCollection(collectionName).remove(query);
     }
 
