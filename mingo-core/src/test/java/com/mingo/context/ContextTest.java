@@ -15,5 +15,11 @@ public class ContextTest {
         Mongo mongo = context.getMongoDBFactory().getMongo();
         assertEquals(WriteConcern.ACKNOWLEDGED, mongo.getWriteConcern());
         assertEquals(100, mongo.getMongoOptions().getConnectTimeout());
+        context.shutdown();
+    }
+
+    public static void main(String[] args) {
+        Context context = Context.create("/xml/context.xml");
+        context.shutdown();
     }
 }

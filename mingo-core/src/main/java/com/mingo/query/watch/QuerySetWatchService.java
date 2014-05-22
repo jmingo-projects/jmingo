@@ -1,17 +1,33 @@
+/**
+ * Copyright 2012-2013 The Mingo Team
+ * <p/>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p/>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p/>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.mingo.query.watch;
 
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.eventbus.EventBus;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.mingo.exceptions.WatchServiceException;
 import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.file.ClosedWatchServiceException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -19,18 +35,19 @@ import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class QuerySetWatchService {
 
-    private final ExecutorService executorService = Executors.newFixedThreadPool(10);
+    ThreadFactory watcherNamedThreadFactory = new ThreadFactoryBuilder().setNameFormat("watcher-thread-%d").build();
+    private final ExecutorService executorService = Executors.newFixedThreadPool(10, watcherNamedThreadFactory);
     private final Set<Path> registered = Sets.newConcurrentHashSet();
-    private final List<Watcher> watchers = Lists.newArrayList();
     private final WatchService watchService;
     private final WatchEventHandler watchEventHandler;
     private final EventBus eventBus;
@@ -43,7 +60,7 @@ public class QuerySetWatchService {
     public QuerySetWatchService(EventBus eventBus) {
         try {
             this.eventBus = eventBus;
-            LOGGER.debug("create new watch service" );
+            LOGGER.debug("create new watch service");
             watchService = FileSystems.getDefault().newWatchService();
             watchEventHandler = new EventBusWatchEventHandler(eventBus, registered);
         } catch (IOException e) {
@@ -58,7 +75,7 @@ public class QuerySetWatchService {
      * @param path the path to file or folder to watch
      */
     public void regiser(Path path) {
-        Validate.notNull(path, "path to watch cannot be null" );
+        Validate.notNull(path, "path to watch cannot be null");
         try {
             lock.lock();
             if (!path.isAbsolute()) {
@@ -72,8 +89,7 @@ public class QuerySetWatchService {
             if (needToRegister(path)) {
                 LOGGER.debug("create watcher for dir: {}", dir);
                 Watcher watcher = new Watcher(watchService, watchEventHandler, dir);
-                executorService.execute(watcher);
-                watchers.add(watcher);
+                executorService.submit(watcher);
             } else {
                 LOGGER.debug("a watcher for dir: {} is already created", dir);
             }
@@ -85,15 +101,21 @@ public class QuerySetWatchService {
         }
     }
 
-    public void shutdown() {
+    public void shutdown() throws WatchServiceException {
         try {
             lock.lock();
-            watchers.forEach(Watcher::stopWatching);
-            executorService.shutdown();
+            LOGGER.debug("shutdown watcher thread pool");
+            executorService.shutdownNow();
+            if (!executorService.awaitTermination(30, TimeUnit.SECONDS)) {
+                throw new WatchServiceException("failed to terminate all watcher threads");
+            }
+            LOGGER.debug("close watch service");
             watchService.close();
             eventBus.unregister(this);
+        } catch (ClosedWatchServiceException | InterruptedException e) {
+                /*  Allow thread to exit  */
         } catch (IOException e) {
-            throw Throwables.propagate(e);
+            throw new WatchServiceException(e);
         } finally {
             lock.unlock();
         }
@@ -121,9 +143,8 @@ public class QuerySetWatchService {
 
     private static class Watcher implements Runnable {
 
-        private WatchService service;
         private Path dir;
-        private boolean active = true;
+        private WatchService service;
         private WatchEventHandler eventHandler;
         private static final Logger LOGGER = LoggerFactory.getLogger(Watcher.class);
 
@@ -133,9 +154,16 @@ public class QuerySetWatchService {
             this.dir = dir;
         }
 
-        public void stopWatching() {
-            active = false;
-        }
+//        /**
+//         * this method doesn't change interrupt status if current thread is executed in thread pool and
+//         * this method is called on the instance directly.
+//         * in the cause of using in a thread pool use shutdownNow() to interrupt thread.
+//         */
+//        public void stopWatching() {
+//            // using interruption for cancellation.
+//            LOGGER.debug("stop watcher for: " + dir);
+//            interrupt();
+//        }
 
         @Override
         public void run() {
@@ -145,29 +173,35 @@ public class QuerySetWatchService {
                         StandardWatchEventKinds.ENTRY_MODIFY,
                         StandardWatchEventKinds.ENTRY_DELETE);
 
-                while (active) {
-                    WatchKey key = service.take();
-                    key.pollEvents().forEach(event -> {
-                        LOGGER.debug(event.kind() + ": " + event.context());
-                        eventHandler.handle(event, key);
-                    });
+                while (!Thread.currentThread().isInterrupted()) {
+                    final WatchKey key = service.poll(1000, TimeUnit.MILLISECONDS);
+                    if (key != null) {
+                        key.pollEvents().forEach(event -> {
+                            LOGGER.debug(event.kind() + ": " + event.context());
+                            eventHandler.handle(event, key);
+                        });
 
-                    boolean valid = key.reset();
-                    if (!valid) {
-                        break;    // Exit if directory is deleted
+                        boolean valid = key.reset();
+                        if (!valid) {
+                            break;    // Exit if directory is deleted
+                        }
                     }
                 }
-            } catch (Exception e) {
+            } catch (InterruptedException | ClosedWatchServiceException e) {
+                /*  Allow thread to exit  */
+            } catch (IOException e) {
                 throw Throwables.propagate(e);
+            } finally {
+                LOGGER.debug("terminate watcher: " + toString());
             }
         }
 
         @Override
         public String toString() {
-            return new ToStringBuilder(this).
-                    append("dir", dir).
-                    append("active", active).
-                    toString();
+            final StringBuilder sb = new StringBuilder(Thread.currentThread().getName() + " {");
+            sb.append("dir=").append(dir);
+            sb.append('}');
+            return sb.toString();
         }
     }
 
@@ -210,7 +244,7 @@ public class QuerySetWatchService {
 
         @Override
         public boolean apply(Path path) {
-            Validate.notNull(path, "File name filter cannot be applied for null" );
+            Validate.notNull(path, "File name filter cannot be applied for null");
             return Iterables.tryFind(allowedPaths, allowedPath -> allowedPath.equals(path)).isPresent();
         }
     }
