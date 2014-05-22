@@ -18,6 +18,7 @@ package com.mingo.util;
 import com.google.common.base.Throwables;
 
 import com.google.common.hash.Hashing;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -25,13 +26,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-/**
- * Created by dmgcodevil on 19.04.2014.
- */
 public class FileUtils {
 
     /**
@@ -55,9 +54,9 @@ public class FileUtils {
     }
 
     /**
-     * Gets absolute path for specified original path. Handles relative and absolute.
+     * Gets absolute path to file for specified original path. Handles relative and absolute.
      *
-     * @param original the original path
+     * @param original the original path to file
      * @return the absolute path
      */
     public static Path getAbsolutePath(String original) {
@@ -65,10 +64,14 @@ public class FileUtils {
         try {
             path = Paths.get(original);
             if (!path.isAbsolute()) {
-                URI uri = FileUtils.class.getResource(original).toURI();
+                URL url = FileUtils.class.getResource(original);
+                if (url == null) {
+                    throw new FileNotFoundException("the path: " + original + " is relative but the file isn't in classpath");
+                }
+                URI uri = url.toURI();
                 path = Paths.get(uri);
             }
-        } catch (URISyntaxException e) {
+        } catch (Exception e) {
             throw Throwables.propagate(e);
         }
         return path;
@@ -78,7 +81,7 @@ public class FileUtils {
         String checksum;
         try {
             checksum = com.google.common.io.Files.hash(file, Hashing.md5()).toString();
-        } catch(IOException e) {
+        } catch (IOException e) {
             throw Throwables.propagate(e);
         }
         return checksum;

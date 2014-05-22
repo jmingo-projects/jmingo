@@ -239,7 +239,7 @@ public class ContextConfigurationParser implements Parser<ContextConfiguration> 
             }
             mongoConfig = mongoConfigBuilder.build();
         } else {
-            throw new MingoParserException(MONGO_TAG + " is required");
+            throw new MingoParserException("<"+MONGO_TAG+"/>" + " is required");
         }
         return mongoConfig;
     }
