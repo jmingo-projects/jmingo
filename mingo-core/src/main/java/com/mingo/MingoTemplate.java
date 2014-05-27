@@ -165,7 +165,7 @@ public class MingoTemplate {
     public WriteResult update(DBObject update, DBObject query, Class<?> documentClass, boolean upsert, boolean multi) {
         assertDocument(documentClass);
         String collectionName = getCollectionName(documentClass);
-        return update(query, update, collectionName, upsert, multi);
+        return update(update, query, collectionName, upsert, multi);
     }
 
     /**

@@ -50,7 +50,8 @@ public class ItemRepositoryIntegrationTest extends CommonIntegrationTest {
         source.setName("new");
         itemRepository.update(source);
         Item updated = itemRepository.findById(source.getId());
-        assertEquals(updated, source);
+        assertEquals(updated.getName(), source.getName());
+        assertEquals(updated.getDate(), source.getDate());
     }
 
     @Test(groups = "integration")
