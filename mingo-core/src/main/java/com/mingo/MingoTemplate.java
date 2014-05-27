@@ -15,6 +15,7 @@
  */
 package com.mingo;
 
+import com.google.common.collect.Iterables;
 import com.mingo.document.id.IdFieldGenerator;
 import com.mingo.document.id.generator.factory.IdGeneratorFactory;
 import com.mingo.executor.QueryExecutor;
@@ -25,11 +26,15 @@ import com.mingo.mapping.marshall.JsonToDBObjectMarshaller;
 import com.mingo.mapping.marshall.jackson.JacksonBsonMarshallingFactory;
 import com.mingo.mapping.marshall.mongo.MongoBsonMarshallingFactory;
 import com.mingo.mongo.MongoDBFactory;
+import com.mingo.mongo.index.Index;
 import com.mingo.query.Criteria;
 import com.mongodb.BasicDBObject;
+import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.WriteResult;
+import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 
 import java.util.ArrayList;
@@ -81,6 +86,75 @@ public class MingoTemplate {
      */
     public void dropCollection(Class<?> type) {
         mongoDBFactory.getDB().getCollection(getCollectionName(type)).drop();
+    }
+
+    /**
+     * Creates index.
+     * @param collectionName the collection name to create index
+     * @param index the index
+     */
+    public void ensureIndex(String collectionName, Index index) {
+        Validate.notBlank(collectionName, "collectionName cannot be null or empty");
+        Validate.notNull(index, "index cannot be null or empty");
+        DBCollection dbCollection = mongoDBFactory.getDB().getCollection(collectionName);
+
+        DBObject keys;
+        DBObject options = null;
+        if (MapUtils.isEmpty(index.getKeys())) {
+            throw new IllegalArgumentException("necessary specify one or more keys to create an index");
+        }
+        keys = jacksonBsonMarshaller.marshall(BasicDBObject.class, index.getKeys());
+        if (MapUtils.isNotEmpty(index.getOptions())) {
+            options = jacksonBsonMarshaller.marshall(BasicDBObject.class, index.getOptions());
+        }
+        if (options != null) {
+            dbCollection.createIndex(keys, options);
+        } else {
+            dbCollection.createIndex(keys);
+        }
+    }
+
+    /**
+     * Drops index by index name.
+     *
+     * @param collectionName the collection name to drop index
+     * @param indexName the index name to drop
+     */
+    public void dropIndex(String collectionName, String indexName) {
+        Validate.notBlank(collectionName, "collectionName cannot be null or empty");
+        Validate.notBlank(indexName, "index name cannot be null or empty");
+
+        DBCollection dbCollection = mongoDBFactory.getDB().getCollection(collectionName);
+        dbCollection.dropIndex(indexName);
+    }
+
+    /**
+     * Gets all existing indexes for in the collection.
+     *
+     * @param collectionName the collection name to find indexes
+     * @return indexes in the given collection
+     */
+    public List<DBObject> getIndexes(String collectionName) {
+        Validate.notBlank(collectionName, "collectionName cannot be null or empty");
+        DBCollection dbCollection = mongoDBFactory.getDB().getCollection(collectionName);
+        return dbCollection.getIndexInfo();
+    }
+
+    /**
+     * Gets index by name.
+     *
+     * @param collectionName the collection name
+     * @param indexName      the index name
+     * @return index or null if no indexes for the given name
+     */
+    public DBObject getIndex(String collectionName, final String indexName) {
+        DBObject index;
+        Validate.notBlank(collectionName, "collectionName cannot be null or empty");
+        Validate.notBlank(collectionName, "indexName cannot be null or empty");
+        DBCollection dbCollection = mongoDBFactory.getDB().getCollection(collectionName);
+        List<DBObject> dbObjects = dbCollection.getIndexInfo();
+        index = Iterables.tryFind(dbObjects, dbObject -> StringUtils.equalsIgnoreCase(dbObject.get("name").toString(), indexName)).orNull();
+        return index;
     }
 
     /**

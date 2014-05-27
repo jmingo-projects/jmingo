@@ -71,7 +71,7 @@ public class QueryManager {
 
     /**
      * key - composite id, value - query.
-     * Query should be unique with multiple query sets.
+     * Query should be UNIQUE with multiple query sets.
      */
     private Map<String, Query> queries = Maps.newConcurrentMap();
 

@@ -8,7 +8,7 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 
 /**
- * Generator of unique positive Long numbers based on Twitter snowflake, https://github.com/twitter/snowflake.
+ * Generator of UNIQUE positive Long numbers based on Twitter snowflake, https://github.com/twitter/snowflake.
  * <p>
  * id is composed of:
  * TIME_BITS - 41 bits (millisecond precision w/ a custom EPOCH gives us 69 years)
@@ -43,9 +43,9 @@ public class SnowflakeGenerator implements IdGenerator {
     }
 
     /**
-     * Generates unique long value.
+     * Generates UNIQUE long value.
      *
-     * @return unique long value
+     * @return UNIQUE long value
      * @throws IdGenerationException
      */
     @Override

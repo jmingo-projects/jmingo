@@ -21,7 +21,7 @@ import java.util.List;
  * limitations under the License.
  * <p/>
  *
- * @param <ID> The type of unique identifier.
+ * @param <ID> The type of UNIQUE identifier.
  * @param <T>  The type of objects managed by repository.
  */
 public interface IBaseRepository<ID, T extends BaseDocument> {

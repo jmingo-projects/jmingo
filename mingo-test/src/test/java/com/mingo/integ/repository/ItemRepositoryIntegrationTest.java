@@ -3,7 +3,9 @@ package com.mingo.integ.repository;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.mingo.domain.Item;
+import com.mingo.mongo.index.Index;
 import com.mingo.repository.impl.ItemRepository;
+import com.mongodb.DBObject;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
@@ -129,6 +131,24 @@ public class ItemRepositoryIntegrationTest extends CommonIntegrationTest {
         saved = itemRepository.findByName(sameName);
         assertNotNull(saved);
         assertEquals(saved.size(), 0);
+    }
+
+    @Test(groups = "integration")
+    public void testCreateIndex() {
+        Index index = Index.builder().key("name").name("name_index").unique(true).build();
+        itemRepository.getMingoTemplate().dropCollection(Item.class);
+        Item item = new Item("1");
+        String name = "testItem";
+        item.setName(name);
+        itemRepository.insert(item);
+        itemRepository.getMingoTemplate().ensureIndex("Item", index);
+
+        DBObject indexDbObject = itemRepository.getMingoTemplate().getIndex("Item", "name_index");
+        assertNotNull(index);
+        assertEquals(indexDbObject.get("name").toString(), "name_index");
+        itemRepository.getMingoTemplate().dropIndex("Item", "name_index");
+        indexDbObject = itemRepository.getMingoTemplate().getIndex("Item", "name_index");
+        assertNull(indexDbObject);
     }
 
 }
