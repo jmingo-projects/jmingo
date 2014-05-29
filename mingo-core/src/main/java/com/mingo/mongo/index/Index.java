@@ -8,13 +8,31 @@ import java.util.Map;
 
 public class Index {
 
+    // Options for All Index Types
     public static final String BACKGROUND = "background";
     public static final String UNIQUE = "unique";
     public static final String NAME = "name";
     public static final String DROP_DUPS = "dropDups";
     public static final String SPARSE = "sparse";
     public static final String EXPIRE_AFTER_SECONDS = "expireAfterSeconds";
-    public static final String VERSION = "version";
+    public static final String VERSION = "v";
+
+    // Options for text Indexes
+    public static final String WEIGHTS = "weights";
+    public static final String DEFAULT_LANGUAGE = "default_language";
+    public static final String LANGUAGE_OVERRIDE = "language_override";
+    public static final String TEXT_INDEX_VERSION = "textIndexVersion";
+
+    // Options for 2dsphere Indexes
+    public static final String TWO_D_SPHERE_INDEX_VERSION = "2dsphereIndexVersion";
+
+    //Options for 2d Indexes
+    public static final String BITS = "bits";
+    public static final String MIN = "min";
+    public static final String MAX = "max";
+
+    // Options for geoHaystack Indexes
+    public static final String BUCKET_SIZE = "bucketSize";
 
     private Map<String, Object> keys = Maps.newHashMap();
     private Map<String, Object> options = Maps.newHashMap();
@@ -87,6 +105,15 @@ public class Index {
 
         public Builder key(String name) {
             keys.put(name, IndexDirection.ASC.getVal());
+            return this;
+        }
+
+        public Builder keys(String... names) {
+            if (names != null && names.length > 0) {
+                for (int i = 0; i < names.length; i++) {
+                    key(names[i]);
+                }
+            }
             return this;
         }
 
