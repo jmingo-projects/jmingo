@@ -84,8 +84,8 @@
 
     <modules>
         <module>mingo-core</module>
-        <module>mingo-test</module>
-        <module>mingo-dashboard</module>
+        <!-- <module>mingo-test</module>
+        <module>mingo-dashboard</module>-->
     <module>mingo-benchmark</module>
   </modules>
 </project>
