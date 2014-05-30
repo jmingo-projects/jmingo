@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<querySet xmlns="http://www.mingo.com/schema/query">
+
+    <config collectionName="Review"/>
+
+    <query id="getTagsCount" type="aggregation"
+           converter-class="com.mingo.demo.util.converter.ReviewSpecificConverter"
+           converter-method="convertTagsCount">
+        <if condition="#statuses != null and #statuses.size()>0">
+            {$match : { "moderationStatus": { $in: "#statuses"}}},
+        </if>
+        {$unwind: "$tags"},
+        {$project: {moderationStatus:1, tags: 1, count: {$add: [1]}}},
+        {$group: {_id: "$tags", totalCount: {$sum: "$count"}}}
+    </query>
+
+</querySet>

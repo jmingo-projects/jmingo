@@ -2,9 +2,9 @@
 
 <context xmlns="http://www.mingo.com/schema/context">
 
-<!--    <querySetConfig>
-        <querySet path="/mingo/reviewQuerySet.xml"/>
-    </querySetConfig>-->
+    <querySetConfig>
+        <querySet path="/META-INF/mingo/query/reviewQuerySet.xml"/>
+    </querySetConfig>
 
     <queryAnalyzer type="springEL"/>
 
