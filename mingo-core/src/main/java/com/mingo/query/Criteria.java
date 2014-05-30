@@ -26,10 +26,13 @@ import java.util.Map;
  */
 public class Criteria {
 
+
     private String queryTemplate;
     private boolean multi;
     private boolean upsert;
     private Map<String, Object> parameters = Maps.newHashMap();
+
+    private static final Criteria EMPTY_CRITERIA = new Criteria("{}");
 
     public Criteria(String queryTemplate) {
         this.queryTemplate = queryTemplate;
@@ -41,6 +44,10 @@ public class Criteria {
 
     public static Criteria whereId(Object id) {
         return Criteria.where("{'_id' : '#_id'}").with("_id", id);
+    }
+
+    public static Criteria empty() {
+        return EMPTY_CRITERIA;
     }
 
     public Criteria with(String paramName, Object paramValue) {

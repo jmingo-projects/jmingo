@@ -24,4 +24,16 @@ public class ContextTest {
         }
     }
 
+    @Test
+    public void testEmptyContext() {
+        Context context = null;
+        try {
+            context = Context.create("/xml/emptyContext.xml");
+        } finally {
+            if (context != null) {
+                context.shutdown();
+            }
+        }
+    }
+
 }

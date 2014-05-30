@@ -70,6 +70,17 @@ public class MingoTemplate {
     }
 
     /**
+     * Creates collection.
+     *
+     * @param document the document to get collection name to create index
+     */
+    public DBCollection createCollection(Class<?> document) {
+        assertDocument(document);
+        String collectionName = getCollectionName(document);
+        return mongoDBFactory.getDB().createCollection(collectionName, null);
+    }
+
+    /**
      * Drops specified collection by name.
      *
      * @param collectionName the collection name to drop
@@ -86,6 +97,17 @@ public class MingoTemplate {
      */
     public void dropCollection(Class<?> type) {
         mongoDBFactory.getDB().getCollection(getCollectionName(type)).drop();
+    }
+
+    /**
+     * Creates index.
+     * @param document the document to get collection name to create index
+     * @param index the index
+     */
+    public void ensureIndex(Class<?> document, Index index) {
+        assertDocument(document);
+        String collectionName = getCollectionName(document);
+        ensureIndex(collectionName, index);
     }
 
     /**
@@ -392,6 +414,18 @@ public class MingoTemplate {
     public <T> WriteResult remove(Criteria criteria, Class<T> documentClass) {
         assertDocument(documentClass);
         DBObject query = buildQuery(criteria);
+        return remove(query, getCollectionName(documentClass));
+    }
+
+    /**
+     * Removes all documents from the collection that is used to store the instances of documentClass.
+     *
+     * @param documentClass the document class
+     * @return result of operation
+     */
+    public <T> WriteResult removeAll(Class<T> documentClass) {
+        assertDocument(documentClass);
+        DBObject query = buildQuery(Criteria.empty());
         return remove(query, getCollectionName(documentClass));
     }
 

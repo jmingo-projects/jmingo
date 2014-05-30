@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<context xmlns="http://www.mingo.com/schema/context"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://www.mingo.com/schema/context
+         file://../../../main/resources/xml-schema/context.xsd">
+
+
+    <mongo dbName="dbTest"/>
+
+</context>

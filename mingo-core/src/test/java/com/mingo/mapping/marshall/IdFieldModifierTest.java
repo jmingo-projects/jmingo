@@ -60,7 +60,7 @@ public class IdFieldModifierTest {
     public void testSnowflakePrimitiveLongId() {
         PrimitiveLongIdSnowflakeStrategy longPrimitiveIdEntity = new PrimitiveLongIdSnowflakeStrategy();
         idFieldModifier.generateId(longPrimitiveIdEntity);
-        assertTrue(longPrimitiveIdEntity.getId() > 0);
+        assertTrue(longPrimitiveIdEntity.getId() != 0);
     }
 
     @Test
@@ -68,7 +68,7 @@ public class IdFieldModifierTest {
         WrapperLongIdSnowflakeStrategy wrapperLongIdEntity = new WrapperLongIdSnowflakeStrategy();
         idFieldModifier.generateId(wrapperLongIdEntity);
         assertNotNull(wrapperLongIdEntity.getId());
-        assertTrue(wrapperLongIdEntity.getId() > 0);
+        assertTrue(wrapperLongIdEntity.getId() != 0);
     }
 
     @Test

@@ -154,18 +154,16 @@ public class ContextConfigurationParser implements Parser<ContextConfiguration> 
      * @return set of paths queries definitions
      */
     private QuerySetConfiguration parseQuerySetConfigTag(Element element) throws MingoParserException {
+        QuerySetConfiguration querySetConfiguration = new QuerySetConfiguration();
         Set<String> querySets = ImmutableSet.of();
         // expected what xml contains single <querySetConfig> tag
         // therefore take first element from node list is normal
-        Node querySetConfigNode = getFirstNecessaryTagOccurrence(element, QUERY_SET_CONFIG_TAG);
-        if (querySetConfigNode.hasChildNodes()) {
+        Node querySetConfigNode = getFirstTagOccurrence(element, QUERY_SET_CONFIG_TAG);
+        if (querySetConfigNode != null && querySetConfigNode.hasChildNodes()) {
             querySets = parseQuerySets(querySetConfigNode.getChildNodes());
         }
-        QuerySetConfiguration querySetConfiguration = new QuerySetConfiguration();
-        querySetConfiguration.setDatabaseName(getAttributeString(querySetConfigNode, MONGO_DBNAME_ATTR));
         querySetConfiguration.addQuerySet(querySets);
         return querySetConfiguration;
-
     }
 
     /**
@@ -221,7 +219,7 @@ public class ContextConfigurationParser implements Parser<ContextConfiguration> 
 
             String databaseHost = getAttributeString(mongoNode, MONGO_HOST_ATTR, MongoConfig.DEF_HOST);
             int databasePort = getAttributeInt(mongoNode, MONGO_PORT_ATTR, MongoConfig.DEF_PORT);
-            String dbName = getAttributeString(mongoNode, "dbName");
+            String dbName = getAttributeString(mongoNode, MONGO_DBNAME_ATTR);
             String writeConcern = getAttributeString(mongoNode, WRITE_CONCERN_ATTR);
             Validate.notBlank(dbName, "attribute 'dbName' is required");
             assertPositive(databasePort, "wrong value for database port. database port must be gt 0");
