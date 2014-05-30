@@ -1,5 +1,8 @@
-package com.mingo.demo.domain;
+package com.mingo.demo.domain
 
+import com.mingo.document.annotation.Document;
+
+@Document(collectionName = "userCollection")
 class User extends BaseDocument {
     String login;
     String password;

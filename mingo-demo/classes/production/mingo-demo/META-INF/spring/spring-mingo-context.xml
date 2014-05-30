@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="windows-1252"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
+
+
+    <!--Mingo configuration-->
+
+    <bean id="mingoContext" class="com.mingo.context.Context" factory-method="create">
+        <constructor-arg value="/META-INF/mingo/mingo-context.xml"/>
+    </bean>
+
+    <bean id="mingoTemplate" class="com.mingo.MingoTemplate" depends-on="mingoContext"
+          factory-bean="mingoContext" factory-method="getMingoTemplate">
+    </bean>
+
+
+
+</beans>
