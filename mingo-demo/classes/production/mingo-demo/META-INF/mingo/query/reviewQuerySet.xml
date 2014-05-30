@@ -4,6 +4,10 @@
 
     <config collectionName="Review"/>
 
+    <query id="getByAuthor">
+        { "author.name": "#name", "author.email": "#email"}
+    </query>
+
     <query id="getTagsCount" type="aggregation"
            converter-class="com.mingo.demo.util.converter.ReviewSpecificConverter"
            converter-method="convertTagsCount">

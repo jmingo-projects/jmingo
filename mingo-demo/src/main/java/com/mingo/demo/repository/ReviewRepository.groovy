@@ -27,7 +27,15 @@ class ReviewRepository extends AbstractRepository<Review> implements IBaseReposi
         indexes.each { getMingoTemplate().ensureIndex(Review.class, it) }
     }
 
-    public Map<String, Integer> getTagsCount(def statuses) {
+    List<Review> getByAuthor(String name, String email) {
+        Map<String, Object> parameters = Maps.newHashMap();
+        parameters.put("name", name);
+        parameters.put("email", email);
+        String collectionName = getCollectionName(Review.class);
+        return mingoTemplate.queryForList(collectionName + ".getByAuthor", Review.class, parameters);
+    }
+
+    Map<String, Integer> getTagsCount(def statuses) {
         Map<String, Object> parameters = Maps.newHashMap();
         parameters.put("statuses", statuses);
         String collectionName = getCollectionName(Review.class);
