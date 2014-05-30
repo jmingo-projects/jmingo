@@ -16,8 +16,6 @@ dependencies {
     compile 'org.codehaus.groovy:groovy-all:2.3.0-rc-1'
 
     /* ---------------- spring dependencies ---------------- */
-    compile('org.grails:grails-core:2.4.0')
-
     compile("org.springframework:spring-core:$springVersion")
     compile("org.springframework:spring-beans:$springVersion")
     compile("org.springframework:spring-context:$springVersion")
@@ -45,5 +43,31 @@ dependencies {
 
     sourceSets.main.java.srcDirs = []
     sourceSets.main.groovy.srcDir 'src/main/java'
+    sourceSets.test.groovy.srcDir 'src/test/java'
+}
+
+test {
+    // enable TestNG support (default is JUnit)
+    useTestNG()
+    include 'com/mingo/demo/repository/integration/**'
+    // show standard out and standard error of the test JVM(s) on the console
+    testLogging.showStandardStreams = true
+
+    // set heap size for the test JVM(s)
+    minHeapSize = "128m"
+    maxHeapSize = "512m"
+
+    // set JVM arguments for the test JVM(s)
+    jvmArgs '-XX:MaxPermSize=256m'
+
+    // listen to events in the test execution lifecycle
+    beforeTest { descriptor ->
+        logger.lifecycle("Running test: " + descriptor)
+    }
+
+    // listen to standard out and standard error of the test JVM(s)
+    onOutput { descriptor, event ->
+        logger.lifecycle("Test: " + descriptor + " produced standard out/err: " + event.message)
+    }
 }
 

@@ -3,7 +3,7 @@ package com.mingo.demo.domain
 public class Person {
     String firstName;
     String secondName;
-    Date birth;
+    Date birthday;
     int age;
     String email;
 
@@ -14,7 +14,7 @@ public class Person {
                 Person{
                     firstName='$firstName',
                     secondName='$secondName',
-                    birth=$birth,
+                    birthday=$birthday,
                     age=$age,
                     email='$email'
                 }"""

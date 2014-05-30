@@ -7,7 +7,8 @@ class User extends BaseDocument {
     String login;
     String password;
     Person person;
-
+    List<String> accounts
+    List<Group> groups
 
     @Override
     public String toString() {
@@ -16,7 +17,8 @@ class User extends BaseDocument {
                     id = '$id'
                     login='$login',
                     password='$password',
-                    person=$person
+                    person=$person,
+                    accounts=$accounts,
                 }"""
     }
 }
