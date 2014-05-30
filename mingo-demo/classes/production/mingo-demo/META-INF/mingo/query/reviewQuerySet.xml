@@ -19,4 +19,21 @@
         {$group: {_id: "$tags", totalCount: {$sum: "$count"}}}
     </query>
 
+
+    <query id="getByModerationStatus" type="aggregation"
+           converter-class="com.mingo.demo.util.converter.ReviewSpecificConverter"
+           converter-method="convertVehicleReviewsWithAggregatedInfo">
+        { "$match" : {"moderationStatus" : "#status"}} ,
+        { "$sort" : { "created" : -1}} , { "$limit" : "#limit"} , { "$skip" : "#skip"} ,
+        { "$project" : { "_id" : 1 , "tags" :1 , "moderationStatus" : 1, "author":1 , "ratings": 1, "text": 1,
+        "title" :1,
+        "comments" : { "$ifNull" : [ "$comments" , [ { "moderationStatus" : "#status"}]]}}} ,
+        { "$unwind" : "$comments"} ,
+        { "$group" : { "_id" : { "_id" : "$_id" , "author" : "$author" , "created" : "$created" ,
+        "title" : "$title" ,"moderationStatus" : "$moderationStatus", "text" : "$text" ,"tags" : "$tags", "ratings" : "$ratings"} ,
+        "commentsCount" : { "$sum" : { "$cond" : [ { "$eq" : [ "$comments.moderationStatus" , "#status"]} , 0 ,
+        1]}}}} ,
+        { "$sort" : { "_id.created" : -1}}
+    </query>
+
 </querySet>

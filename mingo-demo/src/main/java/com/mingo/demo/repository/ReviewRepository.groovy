@@ -1,6 +1,7 @@
 package com.mingo.demo.repository
 
 import com.google.common.collect.Maps
+import com.mingo.demo.domain.ModerationStatus
 import com.mingo.demo.domain.Review
 import com.mingo.demo.repository.api.IBaseRepository
 import com.mingo.mongo.index.Index
@@ -41,6 +42,16 @@ class ReviewRepository extends AbstractRepository<Review> implements IBaseReposi
         String collectionName = getCollectionName(Review.class);
         return mingoTemplate.queryForObject(collectionName + ".getTagsCount", Map.class, parameters);
     }
+
+    List<Review> getByModerationStatus(ModerationStatus status, int limit, int skip) {
+        Map<String, Object> parameters = Maps.newHashMap();
+        parameters.put("status", status);
+        parameters.put("limit", limit);
+        parameters.put("skip", skip);
+        String collectionName = getCollectionName(Review.class);
+        return mingoTemplate.queryForList(collectionName + ".getByModerationStatus", Review.class, parameters);
+    }
+
 
     @Override
     protected Class<Review> getDocumentType() {

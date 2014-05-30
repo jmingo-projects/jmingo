@@ -1,7 +1,9 @@
 package com.mingo.demo.repository.integration
 
 import com.mingo.demo.domain.Author
+import com.mingo.demo.domain.Comment
 import com.mingo.demo.domain.ModerationStatus
+import com.mingo.demo.domain.Rating
 import com.mingo.demo.domain.Review
 import com.mingo.demo.repository.ReviewRepository
 import org.springframework.beans.factory.annotation.Autowired
@@ -10,8 +12,8 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests
 import org.testng.annotations.BeforeMethod
 import org.testng.annotations.Test
 
-import static org.testng.AssertJUnit.assertEquals
-import static org.testng.AssertJUnit.assertNotNull
+import static org.testng.Assert.assertEquals
+import static org.testng.Assert.assertNotNull
 
 @ContextConfiguration(locations = "classpath:META-INF/spring/applicationContext.xml")
 public class ReviewRepositoryIntegrationTest extends AbstractTestNGSpringContextTests {
@@ -39,9 +41,9 @@ public class ReviewRepositoryIntegrationTest extends AbstractTestNGSpringContext
         Map<String, Integer> count = reviewRepository.getTagsCount([ModerationStatus.STATUS_PASSED]);
 
         assertNotNull(count);
-        assertEquals(Integer.valueOf(1), count.get("groovy"));
-        assertEquals(null, count.get("scala"));
-        assertEquals(Integer.valueOf(1), count.get("java"));
+        assertEquals(count.get("groovy"), Integer.valueOf(1));
+        assertEquals(count.get("scala"), null);
+        assertEquals(count.get("java"), Integer.valueOf(1));
     }
 
     @Test
@@ -60,9 +62,9 @@ public class ReviewRepositoryIntegrationTest extends AbstractTestNGSpringContext
         Map<String, Integer> count = reviewRepository.getTagsCount([]);
 
         assertNotNull(count);
-        assertEquals(Integer.valueOf(2), count.get("groovy"));
-        assertEquals(Integer.valueOf(1), count.get("scala"));
-        assertEquals(Integer.valueOf(1), count.get("java"));
+        assertEquals(count.get("groovy"), Integer.valueOf(2));
+        assertEquals(count.get("scala"), Integer.valueOf(1));
+        assertEquals(count.get("java"), Integer.valueOf(1));
     }
 
     @Test
@@ -81,6 +83,57 @@ public class ReviewRepositoryIntegrationTest extends AbstractTestNGSpringContext
         def reviews = reviewRepository.getByAuthor("name1", "mail_1@mail.com");
         assertNotNull(reviews);
         assertEquals(2, reviews.size());
+    }
+
+    @Test
+    void testGetByModerationStatusWithEmptyComments() {
+        Review review1 = new Review()
+        review1.author = new Author("name1", "mail_1@mail.com")
+        review1.ratings = [new Rating(type: "overall", value: 10f)]
+        review1.commentsCount = 0
+        review1.moderationStatus = ModerationStatus.STATUS_PASSED
+        review1.text = 'review text'
+        review1.title = 'review title'
+        review1.tags = ['java', 'groovy']
+        reviewRepository.insert(review1);
+        def reviews = reviewRepository.getByModerationStatus(ModerationStatus.STATUS_PASSED, 10, 0);
+        assertNotNull(reviews);
+        assertEquals(1, reviews.size());
+        def actual = reviews.get(0);
+        assertEquals(0, actual.commentsCount);
+        assertReviewEquals(actual, review1)
+    }
+
+    @Test
+    void testGetByModerationStatusWithComments() {
+        Review review1 = new Review()
+        review1.author = new Author("name1", "mail_1@mail.com")
+        review1.ratings = [new Rating(type: "overall", value: 10f)]
+        review1.comments = [new Comment("comment 1", ModerationStatus.STATUS_PASSED), new Comment("comment 2", ModerationStatus.STATUS_NOT_MODERATED)]
+        review1.moderationStatus = ModerationStatus.STATUS_PASSED
+        review1.text = 'review text'
+        review1.title = 'review title'
+        review1.tags = ['java', 'groovy']
+        reviewRepository.insert(review1);
+        def reviews = reviewRepository.getByModerationStatus(ModerationStatus.STATUS_PASSED, 10, 0);
+        assertNotNull(reviews);
+        assertEquals(1, reviews.size());
+        def actual = reviews.get(0);
+        assertEquals(1, actual.commentsCount);
+        assertEquals(actual.id, review1.id);
+        assertEquals(actual.text, review1.text);
+        assertEquals(actual.title, review1.title);
+        assertEquals(actual.moderationStatus, review1.moderationStatus);
+        //assertEquals(actual.comments.size(), review1.comments.size()); todo
+        assertEquals(actual.ratings.size(), review1.ratings.size());
+        assertEquals(actual.tags.size(), review1.tags.size());
+    }
+
+    private void assertReviewEquals(Review actual, Review expected) {
+        assertEquals(actual.id, expected.id);
+        assertEquals(actual.text, expected.text);
+        assertEquals(actual.title, expected.title);
+        assertEquals(actual.moderationStatus, expected.moderationStatus);
     }
 
 }
