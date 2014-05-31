@@ -160,7 +160,7 @@ public class QuerySetParser implements Parser<QuerySet> {
      */
     private QueryFragment parseQueryFragment(Node fragmentNode) {
         String fragmentId = getAttributeString(fragmentNode, ID);
-        String fragmentBody = parseTextNode(fragmentNode);
+        String fragmentBody = removeLineBreaks(trim(fragmentNode.getTextContent()));
         return new QueryFragment(fragmentId, fragmentBody);
     }
 
