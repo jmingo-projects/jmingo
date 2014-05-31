@@ -31,6 +31,11 @@ public class DefaultIdGeneratorFactory implements IdGeneratorFactory {
     private Map<String, IdGenerator> generators = Maps.newHashMap();
     private Map<Class<?>, IdGenerator> generatorsBindingTypes = Maps.newHashMap();
 
+
+    public DefaultIdGeneratorFactory() {
+        register();
+    }
+
     private void register() {
         IdGenerator uuidGenerator = new UUIDGenerator();
         IdGenerator objectIdGenerator = new ObjectIdGenerator();
@@ -46,30 +51,47 @@ public class DefaultIdGeneratorFactory implements IdGeneratorFactory {
         register(Long.TYPE, snowflakeGenerator);
     }
 
-    public DefaultIdGeneratorFactory() {
-        register();
-    }
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean isRegistered(String strategy) {
         return generators.containsKey(strategy);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean isRegistered(Class<?> type) {
         return generatorsBindingTypes.containsKey(type);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void register(String strategy, IdGenerator idGenerator) {
-        generators.put(strategy, idGenerator);
+        if (!IdGeneratorStrategy.TYPE.equalsIgnoreCase(strategy)) {
+            generators.put(strategy, idGenerator);
+        }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void register(Class<?> type, IdGenerator idGenerator) {
         generatorsBindingTypes.put(type, idGenerator);
     }
 
+    /**
+     * @param strategy the id generation strategy
+     * @param type     the type of id field to generate value. if strategy is
+     *                 {@link com.mingo.document.id.generator.IdGeneratorStrategy#TYPE} then factory
+     *                 tries to find applicable generator based on id field type.
+     * @return an implementation of {@link IdGenerator} for specified strategy/type
+     */
     @Override
     public IdGenerator create(String strategy, Class<?> type) {
         IdGenerator idGenerator = null;

@@ -15,20 +15,38 @@
  */
 package com.mingo.mapping.marshall.jackson;
 
+import com.mingo.exceptions.MarshallingException;
 import com.mingo.mapping.marshall.BsonUnmarshaller;
 import org.bson.BSONObject;
 
-
+/**
+ * Implementation of {@link BsonUnmarshaller} based on Jackson json lib.
+ */
 public class JacksonBsonUnmarshaller implements BsonUnmarshaller {
 
     private MongoMapper mongoMapper;
 
+    /**
+     * Constructor with parameters.
+     *
+     * @param mongoMapper the mongo mapper
+     */
     public JacksonBsonUnmarshaller(MongoMapper mongoMapper) {
         this.mongoMapper = mongoMapper;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public <T, B extends BSONObject> T unmarshall(Class<T> type, B source) {
-        return mongoMapper.convertValue(source, type);
+    public <T, B extends BSONObject> T unmarshall(Class<T> type, B source) throws MarshallingException {
+        T result;
+        try {
+            result = mongoMapper.convertValue(source, type);
+        } catch (RuntimeException ex) {
+            throw new MarshallingException(ex);
+        }
+        return result;
     }
+
 }

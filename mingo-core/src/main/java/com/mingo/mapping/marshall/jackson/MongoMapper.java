@@ -31,6 +31,9 @@ import org.bson.types.ObjectId;
 
 import java.util.Date;
 
+/**
+ * Mapper configured to use within mingo.
+ */
 public class MongoMapper extends ObjectMapper {
 
     public MongoMapper() {

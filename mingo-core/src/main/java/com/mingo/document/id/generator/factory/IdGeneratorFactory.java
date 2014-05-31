@@ -18,15 +18,50 @@ package com.mingo.document.id.generator.factory;
 
 import com.mingo.document.id.generator.IdGenerator;
 
+/**
+ * Factory to create id generators.
+ */
 public interface IdGeneratorFactory {
 
+    /**
+     * Creates instance of {@link IdGenerator} implementation related to the given strategy.
+     *
+     * @param strategy the id generation strategy
+     * @param type     the type of id field to generate value.
+     * @return specific implementation of {@link IdGenerator}
+     */
     IdGenerator create(String strategy, Class<?> type);
 
+    /**
+     * Registers the given generator for the specified strategy.
+     *
+     * @param strategy    the name of strategy, not necessary to be mentioned in {@link com.mingo.document.id.generator.IdGeneratorStrategy}
+     *                    and can have same name but it's prohibited to use 'type' strategy name
+     * @param idGenerator implementation of {@link com.mingo.document.id.generator.IdGenerator} for the specified strategy
+     */
     void register(String strategy, IdGenerator idGenerator);
 
+    /**
+     * Registers the given generator for the specified type. Later to create generator for the given type the "type" strategy must used.
+     *
+     * @param type        the type of id field for which the given generator should be registered
+     * @param idGenerator implementation of {@link com.mingo.document.id.generator.IdGenerator} for the specified type
+     */
     void register(Class<?> type, IdGenerator idGenerator);
 
+    /**
+     * Checks that a generator already registered for specified strategy.
+     *
+     * @param strategy the id generation strategy
+     * @return true of there is generator for specified strategy, otherwise - false
+     */
     boolean isRegistered(String strategy);
 
+    /**
+     * Checks that a generator already registered for specified type.
+     *
+     * @param type the type
+     * @return true of there is generator for specified type, otherwise - false
+     */
     boolean isRegistered(Class<?> type);
 }

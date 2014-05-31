@@ -48,6 +48,7 @@ public class IdFieldGenerator {
 
     // messages
     private static final String INCOMPATIBLE_TYPES = "Incompatible types. Failed to set generated value: ''{0}'' (type: {1}) to the field: ''{2}'' (type: {3}) from {4}. Generator strategy: ''{5}''";
+    private static final String GENERATOR_NOT_FOUND = "wasn't found any generators for strategy: ''{0}'' and type: ''{1}''";
 
     static {
         transformers.put(Long.class, String.class, Object::toString);
@@ -102,8 +103,9 @@ public class IdFieldGenerator {
         if (field.isAnnotationPresent(GeneratedValue.class)) {
             GeneratedValue generatedValue = field.getAnnotation(GeneratedValue.class);
             IdGenerator idGenerator = idGeneratorFactory.create(generatedValue.strategy(), field.getType());
-            Validate.notNull(idGenerator, "wasn't found any generators for strategy: %s and type: %s",
-                    generatedValue.strategy(), field.getType());
+            if (idGenerator == null) {
+                throw new IdGenerationException(format(GENERATOR_NOT_FOUND, generatedValue.strategy(), field.getType()));
+            }
             generateAndSet(pojo, field, idGenerator, generatedValue.strategy());
         }
     }

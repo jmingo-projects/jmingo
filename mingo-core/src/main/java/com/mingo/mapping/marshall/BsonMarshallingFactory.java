@@ -15,11 +15,29 @@
  */
 package com.mingo.mapping.marshall;
 
+/**
+ * Factory to create marshallers.
+ */
 public interface BsonMarshallingFactory {
 
+    /**
+     * Creates Bson marshaller.
+     *
+     * @return Bson marshaller
+     */
     BsonMarshaller createMarshaller();
 
+    /**
+     * Creates Bson unmarshaller
+     *
+     * @return Bson unmarshaller
+     */
     BsonUnmarshaller createUnmarshaller();
 
+    /**
+     * Creates JsonToDBObject marshaller
+     *
+     * @return JsonToDBObject marshaller
+     */
     JsonToDBObjectMarshaller createJsonToDbObjectMarshaller();
 }

@@ -22,11 +22,30 @@ import org.bson.BSONObject;
 import java.util.Collections;
 import java.util.Map;
 
+/**
+ * Marshaller to marshall json into BSON object.
+ */
 public interface JsonToBsonMarshaller<T extends BSONObject> {
 
+    /**
+     * Marshall json into BSON object.
+     *
+     * @param json json to marshall
+     * @return BSON object
+     * @throws MarshallingException if any marshalling errors occur
+     */
     default T marshall(String json) throws MarshallingException {
         return marshall(json, Collections.emptyMap());
     }
 
+    /**
+     * Marshall json into BSON object.
+     *
+     * @param json       json to marshall
+     * @param parameters the parameters are used to replace the values in json that start with specific prefix '#' and
+     *                   present in parameters names
+     * @return BSON object
+     * @throws MarshallingException if any marshalling errors occur
+     */
     T marshall(String json, Map<String, Object> parameters) throws MarshallingException;
 }

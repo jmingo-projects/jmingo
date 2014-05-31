@@ -7,10 +7,18 @@ import com.mingo.benchmark.Profilers;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Decorator for query executor to measure queries execution time.
+ */
 public class QueryExecutorBenchmark implements QueryExecutor {
 
     private QueryExecutor queryExecutor;
 
+    /**
+     * Constructor with parameters.
+     *
+     * @param queryExecutor the query executor
+     */
     public QueryExecutorBenchmark(QueryExecutor queryExecutor) {
         this.queryExecutor = queryExecutor;
     }

@@ -22,8 +22,14 @@ import org.bson.types.ObjectId;
 
 import java.io.IOException;
 
+/**
+ * Json serializer for {@link org.bson.types.ObjectId} type.
+ */
 public class ObjectIdSerializer extends JsonSerializer<ObjectId> {
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void serialize(ObjectId value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
         jgen.writeString(value.toString());

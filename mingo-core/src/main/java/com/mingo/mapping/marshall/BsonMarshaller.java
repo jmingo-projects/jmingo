@@ -19,7 +19,18 @@ package com.mingo.mapping.marshall;
 import com.mingo.exceptions.MarshallingException;
 import org.bson.BSONObject;
 
+/**
+ * Marshall an objects into BSON objects.
+ */
 public interface BsonMarshaller {
 
+    /**
+     * Marshall the given pojo into BSON object.
+     *
+     * @param type the concrete BSON type of object into which the pojo should be marshalled
+     * @param pojo the pojo to marshall
+     * @return pojo marshalled into a BSON object with specified type
+     * @throws MarshallingException if any marshalling errors occur
+     */
     <T extends BSONObject> T marshall(Class<T> type, Object pojo) throws MarshallingException;
 }

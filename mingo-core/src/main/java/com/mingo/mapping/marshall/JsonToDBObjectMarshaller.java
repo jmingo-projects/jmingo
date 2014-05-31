@@ -18,5 +18,8 @@ package com.mingo.mapping.marshall;
 
 import com.mongodb.DBObject;
 
-public interface JsonToDBObjectMarshaller extends JsonToBsonMarshaller<DBObject>{
+/**
+ * Specific marshaller to marshall json to {@link DBObject}.
+ */
+public interface JsonToDBObjectMarshaller extends JsonToBsonMarshaller<DBObject> {
 }

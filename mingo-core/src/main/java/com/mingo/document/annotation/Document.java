@@ -22,10 +22,18 @@ import java.lang.annotation.Target;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
+/**
+ * Used to specify a properties to be applied when a domain saved to MongoDB.
+ */
 @Retention(RUNTIME)
 @Target(ElementType.TYPE)
 @Inherited
 public @interface Document {
 
+    /**
+     * Identifies mongodb collection to work with.
+     *
+     * @return the collection name
+     */
     String collectionName() default "";
 }

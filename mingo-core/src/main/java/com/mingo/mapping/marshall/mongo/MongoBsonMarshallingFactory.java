@@ -20,18 +20,30 @@ import com.mingo.mapping.marshall.BsonMarshallingFactory;
 import com.mingo.mapping.marshall.BsonUnmarshaller;
 import com.mingo.mapping.marshall.JsonToDBObjectMarshaller;
 
+/**
+ * This implementation is used to create marshallers based on Mongo JSON.
+ */
 public class MongoBsonMarshallingFactory implements BsonMarshallingFactory {
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public BsonMarshaller createMarshaller() {
         throw new UnsupportedOperationException("MongoBsonMarshallingFactory::createMarshaller(), there are no implementations of BsonMarshaller to create");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public BsonUnmarshaller createUnmarshaller() {
         throw new UnsupportedOperationException("MongoBsonMarshallingFactory::createUnmarshaller(), there are no implementations of BsonUnmarshaller to create");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public JsonToDBObjectMarshaller createJsonToDbObjectMarshaller() {
         return new MongoJsonToDBObjectMarshaller();

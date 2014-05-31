@@ -46,7 +46,7 @@ public enum ELEngineType {
      * Gets enum by name.
      *
      * @param name name
-     * @return {@link com.mingo.query.QueryExecutorType}
+     * @return {@link com.mingo.query.el.ELEngineType}
      */
     public static ELEngineType getByName(final String name) {
         return Iterables.find(Lists.newArrayList(values()),

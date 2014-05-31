@@ -1,3 +1,18 @@
+/**
+ * Copyright 2012-2013 The Mingo Team
+ * <p>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.mingo.mapping.convert;
 
 import com.google.common.collect.Lists;
@@ -20,19 +35,7 @@ import java.util.*;
 import static java.text.MessageFormat.format;
 
 /**
- * Copyright 2012-2013 The Mingo Team
- * <p>
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Service provides methods to create and get converters.
  */
 public class ConverterService {
 
@@ -63,7 +66,7 @@ public class ConverterService {
     /**
      * Constructor with parameters.
      *
-     * @param convertersPackages converters packages
+     * @param convertersPackages the packages to scan for converters
      */
     public ConverterService(String convertersPackages) {
         if (StringUtils.isNotBlank(convertersPackages)) {
@@ -73,11 +76,23 @@ public class ConverterService {
         }
     }
 
+    /**
+     * Constructor with parameters.
+     *
+     * @param convertersPackages the packages to scan for converters
+     * @param defaultConverter   the convert to use by default
+     */
     public ConverterService(String convertersPackages, Converter defaultConverter) {
         this(convertersPackages);
         this.defaultConverter = defaultConverter;
     }
 
+    /**
+     * Constructor with parameters.
+     *
+     * @param convertersPackages the packages to scan for converters
+     * @param defaultConverter   full class name of default converter
+     */
     public ConverterService(String convertersPackages, String defaultConverter) {
         this(convertersPackages);
         if (StringUtils.isNotBlank(defaultConverter)) {
@@ -85,17 +100,24 @@ public class ConverterService {
         }
     }
 
-    public <T>Converter<T> getDefaultConverter() {
+    /**
+     * Gets default convert.
+     *
+     * @param <T>
+     * @return default convert
+     */
+    public <T> Converter<T> getDefaultConverter() {
         return defaultConverter;
     }
 
     /**
      * Gets converter for specified type.
      *
-     * @param aClass class
+     * @param aClass the type to get converter
      * @param <T>    the type of the class modeled by this {@code Class} object
      * @return converter for specified type. returns default converter if there is no suitable converter for this type.
      */
+    @SuppressWarnings("unchecked")
     public <T> Converter<T> lookupConverter(final Class<T> aClass) {
         if (CollectionUtils.isEmpty(convertersClasses)) {
             return defaultConverter;
@@ -130,6 +152,7 @@ public class ConverterService {
      * @param <T>             the type of the class modeled by this {@code Class} object
      * @return converted object
      */
+    @SuppressWarnings("unchecked")
     public <T> T convertByMethod(DBObject source,
                                  String converterClass, String converterMethod) {
         Validate.notBlank(converterClass, "converter class name cannot be null or empty");

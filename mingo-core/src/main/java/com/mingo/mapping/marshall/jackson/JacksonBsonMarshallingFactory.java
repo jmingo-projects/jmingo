@@ -20,20 +20,32 @@ import com.mingo.mapping.marshall.BsonMarshallingFactory;
 import com.mingo.mapping.marshall.BsonUnmarshaller;
 import com.mingo.mapping.marshall.JsonToDBObjectMarshaller;
 
+/**
+ * This implementation is used to create marshallers based on Jackson.
+ */
 public class JacksonBsonMarshallingFactory implements BsonMarshallingFactory {
 
     private static final MongoMapper MONGO_MAPPER = new MongoMapper();
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public BsonMarshaller createMarshaller() {
         return new JacksonBsonMarshaller(MONGO_MAPPER);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public BsonUnmarshaller createUnmarshaller() {
         return new JacksonBsonUnmarshaller(MONGO_MAPPER);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public JsonToDBObjectMarshaller createJsonToDbObjectMarshaller() {
         throw new UnsupportedOperationException("There are no Jackson implementation of JsonToDBObjectMarshaller");

@@ -23,9 +23,11 @@ import java.lang.annotation.Retention;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
+/**
+ * Used to mark fields to use as mongodb identifier.
+ */
 @Retention(RUNTIME)
 @JacksonAnnotationsInside
-
 @JsonProperty("_id")
 @Inherited
 public @interface Id {

@@ -16,7 +16,6 @@
 package com.mingo.mapping.marshall.mongo;
 
 import com.mingo.exceptions.MarshallingException;
-import com.mingo.mapping.marshall.AbstractJsonToBsonMarshaller;
 import com.mingo.mapping.marshall.JsonToDBObjectMarshaller;
 import com.mingo.mapping.marshall.mongo.callback.BasicDBListReplacementCallback;
 import com.mingo.mapping.marshall.mongo.callback.BasicDBObjectReplacementCallback;
@@ -31,8 +30,14 @@ import org.bson.BSON;
 
 import java.util.Map;
 
-public class MongoJsonToDBObjectMarshaller extends AbstractJsonToBsonMarshaller<DBObject> implements JsonToDBObjectMarshaller {
+/**
+ * Implementation of {@link JsonToDBObjectMarshaller} based on {@link JSON}.
+ */
+public class MongoJsonToDBObjectMarshaller implements JsonToDBObjectMarshaller {
 
+    /**
+     * Default constructor.
+     */
     public MongoJsonToDBObjectMarshaller() {
 
         // fix for https://jira.mongodb.org/browse/JAVA-268
@@ -45,6 +50,9 @@ public class MongoJsonToDBObjectMarshaller extends AbstractJsonToBsonMarshaller<
         });
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public DBObject marshall(String json, Map<String, Object> parameters) throws MarshallingException {
         return (DBObject) JSON.parse(json, new BSONCallback(parameters));

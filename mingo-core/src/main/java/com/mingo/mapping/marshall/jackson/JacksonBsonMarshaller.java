@@ -15,6 +15,7 @@
  */
 package com.mingo.mapping.marshall.jackson;
 
+import com.mingo.exceptions.MarshallingException;
 import com.mingo.mapping.marshall.BsonMarshaller;
 import org.bson.BSONObject;
 
@@ -25,12 +26,27 @@ public class JacksonBsonMarshaller implements BsonMarshaller {
 
     private MongoMapper mongoMapper;
 
+    /**
+     * Constructor with parameters.
+     *
+     * @param mongoMapper the mongo mapper
+     */
     public JacksonBsonMarshaller(MongoMapper mongoMapper) {
         this.mongoMapper = mongoMapper;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public <T extends BSONObject> T marshall(Class<T> type, Object pojo) throws RuntimeException {
-        return mongoMapper.convertValue(pojo, type);
+    public <T extends BSONObject> T marshall(Class<T> type, Object pojo) throws MarshallingException {
+        T result;
+        try {
+            result = mongoMapper.convertValue(pojo, type);
+        } catch (RuntimeException ex) {
+            throw new MarshallingException(ex);
+        }
+        return result;
     }
+
 }

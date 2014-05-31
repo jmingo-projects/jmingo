@@ -16,9 +16,21 @@
 package com.mingo.mapping.marshall;
 
 
+import com.mingo.exceptions.MarshallingException;
 import org.bson.BSONObject;
 
+/**
+ * Unmarshall BSON objects into an objects.
+ */
 public interface BsonUnmarshaller {
 
-    <T, B extends BSONObject> T unmarshall(Class<T> type, B source);
+    /**
+     * Unmarshall the given BSON object into an object with specified type.
+     *
+     * @param type   the type of the result object
+     * @param source the BSON object to unmarshall
+     * @return unmarshalled BSON object
+     * @throws MarshallingException if any marshalling errors occur
+     */
+    <T, B extends BSONObject> T unmarshall(Class<T> type, B source) throws MarshallingException;
 }

@@ -17,6 +17,9 @@ package com.mingo.mapping.marshall.jackson.mixin;
 
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 
+/**
+ * MixIn to convert {@code DBObject} objects to custom types.
+ */
 public interface DBObjectMixIn {
     @JsonAnySetter
     void put(String key, Object value);

@@ -1,7 +1,3 @@
-package com.mingo.mapping.convert.mongo.type;
-
-import com.mongodb.DBObject;
-
 /**
  * Copyright 2012-2013 The Mingo Team
  * <p/>
@@ -16,6 +12,13 @@ import com.mongodb.DBObject;
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ */
+package com.mingo.mapping.convert.mongo.type;
+
+import com.mongodb.DBObject;
+
+/**
+ * Functional interface to get a value from dbObject and transform to object with specified type T.
  *
  * @param <T> the type of the class modeled by this {@code Class} object.
  */

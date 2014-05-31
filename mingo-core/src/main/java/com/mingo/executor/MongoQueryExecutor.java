@@ -18,8 +18,10 @@ import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
+
 import java.util.List;
 import java.util.Map;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
@@ -50,15 +52,23 @@ public class MongoQueryExecutor extends AbstractQueryExecutor implements QueryEx
     private ELEngine elEngine;
     private ConverterService converterService;
     private Map<QueryType, QueryStrategy> queryStrategyMap =
-        new ImmutableMap.Builder<QueryType, QueryStrategy>()
-            .put(QueryType.AGGREGATION, new AggregationQueryStrategy())
-            .put(QueryType.PLAIN, new PlainQueryStrategy())
-            .build();
+            new ImmutableMap.Builder<QueryType, QueryStrategy>()
+                    .put(QueryType.AGGREGATION, new AggregationQueryStrategy())
+                    .put(QueryType.PLAIN, new PlainQueryStrategy())
+                    .build();
 
     private static final JsonToDBObjectMarshaller JSON_TO_DB_OBJECT_MARSHALLER = new MongoBsonMarshallingFactory().createJsonToDbObjectMarshaller();
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoQueryExecutor.class);
 
+    /**
+     * Constructor to create mongo query executor.
+     *
+     * @param mongoDBFactory   the mongodb factory
+     * @param queryManager     the query manager
+     * @param elEngine         the EL engine
+     * @param converterService the converter service
+     */
     public MongoQueryExecutor(MongoDBFactory mongoDBFactory, QueryManager queryManager, ELEngine elEngine,
                               ConverterService converterService) {
         this.mongoDBFactory = mongoDBFactory;
@@ -142,11 +152,11 @@ public class MongoQueryExecutor extends AbstractQueryExecutor implements QueryEx
         <T> List<T> queryForList(QueryStatement queryStatement, Class<T> type) {
             DBCollection dbCollection = getDbCollection(queryStatement.getCollectionName());
             BasicDBList query = (BasicDBList) JSON_TO_DB_OBJECT_MARSHALLER.marshall(queryStatement.getPreparedQuery(),
-                queryStatement.getParameters());
+                    queryStatement.getParameters());
             AggregationOutput aggregationOutput = performAggregationQuery(dbCollection, query);
             BasicDBList source = getAsBasicDBList(aggregationOutput);
             List<T> result = convertList(type, source, queryStatement.getConverterClass(),
-                queryStatement.getConverterMethod());
+                    queryStatement.getConverterMethod());
             return result != null ? result : Lists.<T>newArrayList();
         }
 
@@ -154,7 +164,7 @@ public class MongoQueryExecutor extends AbstractQueryExecutor implements QueryEx
         <T> T queryForObject(QueryStatement queryStatement, Class<T> type) {
             DBCollection dbCollection = getDbCollection(queryStatement.getCollectionName());
             BasicDBList query = (BasicDBList) JSON_TO_DB_OBJECT_MARSHALLER.marshall(queryStatement.getPreparedQuery(),
-                queryStatement.getParameters());
+                    queryStatement.getParameters());
             AggregationOutput aggregationOutput = performAggregationQuery(dbCollection, query);
             BasicDBList result = getAsBasicDBList(aggregationOutput);
             return convertOne(type, result, queryStatement.getConverterClass(), queryStatement.getConverterMethod());
@@ -170,10 +180,10 @@ public class MongoQueryExecutor extends AbstractQueryExecutor implements QueryEx
         <T> List<T> queryForList(QueryStatement queryStatement, Class<T> type) {
             DBCollection dbCollection = getDbCollection(queryStatement.getCollectionName());
             DBObject query = JSON_TO_DB_OBJECT_MARSHALLER.marshall(queryStatement.getPreparedQuery(),
-                queryStatement.getParameters());
+                    queryStatement.getParameters());
             DBCursor source = dbCollection.find(query);
             List<T> result = convertList(type, source, queryStatement.getConverterClass(),
-                queryStatement.getConverterMethod());
+                    queryStatement.getConverterMethod());
             return result != null ? result : Lists.<T>newArrayList();
         }
 
@@ -181,7 +191,7 @@ public class MongoQueryExecutor extends AbstractQueryExecutor implements QueryEx
         <T> T queryForObject(QueryStatement queryStatement, Class<T> type) {
             DBCollection dbCollection = getDbCollection(queryStatement.getCollectionName());
             DBObject query = JSON_TO_DB_OBJECT_MARSHALLER.marshall(queryStatement.getPreparedQuery(),
-                queryStatement.getParameters());
+                    queryStatement.getParameters());
             DBObject result = dbCollection.findOne(query);
             return convertOne(type, result, queryStatement.getConverterClass(), queryStatement.getConverterMethod());
         }
@@ -189,11 +199,11 @@ public class MongoQueryExecutor extends AbstractQueryExecutor implements QueryEx
 
     private <T> List<T> convertList(Class<T> type, DBCursor result, String converterClass, String converterMethod) {
         List<T> list = null;
-        if(result != null && result.hasNext()) {
+        if (result != null && result.hasNext()) {
             list = Lists.newArrayList();
-            for(DBObject item : result) {
+            for (DBObject item : result) {
                 list.add(convertOne(type, item, converterClass,
-                    converterMethod));
+                        converterMethod));
             }
         }
         return list;
@@ -201,7 +211,7 @@ public class MongoQueryExecutor extends AbstractQueryExecutor implements QueryEx
 
     @SuppressWarnings("unchecked")
     private <T> List<T> convertList(Class<T> type, BasicDBList result, String converterClass, String converterMethod) {
-        if(StringUtils.isNotBlank(converterClass) && StringUtils.isNotBlank(converterMethod)) {
+        if (StringUtils.isNotBlank(converterClass) && StringUtils.isNotBlank(converterMethod)) {
             return (List<T>) convertByMethod(result, converterClass, converterMethod);
         } else {
             return convertList(type, result, converterService.lookupConverter(type));
@@ -209,7 +219,7 @@ public class MongoQueryExecutor extends AbstractQueryExecutor implements QueryEx
     }
 
     private <T> T convertOne(Class<T> type, DBObject result, String converterClass, String converterMethod) {
-        if(StringUtils.isNotBlank(converterClass) && StringUtils.isNotBlank(converterMethod)) {
+        if (StringUtils.isNotBlank(converterClass) && StringUtils.isNotBlank(converterMethod)) {
             return convertByMethod(result, converterClass, converterMethod);
         } else {
             return converterService.lookupConverter(type).convert(type, result);

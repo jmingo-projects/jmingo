@@ -26,11 +26,17 @@ import java.lang.annotation.Target;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * Used to mark fields which should be set with new identifier generated value.
+ * Used to mark fields for which should be generated new value.
  */
 @Retention(RUNTIME)
 @Target(ElementType.FIELD)
 @Inherited
 public @interface GeneratedValue {
+
+    /**
+     * Indicates id generation strategy, to read more about out of the box strategies see {@link IdGeneratorStrategy}.
+     *
+     * @return id generation strategy
+     */
     String strategy() default IdGeneratorStrategy.TYPE;
 }
