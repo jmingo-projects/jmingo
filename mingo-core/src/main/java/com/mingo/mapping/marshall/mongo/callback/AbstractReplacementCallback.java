@@ -16,11 +16,16 @@
 package com.mingo.mapping.marshall.mongo.callback;
 
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 
 import java.util.Collection;
 import java.util.Map;
 
-
+/**
+ * Base implementation of {@link ReplacementCallback}.
+ *
+ * @param <T> type of replaced object
+ */
 public abstract class AbstractReplacementCallback<T> implements ReplacementCallback<T> {
 
     private String prefix = DEFAULT_PREFIX;
@@ -28,31 +33,71 @@ public abstract class AbstractReplacementCallback<T> implements ReplacementCallb
 
     private static final String DEFAULT_PREFIX = "#";
 
+    /**
+     * Constructor this parameters.
+     *
+     * @param prefix       the prefix identifies that field is parameter
+     * @param replacements the replacements
+     */
     public AbstractReplacementCallback(String prefix, Map<String, Object> replacements) {
         this.prefix = prefix;
         this.replacements = replacements;
     }
 
+    /**
+     * Constructor this parameters.
+     *
+     * @param replacements the replacements
+     */
     public AbstractReplacementCallback(Map<String, Object> replacements) {
         this(DEFAULT_PREFIX, replacements);
     }
 
+    /**
+     * Gets parameter prefix.
+     *
+     * @return parameter prefix
+     */
     String getPrefix() {
         return prefix;
     }
 
-    boolean isCollection(Object val) {
-        return val instanceof Collection;
+    /**
+     * Checks that the given value is a collection.
+     *
+     * @param value the value to check
+     * @return true if value is instance of Collection, otherwise - false
+     */
+    boolean isCollection(Object value) {
+        return (value instanceof Collection);
     }
 
+    /**
+     * Checks that the given value is a map.
+     *
+     * @param value the value to check
+     * @return true if value is instance of Map, otherwise - false
+     */
     boolean isMap(Object value) {
         return (value instanceof Map);
     }
 
+    /**
+     * Applies {@link #getReplacement(Object)} for each element in the collection.
+     *
+     * @param collection the collection to replace
+     * @return new collection with replaced elements
+     */
     Object replaceInCollection(Collection collection) {
-        return Iterables.transform(collection, this::getReplacement);
+        return Lists.newArrayList(Iterables.transform(collection, this::getReplacement));
     }
 
+    /**
+     * Gets a replacement for the given source.
+     *
+     * @param source the source to get replacement
+     * @return replacement
+     */
     Object getReplacement(Object source) {
         if (source == null) {
             return source;

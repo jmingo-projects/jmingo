@@ -30,7 +30,7 @@ public final class Profilers {
      * Creates new {@link QueryProfiler}.
      *
      * @param queryId the query id
-     * @return the profiler
+     * @return new instance of {@link QueryProfiler}
      */
     public static Profiler newQueryProfiler(String queryId) {
         return new QueryProfiler(queryId, METRICS_TRANSFER);

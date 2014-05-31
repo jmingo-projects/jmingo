@@ -19,7 +19,7 @@ package com.mingo.benchmark;
 import java.util.concurrent.TimeUnit;
 
 /**
- * This profiler is used to profile execution time of queries.
+ * This profiler is used to measure execution time of queries.
  */
 public class QueryProfiler implements Profiler {
 
@@ -31,19 +31,27 @@ public class QueryProfiler implements Profiler {
      * Constructor with parameters.
      *
      * @param queryId         the query id to profile
-     * @param metricsTransfer the metrics transfer to send metrics to benchmark services
+     * @param metricsTransfer the metrics transfer to send metrics to a benchmark services
      */
     public QueryProfiler(String queryId, MetricsTransfer metricsTransfer) {
         this.queryId = queryId;
         this.metricsTransfer = metricsTransfer;
     }
 
+    /**
+     * Starts profiling and stores start time in nanoseconds.
+     *
+     * @return current profiler
+     */
     @Override
     public Profiler start() {
         this.startTime = System.nanoTime();
         return this;
     }
 
+    /**
+     * Stops profiling. Calculates execution time and sends metrics through metrics transfer.
+     */
     @Override
     public void stop() {
         long executionTime = System.nanoTime() - startTime;

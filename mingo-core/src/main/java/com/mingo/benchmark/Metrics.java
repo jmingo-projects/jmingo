@@ -22,7 +22,7 @@ import java.io.Serializable;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Represents information about profiling.
+ * Represents information about profiling result.
  * This class is immutable and can be shared between threads without any synchronization.
  */
 public class Metrics implements Serializable {

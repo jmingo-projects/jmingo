@@ -16,7 +16,7 @@
 package com.mingo.benchmark;
 
 /**
- * This event is used to send metrics to a subscribers: benchmark services.
+ * This event is used to send metrics to a subscribers namely benchmark services.
  */
 public class MetricsEvent {
 

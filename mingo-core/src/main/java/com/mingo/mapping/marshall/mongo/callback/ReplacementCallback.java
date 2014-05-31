@@ -15,7 +15,19 @@
  */
 package com.mingo.mapping.marshall.mongo.callback;
 
+/**
+ * Callback that's called to replace an item with a value.
+ *
+ * @param <T> type of replaced object
+ */
+@FunctionalInterface
 public interface ReplacementCallback<T> {
 
+    /**
+     * Replace given item with a value.
+     *
+     * @param item the item to be replaced
+     * @return replaced object
+     */
     Object doReplace(T item);
 }

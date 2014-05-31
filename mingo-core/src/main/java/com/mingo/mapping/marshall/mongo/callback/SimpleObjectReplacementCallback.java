@@ -17,16 +17,30 @@ package com.mingo.mapping.marshall.mongo.callback;
 
 import java.util.Map;
 
+/**
+ * This implementation finds a replacement in replacements map.
+ */
 public class SimpleObjectReplacementCallback extends AbstractReplacementCallback<Object> implements ReplacementCallback<Object> {
 
+    /**
+     * {@inheritDoc}
+     */
     public SimpleObjectReplacementCallback(String prefix, Map<String, Object> replacements) {
         super(prefix, replacements);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public SimpleObjectReplacementCallback(Map<String, Object> replacements) {
         super(replacements);
     }
 
+    /**
+     * Gets replacement from replacements map for specified item.
+     *
+     * @return replacement
+     */
     @Override
     public Object doReplace(Object item) {
         return item == null ? item : getReplacement(item);

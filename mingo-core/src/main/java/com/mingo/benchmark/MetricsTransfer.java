@@ -55,6 +55,12 @@ public class MetricsTransfer {
      */
     private static class MetricsEventHandler {
 
+        /**
+         * Handles metrics events and gets {@link com.mingo.benchmark.Metrics} from it to send
+         * to the registered benchmark services.
+         *
+         * @param metricsEvent the metrics event
+         */
         @Subscribe
         @AllowConcurrentEvents
         public void handle(MetricsEvent metricsEvent) {
@@ -68,6 +74,11 @@ public class MetricsTransfer {
 
         }
 
+        /**
+         * Handles dead events and logs it.
+         *
+         * @param deadEvent the dead event
+         */
         @Subscribe
         @AllowConcurrentEvents
         public void handle(DeadEvent deadEvent) {
