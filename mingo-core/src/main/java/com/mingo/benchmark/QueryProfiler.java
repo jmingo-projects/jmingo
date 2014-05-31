@@ -18,12 +18,21 @@ package com.mingo.benchmark;
 
 import java.util.concurrent.TimeUnit;
 
+/**
+ * This profiler is used to profile execution time of queries.
+ */
 public class QueryProfiler implements Profiler {
 
     private final String queryId;
     private long startTime;
     private MetricsTransfer metricsTransfer;
 
+    /**
+     * Constructor with parameters.
+     *
+     * @param queryId         the query id to profile
+     * @param metricsTransfer the metrics transfer to send metrics to benchmark services
+     */
     public QueryProfiler(String queryId, MetricsTransfer metricsTransfer) {
         this.queryId = queryId;
         this.metricsTransfer = metricsTransfer;

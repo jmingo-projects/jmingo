@@ -15,15 +15,27 @@
  */
 package com.mingo.benchmark;
 
-
+/**
+ * This event is used to send metrics to a subscribers: benchmark services.
+ */
 public class MetricsEvent {
 
     private final Metrics metrics;
 
+    /**
+     * Constructor to set metrics in event.
+     *
+     * @param metrics the metrics {@link com.mingo.benchmark.Metrics}
+     */
     public MetricsEvent(Metrics metrics) {
         this.metrics = metrics;
     }
 
+    /**
+     * Gets metrics.
+     *
+     * @return metrics
+     */
     public Metrics getMetrics() {
         return metrics;
     }

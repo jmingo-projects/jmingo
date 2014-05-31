@@ -15,10 +15,20 @@
  */
 package com.mingo.benchmark;
 
-
+/**
+ * Common interface that provides methods to start and stop profiling.
+ */
 public interface Profiler {
 
+    /**
+     * Starts profiling.
+     *
+     * @return the profiler instance
+     */
     Profiler start();
 
+    /**
+     * Stops profiling.
+     */
     void stop();
 }

@@ -28,7 +28,9 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-
+/**
+ * Used to transfer events from a profiler to the registered benchmark services using Guava event bus.
+ */
 public class MetricsTransfer {
 
     private ExecutorService eventBusThreadPool = Executors.newFixedThreadPool(10);
@@ -39,14 +41,18 @@ public class MetricsTransfer {
         eventBus.register(new MetricsEventHandler());
     }
 
-    public void register(Profiler profiler) {
-        eventBus.register(profiler);
-    }
-
+    /**
+     * Sends the given event to the registered benchmark services.
+     *
+     * @param metricsEvent the metrics event
+     */
     public void sendEvent(MetricsEvent metricsEvent) {
         eventBus.post(metricsEvent);
     }
 
+    /**
+     * Handler to handle {@link MetricsEvent} events.
+     */
     private static class MetricsEventHandler {
 
         @Subscribe

@@ -16,14 +16,24 @@
 package com.mingo.benchmark;
 
 
-public class Profilers {
+/**
+ * Creates instances of {@link Profiler} interface.
+ */
+public final class Profilers {
 
     private static final MetricsTransfer METRICS_TRANSFER = new MetricsTransfer();
 
+    private Profilers() {
+    }
+
+    /**
+     * Creates new {@link QueryProfiler}.
+     *
+     * @param queryId the query id
+     * @return the profiler
+     */
     public static Profiler newQueryProfiler(String queryId) {
-        Profiler profiler = new QueryProfiler(queryId, METRICS_TRANSFER);
-        METRICS_TRANSFER.register(profiler);
-        return profiler;
+        return new QueryProfiler(queryId, METRICS_TRANSFER);
     }
 
 }

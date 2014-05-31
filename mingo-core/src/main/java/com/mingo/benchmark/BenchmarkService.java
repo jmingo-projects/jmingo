@@ -42,6 +42,7 @@ public interface BenchmarkService {
 
     /**
      * This method is called when {@link Context#shutdown()} is invoked.
+     * Try to avoid long operations  in this method.
      */
     void destroy();
 }
