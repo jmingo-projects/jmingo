@@ -29,6 +29,7 @@ import com.mingo.mongo.MongoDBFactory;
 import com.mingo.mongo.index.Index;
 import com.mingo.query.Criteria;
 import com.mongodb.BasicDBObject;
+import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
@@ -70,6 +71,15 @@ public class MingoTemplate {
     }
 
     /**
+     * Gets current db.
+     *
+     * @return current db
+     */
+    public DB getDB() {
+        return mongoDBFactory.getDB();
+    }
+
+    /**
      * Creates collection.
      *
      * @param document the document to get collection name to create index
@@ -101,8 +111,9 @@ public class MingoTemplate {
 
     /**
      * Creates index.
+     *
      * @param document the document to get collection name to create index
-     * @param index the index
+     * @param index    the index to create
      */
     public void ensureIndex(Class<?> document, Index index) {
         assertDocument(document);
@@ -112,8 +123,9 @@ public class MingoTemplate {
 
     /**
      * Creates index.
+     *
      * @param collectionName the collection name to create index
-     * @param index the index
+     * @param index          the index to create
      */
     public void ensureIndex(String collectionName, Index index) {
         Validate.notBlank(collectionName, "collectionName cannot be null or empty");
@@ -140,7 +152,7 @@ public class MingoTemplate {
      * Drops index by index name.
      *
      * @param collectionName the collection name to drop index
-     * @param indexName the index name to drop
+     * @param indexName      the index name to drop
      */
     public void dropIndex(String collectionName, String indexName) {
         Validate.notBlank(collectionName, "collectionName cannot be null or empty");
