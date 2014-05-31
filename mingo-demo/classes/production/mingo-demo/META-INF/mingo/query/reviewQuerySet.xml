@@ -4,6 +4,11 @@
 
     <config collectionName="Review"/>
 
+    <queryFragment id="review-project">
+        { "$project" : { "_id" : 1 , "tags" : 1 , "moderationStatus" : 1 , "author" : 1 , "ratings" : 1 , "text" : 1 ,
+        "title" : 1 , "comments" : { "$ifNull" : [ "$comments" , [ { "moderationStatus" : "STATUS_REJECTED"}]]}}},
+    </queryFragment>
+
     <query id="getByAuthor">
         { "author.name": "#name", "author.email": "#email"}
     </query>
@@ -23,15 +28,19 @@
     <query id="getByModerationStatus" type="aggregation"
            converter-class="com.mingo.demo.util.converter.ReviewSpecificConverter"
            converter-method="convertVehicleReviewsWithAggregatedInfo">
-        { "$match" : {"moderationStatus" : "#status"}} ,
-        { "$sort" : { "created" : -1}} , { "$limit" : "#limit"} , { "$skip" : "#skip"} ,
-        { "$project" : { "_id" : 1 , "tags" :1 , "moderationStatus" : 1, "author":1 , "ratings": 1, "text": 1,
-        "title" :1,
-        "comments" : { "$ifNull" : [ "$comments" , [ { "moderationStatus" : "#status"}]]}}} ,
+        <if condition="#status != null">
+            { "$match" : { "moderationStatus" : "#status"}} ,
+            <else>
+                { "$match" : { "moderationStatus" : "STATUS_PASSED"}} ,
+            </else>
+        </if>
+        { "$sort" : { "created" : -1}} , { "$limit" : 10} , { "$skip" : 0} ,
+        <fragment ref="review-project"/>
         { "$unwind" : "$comments"} ,
-        { "$group" : { "_id" : { "_id" : "$_id" , "author" : "$author" , "created" : "$created" ,
-        "title" : "$title" ,"moderationStatus" : "$moderationStatus", "text" : "$text" ,"tags" : "$tags", "ratings" : "$ratings"} ,
-        "commentsCount" : { "$sum" : { "$cond" : [ { "$eq" : [ "$comments.moderationStatus" , "#status"]} , 0 ,
+        { "$group" : { "_id" : { "_id" : "$_id" , "author" : "$author" , "created" : "$created" , "title" : "$title" ,
+        "moderationStatus" : "$moderationStatus" , "text" : "$text" , "tags" : "$tags" , "ratings" : "$ratings"} ,
+        "comments": { "$addToSet": "$comments" },
+        "commentsCount" : { "$sum" : { "$cond" : [ { "$eq" : [ "$comments.moderationStatus" , "STATUS_REJECTED"]} , 0 ,
         1]}}}} ,
         { "$sort" : { "_id.created" : -1}}
     </query>

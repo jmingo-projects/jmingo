@@ -109,7 +109,9 @@ public class ReviewRepositoryIntegrationTest extends AbstractTestNGSpringContext
         Review review1 = new Review()
         review1.author = new Author("name1", "mail_1@mail.com")
         review1.ratings = [new Rating(type: "overall", value: 10f)]
-        review1.comments = [new Comment("comment 1", ModerationStatus.STATUS_PASSED), new Comment("comment 2", ModerationStatus.STATUS_NOT_MODERATED)]
+        review1.comments = [new Comment("comment 1", ModerationStatus.STATUS_PASSED), new Comment("comment 2",
+                ModerationStatus.STATUS_NOT_MODERATED),
+                            new Comment("comment 3", ModerationStatus.STATUS_REJECTED)]
         review1.moderationStatus = ModerationStatus.STATUS_PASSED
         review1.text = 'review text'
         review1.title = 'review title'
@@ -119,12 +121,39 @@ public class ReviewRepositoryIntegrationTest extends AbstractTestNGSpringContext
         assertNotNull(reviews);
         assertEquals(1, reviews.size());
         def actual = reviews.get(0);
-        assertEquals(1, actual.commentsCount);
+        assertEquals(2, actual.commentsCount);
         assertEquals(actual.id, review1.id);
         assertEquals(actual.text, review1.text);
         assertEquals(actual.title, review1.title);
         assertEquals(actual.moderationStatus, review1.moderationStatus);
-        //assertEquals(actual.comments.size(), review1.comments.size()); todo
+        assertEquals(actual.comments.size(), review1.comments.size());
+        assertEquals(actual.ratings.size(), review1.ratings.size());
+        assertEquals(actual.tags.size(), review1.tags.size());
+    }
+
+    @Test
+    void testGetByEmptyModerationStatus() {
+        Review review1 = new Review()
+        review1.author = new Author("name1", "mail_1@mail.com")
+        review1.ratings = [new Rating(type: "overall", value: 10f)]
+        review1.comments = [new Comment("comment 1", ModerationStatus.STATUS_PASSED), new Comment("comment 2",
+                ModerationStatus.STATUS_NOT_MODERATED),
+                            new Comment("comment 3", ModerationStatus.STATUS_REJECTED)]
+        review1.moderationStatus = ModerationStatus.STATUS_PASSED
+        review1.text = 'review text'
+        review1.title = 'review title'
+        review1.tags = ['java', 'groovy']
+        reviewRepository.insert(review1);
+        def reviews = reviewRepository.getByModerationStatus(null, 10, 0);
+        assertNotNull(reviews);
+        assertEquals(1, reviews.size());
+        def actual = reviews.get(0);
+        assertEquals(2, actual.commentsCount);
+        assertEquals(actual.id, review1.id);
+        assertEquals(actual.text, review1.text);
+        assertEquals(actual.title, review1.title);
+        assertEquals(actual.moderationStatus, review1.moderationStatus);
+        assertEquals(actual.comments.size(), review1.comments.size());
         assertEquals(actual.ratings.size(), review1.ratings.size());
         assertEquals(actual.tags.size(), review1.tags.size());
     }

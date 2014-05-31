@@ -1,11 +1,13 @@
 package com.mingo.demo.util.converter
 
+import com.mingo.demo.domain.Comment
 import com.mingo.demo.domain.Review
 import com.mingo.mapping.convert.DefaultConverter
 import com.mongodb.BasicDBList
 import com.mongodb.DBObject
 
 import static com.google.common.collect.Maps.newHashMap
+import static com.mingo.mapping.convert.ConversionUtils.convertList
 import static com.mingo.mapping.convert.ConversionUtils.getAsInteger
 import static com.mingo.mapping.convert.ConversionUtils.getAsString
 
@@ -13,8 +15,8 @@ import static com.mingo.mapping.convert.ConversionUtils.getAsString
 class ReviewSpecificConverter {
 
     public static final String ID = "_id";
-    public static final String AVERAGE_RATING = "averageRating";
     public static final String COMMENTS_COUNT = "commentsCount";
+    public static final String COMMENTS = "comments"
 
     private DefaultConverter converter = new DefaultConverter();
 
@@ -36,9 +38,10 @@ class ReviewSpecificConverter {
             DBObject reviewItem = (DBObject) responseItem;
             DBObject reviewIdItem = (DBObject) reviewItem.get(ID);
             Review review = convertReview(reviewIdItem);
-//            if (reviewIdItem.get(AVERAGE_RATING) != null) {
-//                review.setAverageRating((Double) reviewIdItem.get(AVERAGE_RATING));
-//            }
+            if (responseItem.get(COMMENTS) != null) {
+                DBObject comments = responseItem.get(COMMENTS);
+                review.comments = convertList(Comment.class, comments, converter);;
+            }
             if (reviewItem.get(COMMENTS_COUNT) != null) {
                 review.commentsCount = (int) reviewItem.get(COMMENTS_COUNT);
             }
