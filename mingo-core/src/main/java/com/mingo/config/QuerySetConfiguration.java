@@ -1,13 +1,3 @@
-package com.mingo.config;
-
-import com.google.common.collect.Sets;
-
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.Validate;
-
-import java.util.Collections;
-import java.util.Set;
-
 /**
  * Copyright 2012-2013 The Mingo Team
  * <p/>
@@ -23,31 +13,22 @@ import java.util.Set;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.mingo.config;
+
+import com.google.common.collect.Sets;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.Validate;
+
+import java.util.Collections;
+import java.util.Set;
+
+/**
+ * Contains properties related to the query sets.
+ */
 public class QuerySetConfiguration {
 
-    private String databaseName;
-
-    private Set<String> querySets = Collections.emptySet();
-
-    /**
-     * Gets database name.
-     *
-     * @return database name
-     */
-    @Deprecated
-    public String getDatabaseName() {
-        return databaseName;
-    }
-
-    /**
-     * Sets database name.
-     *
-     * @param databaseName database name
-     */
-    @Deprecated
-    public void setDatabaseName(String databaseName) {
-        this.databaseName = databaseName;
-    }
+    private Set<String> querySets = Sets.newHashSet();
 
     /**
      * Gets query sets.
@@ -65,22 +46,16 @@ public class QuerySetConfiguration {
      */
     public void addQuerySet(String querySet) {
         Validate.notBlank(querySet, "query set path cannot be empty");
-        if (CollectionUtils.isEmpty(querySets)) {
-            querySets = Sets.newHashSet();
-        }
         querySets.add(querySet);
     }
 
     /**
      * Add query sets.
      *
-     * @param pQuerySets query sets
+     * @param pQuerySets the query sets to add
      */
     public void addQuerySet(Set<String> pQuerySets) {
         if (CollectionUtils.isNotEmpty(pQuerySets)) {
-            if (CollectionUtils.isEmpty(querySets)) {
-                querySets = Sets.newHashSet(pQuerySets);
-            }
             querySets.addAll(pQuerySets);
         }
     }

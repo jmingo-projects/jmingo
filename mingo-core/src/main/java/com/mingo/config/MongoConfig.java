@@ -21,20 +21,23 @@ import com.mongodb.ServerAddress;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Config is used to collect information necessary to create and set up {@link com.mongodb.Mongo} instance.
+ */
 public class MongoConfig {
 
     public static String DEF_HOST = ServerAddress.defaultHost();
     public static int DEF_PORT = ServerAddress.defaultPort();
 
-    private String databaseHost;
-    private int databasePort;
-    private String dbName;
-    private String writeConcern;
+    private final String databaseHost;
+    private final int databasePort;
+    private final String dbName;
+    private final String writeConcern;
 
     private Map<String, String> options;
 
     private MongoConfig() {
-        throw new UnsupportedOperationException("private constructor, use builder");
+        throw new UnsupportedOperationException("private constructor, use builder instead");
     }
 
     public static Builder builder() {
@@ -96,6 +99,11 @@ public class MongoConfig {
             return this;
         }
 
+        /**
+         * Mongo options, to get more info see {@link com.mongodb.MongoClientOptions}.
+         *
+         * @param options options
+         */
         public void options(Map<String, String> options) {
             this.options = options;
         }

@@ -47,7 +47,7 @@ public class MongoQueryExecutor extends AbstractQueryExecutor implements QueryEx
     private MongoDBFactory mongoDBFactory;
 
     private QueryManager queryManager;
-    private ELEngine queryAnalyzer;
+    private ELEngine elEngine;
     private ConverterService converterService;
     private Map<QueryType, QueryStrategy> queryStrategyMap =
         new ImmutableMap.Builder<QueryType, QueryStrategy>()
@@ -59,11 +59,11 @@ public class MongoQueryExecutor extends AbstractQueryExecutor implements QueryEx
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoQueryExecutor.class);
 
-    public MongoQueryExecutor(MongoDBFactory mongoDBFactory, QueryManager queryManager, ELEngine queryAnalyzer,
+    public MongoQueryExecutor(MongoDBFactory mongoDBFactory, QueryManager queryManager, ELEngine elEngine,
                               ConverterService converterService) {
         this.mongoDBFactory = mongoDBFactory;
         this.queryManager = queryManager;
-        this.queryAnalyzer = queryAnalyzer;
+        this.elEngine = elEngine;
         this.converterService = converterService;
     }
 
@@ -100,7 +100,7 @@ public class MongoQueryExecutor extends AbstractQueryExecutor implements QueryEx
                              QueryCallback<S, R> queryCallback) {
         Validate.notEmpty(queryName, "query name cannot be null");
         Validate.notNull(type, "type cannot be null");
-        QueryStatement queryStatement = new QueryStatement(queryManager, queryAnalyzer, queryName, parameters);
+        QueryStatement queryStatement = new QueryStatement(queryManager, elEngine, queryName, parameters);
         QueryStrategy queryStrategy = queryStrategyMap.get(queryStatement.getQueryType());
         return queryCallback.query(queryStrategy, queryStatement, type);
     }

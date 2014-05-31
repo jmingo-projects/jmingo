@@ -18,7 +18,9 @@ package com.mingo.config;
 import com.mingo.query.el.ELEngineType;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-
+/**
+ * Mingo context configurations contains information to create and initialize context.
+ */
 public class ContextConfiguration {
 
     private MingoContextConfig mingoContextConfig;
@@ -38,10 +40,20 @@ public class ContextConfiguration {
 
     private String converterPackageScan;
 
+    /**
+     * Gets mingo context config.
+     *
+     * @return the mingo context config
+     */
     public MingoContextConfig getMingoContextConfig() {
         return mingoContextConfig;
     }
 
+    /**
+     * Sets mingo context config.
+     *
+     * @param mingoContextConfig the mingo context config {@link MingoContextConfig}
+     */
     public void setMingoContextConfig(MingoContextConfig mingoContextConfig) {
         this.mingoContextConfig = mingoContextConfig;
     }
@@ -85,27 +97,16 @@ public class ContextConfiguration {
     }
 
     /**
-     * Gets database host.
+     * Gets database host. also see {@link #getMongoConfig()}.
      *
      * @return database host
      */
-    @Deprecated
     public String getDatabaseHost() {
         return mongoConfig.getDatabaseHost();
     }
 
     /**
-     * Sets database host.
-     *
-     * @param databaseHost database host
-     */
-    @Deprecated
-    public void setDatabaseHost(String databaseHost) {
-        this.databaseHost = databaseHost;
-    }
-
-    /**
-     * Gets database port.
+     * Gets database port. also see {@link #getMongoConfig()}.
      *
      * @return database port
      */
@@ -114,23 +115,14 @@ public class ContextConfiguration {
         return mongoConfig.getDatabasePort();
     }
 
-    /**
-     * Sets database port.
-     *
-     * @param databasePort database port
-     */
-    @Deprecated
-    public void setDatabasePort(int databasePort) {
-        this.databasePort = databasePort;
-    }
 
     /**
      * Sets default converter.
      *
-     * @param cClass converter class
+     * @param fullClassName full converter class name
      */
-    public void setDefaultConverter(String cClass) {
-        this.defaultConverter = cClass;
+    public void setDefaultConverter(String fullClassName) {
+        this.defaultConverter = fullClassName;
     }
 
     /**
@@ -142,18 +134,38 @@ public class ContextConfiguration {
         return defaultConverter;
     }
 
+    /**
+     * Gets converter package scan.
+     *
+     * @return converter package scan
+     */
     public String getConverterPackageScan() {
         return converterPackageScan;
     }
 
+    /**
+     * Sets converter package scan.
+     *
+     * @param converterPackageScan the converter package scan
+     */
     public void setConverterPackageScan(String converterPackageScan) {
         this.converterPackageScan = converterPackageScan;
     }
 
+    /**
+     * Gets mongo config.
+     *
+     * @return mongo config
+     */
     public MongoConfig getMongoConfig() {
         return mongoConfig;
     }
 
+    /**
+     * Sets mongo config.
+     *
+     * @param mongoConfig the mongo config
+     */
     public void setMongoConfig(MongoConfig mongoConfig) {
         this.mongoConfig = mongoConfig;
     }
