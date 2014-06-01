@@ -16,28 +16,51 @@
 package com.mingo.query;
 
 /**
- * Immutable.
+ * Text element. Immutable.
  */
 public class TextElement implements QueryElement {
 
     private final String text;
 
+    /**
+     * Constructor with parameters.
+     *
+     * @param text the element text
+     */
     public TextElement(String text) {
         this.text = text;
     }
 
+    /**
+     * Gets text.
+     *
+     * @return text
+     */
     public String getText() {
         return text;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void accept(QBuilder queryBuilder) {
         queryBuilder.append(this);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String asString() {
         return text;
     }
 
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("TextElement{");
+        sb.append("text='").append(text).append('\'');
+        sb.append('}');
+        return sb.toString();
+    }
 }

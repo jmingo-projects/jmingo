@@ -23,6 +23,7 @@ import com.mingo.config.ContextConfiguration;
 import com.mingo.document.id.generator.factory.DefaultIdGeneratorFactory;
 import com.mingo.document.id.generator.factory.IdGeneratorFactory;
 import com.mingo.exceptions.ContextInitializationException;
+import com.mingo.exceptions.ShutdownException;
 import com.mingo.executor.MongoQueryExecutor;
 import com.mingo.executor.QueryExecutor;
 import com.mingo.executor.QueryExecutorBenchmark;
@@ -225,11 +226,16 @@ public class Context {
      * How long this method will execute depends on time of actions that will be performed be other components:
      * for instance if one of the benchmarks services will save data in slow storage then calling code will wait until
      * the operation is completed, thus try to avoid complicated logic in those methods.
+     * @throws ShutdownException if any errors occur
      */
-    public void shutdown() {
-        queryManager.shutdown();
-        if (CollectionUtils.isNotEmpty(benchmarkServices)) {
-            benchmarkServices.forEach(BenchmarkService::destroy);
+    public void shutdown() throws ShutdownException {
+        try {
+            queryManager.shutdown();
+            if (CollectionUtils.isNotEmpty(benchmarkServices)) {
+                benchmarkServices.forEach(BenchmarkService::destroy);
+            }
+        } catch (RuntimeException e) {
+            throw new ShutdownException(e);
         }
     }
 

@@ -16,24 +16,39 @@
  */
 package com.mingo.exceptions;
 
-/**
- * Created by dmgcodevil on 19.04.2014.
- */
 public class MingoParserException extends RuntimeException {
 
+    /**
+     * Default constructor.
+     */
     public MingoParserException() {
     }
 
+    /**
+     * Constructor with parameters.
+     *
+     * @param message message
+     */
     public MingoParserException(String message) {
         super(message);
     }
 
-    public MingoParserException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
+    /**
+     * Constructor with parameters.
+     *
+     * @param cause cause
+     */
     public MingoParserException(Throwable cause) {
         super(cause);
     }
 
+    /**
+     * Constructor with parameters.
+     *
+     * @param message message
+     * @param cause   cause
+     */
+    public MingoParserException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

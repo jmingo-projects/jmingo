@@ -17,18 +17,38 @@ package com.mingo.exceptions;
 
 
 public class MarshallingException extends RuntimeException {
+
+    /**
+     * Default constructor.
+     */
     public MarshallingException() {
     }
 
+    /**
+     * Constructor with parameters.
+     *
+     * @param message message
+     */
     public MarshallingException(String message) {
         super(message);
     }
 
-    public MarshallingException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
+    /**
+     * Constructor with parameters.
+     *
+     * @param cause cause
+     */
     public MarshallingException(Throwable cause) {
         super(cause);
+    }
+
+    /**
+     * Constructor with parameters.
+     *
+     * @param message message
+     * @param cause   cause
+     */
+    public MarshallingException(String message, Throwable cause) {
+        super(message, cause);
     }
 }

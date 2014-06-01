@@ -17,9 +17,14 @@ package com.mingo.query;
 
 import com.mingo.query.el.ELEngine;
 import com.mingo.util.QueryUtils;
+
 import java.util.Map;
+
 import org.apache.commons.lang3.Validate;
 
+/**
+ * Prepares query to be executed by MongoDB driver.
+ */
 public class QueryStatement {
 
     private String preparedQuery;
@@ -110,7 +115,8 @@ public class QueryStatement {
     }
 
     /**
-     * Build query and prepare for execution.
+     * Builds query using {@link com.mingo.query.Query#build(com.mingo.query.el.ELEngine, java.util.Map)}
+     * and prepares for execution.
      *
      * @param elEngine   the EL engine
      * @param pQuery     {@link Query}
@@ -118,7 +124,7 @@ public class QueryStatement {
      */
     private void prepare(ELEngine elEngine, Query pQuery, Map<String, Object> parameters) {
         preparedQuery = pQuery.build(elEngine, parameters);
-        converterClass = pQuery.getConverter();
+        converterClass = pQuery.getConverterClass();
         converterMethod = pQuery.getConverterMethod();
         queryType = pQuery.getQueryType();
         escapeNullParameters = pQuery.isEscapeNullParameters();

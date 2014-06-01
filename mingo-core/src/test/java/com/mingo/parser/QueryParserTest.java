@@ -10,7 +10,7 @@ import com.mingo.util.FileUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import static com.mingo.util.QueryUtils.createCompositeIdForQueries;
+
 
 /**
  * Test for {@link com.mingo.parser.xml.dom.QuerySetParser}.
@@ -28,7 +28,6 @@ public class QueryParserTest {
         String queryXml = "/xml/testQuerySet.xml";
         Parser<QuerySet> xmlParser = ParserFactory.createParser(ParserFactory.ParseComponent.QUERY);
         QuerySet querySet = xmlParser.parse(FileUtils.getAbsolutePath(queryXml));
-        createCompositeIdForQueries(querySet);
         Assert.assertEquals(querySet.getCollectionName(), COLLECTION_ONE);
         Assert.assertNotNull(querySet);
         Assert.assertEquals(querySet.getQueries().size(), 2);
@@ -42,7 +41,7 @@ public class QueryParserTest {
         Assert.assertEquals(query.getQueryType(), QueryType.AGGREGATION);
         String expected = "[{'query-1_body' : 'start root text'},{'ifClause': 'name is john'},{'elseIfClause': 'name is not john'},{'elseClause': 'name is undefined'},{'query-1_body' : 'end root text'}]";
         Assert.assertEquals(query.getText(), expected);
-        Assert.assertEquals(query.getConverter(), "simpleDomainConverter");
+        Assert.assertEquals(query.getConverterClass(), "simpleDomainConverter");
         Assert.assertEquals(query.getConverterMethod(), "customConvertMethod");
         Assert.assertEquals(query.getQueryElements().size(), 3);
     }

@@ -16,23 +16,50 @@
 package com.mingo.query;
 
 /**
- * Immutable.
+ * Element with condition. Immutable.
  */
 public class ConditionElement extends TextElement {
 
     private final String expression;
 
-    public ConditionElement(String body) {
-        super(body);
+    /**
+     * Constructor with parameters.
+     *
+     * @param text the text
+     */
+    public ConditionElement(String text) {
+        super(text);
         this.expression = "";
     }
 
-    public ConditionElement(String body, String expression) {
-        super(body);
+    /**
+     * Constructor with parameters.
+     *
+     * @param text       the text
+     * @param expression the expression
+     */
+    public ConditionElement(String text, String expression) {
+        super(text);
         this.expression = expression;
     }
 
+    /**
+     * Gets condition expression.
+     *
+     * @return condition expression
+     */
     public String getExpression() {
         return expression;
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("ConditionElement{");
+        sb.append("text='").append(getText()).append('\'');
+        sb.append('}');
+        sb.append("expression='").append(expression).append('\'');
+        sb.append('}');
+        return sb.toString();
+    }
+
 }

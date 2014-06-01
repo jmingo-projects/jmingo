@@ -22,10 +22,10 @@ public class QueryTest {
 
     private ELEngine elEngine = new SpringELEngine();
 
-    private IfElseConditionalConstruct ifElseConstruct = new IfElseConditionalConstruct()
+    private IfElseConditionalConstruct ifElseConstruct = IfElseConditionalConstruct.builder()
             .withIf("#a > #b", "a gt b")
             .elseIf("#a < #b", "a lt b")
-            .withElse("a eq b");
+            .withElse("a eq b").build();
 
     @DataProvider(name = "testBuildQueryProvider")
     public Object[][] testBuildQueryProvider() {
@@ -45,9 +45,9 @@ public class QueryTest {
                         "{start,a lt b,end}"
                 },
                 {
-                        Arrays.asList(new TextElement("start,"), new IfElseConditionalConstruct()
+                        Arrays.asList(new TextElement("start,"), IfElseConditionalConstruct.builder()
                                         .withIf("#a > #b", "a gt b")
-                                        .elseIf("#a < #b", "a lt b"),
+                                        .elseIf("#a < #b", "a lt b").build(),
                                 new TextElement("end")
                         ),
                         ImmutableMap.<String, Object>builder()
@@ -67,9 +67,9 @@ public class QueryTest {
                         "{start,a eq b,end}"
                 },
                 {
-                        Arrays.asList(new TextElement("start,"), new IfElseConditionalConstruct()
+                        Arrays.asList(new TextElement("start,"), IfElseConditionalConstruct.builder()
                                         .withIf("#a > #b", "a gt b")
-                                        .elseIf("#a < #b", "a lt b"),
+                                        .elseIf("#a < #b", "a lt b").build(),
                                 new TextElement("end")
                         ),
                         Collections.emptyMap(),
@@ -81,16 +81,14 @@ public class QueryTest {
 
     @Test(dataProvider = "testBuildQueryProvider")
     public void testBuildQuery(List<QueryElement> queryElements, Map<String, Object> parameters, String expectedQuery) {
-        Query query = new Query();
-        query.add(queryElements);
+        Query query = Query.builder().id("test").collectionName("test").add(queryElements).build();
         String result = query.build(elEngine, parameters);
         assertEquals(result, expectedQuery);
     }
 
     @Test(dataProvider = "testBuildQueryWithMissingParamsProvider")
     public void testBuildQueryWithMissingParams(List<QueryElement> queryElements, Map<String, Object> parameters, String expectedQuery) {
-        Query query = new Query();
-        query.add(queryElements);
+        Query query = Query.builder().id("test").collectionName("test").add(queryElements).build();
         String result = query.build(elEngine, parameters);
         assertEquals(result, expectedQuery);
     }

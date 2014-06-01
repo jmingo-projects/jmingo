@@ -11,15 +11,6 @@ import com.mingo.query.QueryFragment;
 import com.mingo.query.QuerySet;
 import com.mingo.query.QueryType;
 import com.mingo.util.FileUtils;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.nio.file.Path;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
@@ -32,10 +23,18 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.nio.file.Path;
+import java.util.Collections;
+import java.util.Set;
+
 import static com.mingo.parser.xml.dom.DocumentBuilderFactoryCreator.createDocumentBuilderFactory;
 import static com.mingo.parser.xml.dom.util.DomUtil.getAttributeBoolean;
 import static com.mingo.parser.xml.dom.util.DomUtil.getAttributeString;
-import static com.mingo.parser.xml.dom.util.DomUtil.getAttributes;
 import static com.mingo.parser.xml.dom.util.DomUtil.getChildNodes;
 import static com.mingo.parser.xml.dom.util.DomUtil.getFirstNecessaryTagOccurrence;
 import static com.mingo.parser.xml.dom.util.DomUtil.isNotEmpty;
@@ -85,17 +84,20 @@ public class QuerySetParser implements Parser<QuerySet> {
     private static final String ELSE_IF_TAG = "elseIf";
     private static final String ELSE_TAG = "else";
 
+    // messages
     private static final String INVALID_QUERY_ERROR_MSG = "invalid query with id: {}. Query: {}";
+    private static final String CONVERTER_METHOD_DEFINITION_ERROR = "if converter class was defined then " +
+            "converter method must be defined too. see query set : '{}', query: '{}'";
 
     /**
      * Constructor with parameters.
      *
      * @param parserConfiguration parser configuration
-     * @param parseErrorHandler parser error handler
+     * @param parseErrorHandler   parser error handler
      * @throws ParserConfigurationException {@link ParserConfigurationException}
      */
     public QuerySetParser(ParserConfiguration parserConfiguration, ErrorHandler parseErrorHandler)
-        throws ParserConfigurationException {
+            throws ParserConfigurationException {
         this.documentBuilderFactory = createDocumentBuilderFactory(parserConfiguration);
         this.parseErrorHandler = parseErrorHandler;
     }
@@ -119,7 +121,7 @@ public class QuerySetParser implements Parser<QuerySet> {
             parseConfigTag(root, querySet);
             parseQueryFragments(root, querySet);
             parseQueries(root, querySet);
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw new MingoParserException(e);
         }
         return querySet;
@@ -129,7 +131,7 @@ public class QuerySetParser implements Parser<QuerySet> {
     /**
      * parse <config/> tag and add parsed information to querySet.
      *
-     * @param element element of XML document
+     * @param element  element of XML document
      * @param querySet {@link QuerySet}
      */
     private void parseConfigTag(Element element, QuerySet querySet) throws MingoParserException {
@@ -144,9 +146,9 @@ public class QuerySetParser implements Parser<QuerySet> {
     private void parseQueryFragments(Element root, QuerySet querySet) {
         Set<QueryFragment> queryFragments = Collections.emptySet();
         NodeList fragmentNodeList = root.getElementsByTagName(QUERY_FRAGMENT);
-        if(isNotEmpty(fragmentNodeList)) {
+        if (isNotEmpty(fragmentNodeList)) {
             queryFragments = Sets.newHashSet();
-            for(int i = 0; i < fragmentNodeList.getLength(); i++) {
+            for (int i = 0; i < fragmentNodeList.getLength(); i++) {
                 queryFragments.add(parseQueryFragment(fragmentNodeList.item(i)));
             }
         }
@@ -172,58 +174,61 @@ public class QuerySetParser implements Parser<QuerySet> {
      */
     private void parseQueries(Element root, QuerySet querySet) throws MingoParserException {
         NodeList queryNodeList = root.getElementsByTagName(QUERY_TAG);
-        if(isNotEmpty(queryNodeList)) {
-            for(int i = 0; i < queryNodeList.getLength(); i++) {
+        if (isNotEmpty(queryNodeList)) {
+            for (int i = 0; i < queryNodeList.getLength(); i++) {
                 parseQueryTag(queryNodeList.item(i), querySet);
             }
         }
     }
 
     /**
-     * Parse <query/> node.
+     * Parse <query/> node and add query in querySet.
      *
-     * @param node node
-     * @return {@link Query}
+     * @param node the query node
      */
     private void parseQueryTag(Node node, QuerySet querySet) throws MingoParserException {
-        if(node == null || !QUERY_TAG.equals(node.getNodeName())) {
+        if (node == null || !QUERY_TAG.equals(node.getNodeName())) {
             return;
         }
-        Map<String, String> attributes = getAttributes(node);
-        Query query = new Query(attributes.get(ID));
-        query.setQueryType(QueryType.getByName(attributes.get(TYPE_ATTR)));
-        query.setConverter(attributes.get(CONVERTER_CLASS_ATTR));
-        query.setConverterMethod(attributes.get(CONVERTER_METHOD_ATTR));
-        query.setEscapeNullParameters(getAttributeBoolean(node, ESCAPE_NULL_PARAMETERS));
+        Query.Builder builder = Query.builder();
+        String queryId = getAttributeString(node, ID);
+        builder.id(queryId);
+        builder.collectionName(querySet.getCollectionName());
+        builder.queryType(QueryType.getByName(getAttributeString(node, TYPE_ATTR, QueryType.PLAIN.getName())));
+        String converterClass = getAttributeString(node, CONVERTER_CLASS_ATTR);
+        String converterMethod = getAttributeString(node, CONVERTER_METHOD_ATTR);
+        validateConverter(converterClass, converterMethod, queryId, querySet);
+        builder.converterClass(converterClass);
+        builder.converterMethod(converterMethod);
+        builder.escapeNullParameters(getAttributeBoolean(node, ESCAPE_NULL_PARAMETERS));
 
         getChildNodes(node).forEach(child -> {
-            if(child.getNodeType() == Node.TEXT_NODE) {
+            if (child.getNodeType() == Node.TEXT_NODE) {
                 String text = parseTextNode(child);
-                if(StringUtils.isNotBlank(text)) {
-                    query.addTextElement(text);
+                if (StringUtils.isNotBlank(text)) {
+                    builder.addTextElement(text);
                 }
             }
             // parse <fragment> tag
-            if(FRAGMENT_TAG.equals(child.getNodeName())) {
+            if (FRAGMENT_TAG.equals(child.getNodeName())) {
                 QueryFragment queryFragment = querySet.getQueryFragmentById(getFragmentRef(child));
-                if(queryFragment != null) {
-                    query.addTextElement(queryFragment.getBody());
+                if (queryFragment != null) {
+                    builder.addTextElement(queryFragment.getBody());
                 }
             }
             // parse <if> tag
-            if(IF_TAG.equals(child.getNodeName())) {
+            if (IF_TAG.equals(child.getNodeName())) {
                 QueryElement ifStatement = parseIfElseTag(child);
-                query.add(ifStatement);
+                builder.add(ifStatement);
             }
         });
-
-        if(!isValidJSON(query.getText())) {
+        Query query = builder.build();
+        if (!isValidJSON(query.getText())) {
             throw new MingoParserException(MessageFormatter.format(INVALID_QUERY_ERROR_MSG,
-                query.getId(), query).getMessage());
+                    query.getId(), query).getMessage());
         }
         querySet.addQuery(query);
     }
-
 
     /**
      * Parse <case/> tag.
@@ -231,32 +236,32 @@ public class QuerySetParser implements Parser<QuerySet> {
      * @param node node
      */
     private IfElseConditionalConstruct parseIfElseTag(Node node) throws MingoParserException {
-        IfElseConditionalConstruct conditionalConstruct = new IfElseConditionalConstruct();
+        IfElseConditionalConstruct.Builder builder = IfElseConditionalConstruct.builder();
         String ifCondition = getAttributeString(node, CONDITION);
         StringBuilder clauseBuilder = new StringBuilder();
         getChildNodes(node).forEach(child -> {
-            if(child.getNodeType() == Node.TEXT_NODE) {
+            if (child.getNodeType() == Node.TEXT_NODE) {
                 clauseBuilder.append(parseTextNode(child));
             }
-            if(child.getNodeType() == Node.ELEMENT_NODE) {
-                if(ELSE_IF_TAG.equals(child.getNodeName())) {
-                    conditionalConstruct.elseIf(parseElseIfTag(child));
+            if (child.getNodeType() == Node.ELEMENT_NODE) {
+                if (ELSE_IF_TAG.equals(child.getNodeName())) {
+                    builder.elseIf(parseElseIfTag(child));
                 }
-                if(ELSE_TAG.equals(child.getNodeName())) {
-                    conditionalConstruct.withElse(parseElseTag(child));
+                if (ELSE_TAG.equals(child.getNodeName())) {
+                    builder.withElse(parseElseTag(child));
                 }
             }
         });
 
-        conditionalConstruct.withIf(ifCondition, clauseBuilder.toString());
-        return conditionalConstruct;
+        builder.withIf(ifCondition, clauseBuilder.toString());
+        return builder.build();
     }
 
     private ConditionElement parseElseIfTag(Node elseIfNode) {
         String condition = getAttributeString(elseIfNode, CONDITION);
         final StringBuilder clause = new StringBuilder();
         getChildNodes(elseIfNode).forEach(child -> {
-            if(child.getNodeType() == Node.TEXT_NODE) {
+            if (child.getNodeType() == Node.TEXT_NODE) {
                 clause.append(parseTextNode(child));
             }
         });
@@ -266,7 +271,7 @@ public class QuerySetParser implements Parser<QuerySet> {
     private String parseElseTag(Node elseIfNode) {
         final StringBuilder clause = new StringBuilder();
         getChildNodes(elseIfNode).forEach(child -> {
-            if(child.getNodeType() == Node.TEXT_NODE) {
+            if (child.getNodeType() == Node.TEXT_NODE) {
                 clause.append(parseTextNode(child));
             }
         });
@@ -280,5 +285,22 @@ public class QuerySetParser implements Parser<QuerySet> {
 
     private String getFragmentRef(Node child) {
         return getAttributeString(child, FRAGMENT_REF_ATTR);
+    }
+
+    /**
+     * Checks that the next assumption is correct: if custom converter is specified for the query
+     * then convert method should be specified as well.
+     *
+     * @param converterClass  the converter class
+     * @param converterMethod the converter method
+     * @param queryId         the qeruy id
+     * @param querySet        the query set to build detail information for exception message
+     * @throws IllegalArgumentException if current converter configuration isn't correct
+     */
+    public static void validateConverter(String converterClass, String converterMethod, String queryId, QuerySet querySet) {
+        if (StringUtils.isNotBlank(converterClass) && StringUtils.isBlank(converterMethod)) {
+            throw new IllegalArgumentException(MessageFormatter.arrayFormat(CONVERTER_METHOD_DEFINITION_ERROR,
+                    new Object[]{querySet.getPath(), queryId}).getMessage());
+        }
     }
 }

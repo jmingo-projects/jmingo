@@ -1,14 +1,3 @@
-package com.mingo.query;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
-import com.mingo.query.el.ELEngine;
-import java.util.List;
-import java.util.Map;
-import org.apache.commons.lang3.StringUtils;
-
-import static com.mingo.query.QueryType.PLAIN;
-
 /**
  * Copyright 2012-2013 The Mingo Team
  * <p>
@@ -24,40 +13,75 @@ import static com.mingo.query.QueryType.PLAIN;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.mingo.query;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+import com.mingo.query.el.ELEngine;
+
+import java.util.List;
+import java.util.Map;
+
+import com.mingo.util.QueryUtils;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
+
+import static com.mingo.query.QueryType.PLAIN;
+
+/**
+ * Mingo query. Immutable.
+ */
 public class Query {
 
     private final String id;
 
-    private String compositeId;
+    private final String compositeId;
 
-    private String converter;
+    private final String converterClass;
 
-    private String converterMethod;
+    private final String converterMethod;
 
     /* escape null parameters*/
-    private boolean escapeNullParameters = true;
+    private final boolean escapeNullParameters;
 
-    private QueryType queryType = PLAIN;
+    private final QueryType queryType;
 
-    private List<QueryElement> queryElements = Lists.newArrayList();
+    private final List<QueryElement> queryElements;
 
-    public Query() {
-        id = "";
+    /**
+     * Creates builder.
+     *
+     * @return builder
+     */
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    private Query(Builder builder) {
+        this.id = builder.id;
+        this.compositeId = builder.compositeId();
+        this.converterClass = builder.converterClass;
+        this.converterMethod = builder.converterMethod;
+        this.escapeNullParameters = builder.escapeNullParameters;
+        this.queryType = builder.queryType;
+        this.queryElements = ImmutableList.copyOf(builder.queryElements);
     }
 
     /**
-     * Constructor with parameters.
+     * Gets id.
      *
-     * @param id id
+     * @return query id
      */
-    public Query(String id) {
-        this.id = id;
-    }
-
     public String getId() {
         return id;
     }
 
+    /**
+     * Gets query text.
+     *
+     * @return query text
+     */
     public String getText() {
         return QueryBuilder.getFullQueryText(queryType, queryElements);
     }
@@ -72,33 +96,21 @@ public class Query {
     }
 
     /**
-     * Set composite id.
+     * Gets query type.
      *
-     * @param compositeId composite id
+     * @return query type
      */
-    public void setCompositeId(String compositeId) {
-        this.compositeId = compositeId;
+    public QueryType getQueryType() {
+        return queryType;
     }
 
     /**
-     * Gets converter.
+     * Gets converter class.
      *
-     * @return converter
+     * @return converter class
      */
-    public String getConverter() {
-        return converter;
-    }
-
-    /**
-     * Sets converter.
-     *
-     * @param converter converter
-     */
-    public void setConverter(String converter) {
-        if(StringUtils.isNotBlank(converter)) {
-            this.converter = converter;
-        }
-
+    public String getConverterClass() {
+        return converterClass;
     }
 
     /**
@@ -111,37 +123,6 @@ public class Query {
     }
 
     /**
-     * Sets converter method.
-     *
-     * @param converterMethod converter method
-     */
-    public void setConverterMethod(String converterMethod) {
-        if(StringUtils.isNotBlank(converterMethod)) {
-            this.converterMethod = converterMethod;
-        }
-    }
-
-    /**
-     * Gets query type.
-     *
-     * @return query type
-     */
-    public QueryType getQueryType() {
-        return queryType;
-    }
-
-    /**
-     * Sets queryType.
-     *
-     * @param queryType query type
-     */
-    public void setQueryType(QueryType queryType) {
-        if(queryType != null) {
-            this.queryType = queryType;
-        }
-    }
-
-    /**
      * Gets escape null parameters mode.
      *
      * @return true or false
@@ -151,38 +132,99 @@ public class Query {
     }
 
     /**
-     * Sets escape null parameters mode.
+     * Gets query elements.
      *
-     * @param escapeNullParameters true or false
+     * @return query elements
      */
-    public void setEscapeNullParameters(boolean escapeNullParameters) {
-        this.escapeNullParameters = escapeNullParameters;
-    }
-
-    public Query add(QueryElement queryEl) {
-        queryElements.add(queryEl);
-        return this;
-    }
-
-    public Query add(List<QueryElement> qElements) {
-        queryElements.addAll(qElements);
-        return this;
-    }
-
-    public Query addTextElement(String text) {
-        queryElements.add(new TextElement(text));
-        return this;
-    }
-
     public List<QueryElement> getQueryElements() {
-        return ImmutableList.copyOf(queryElements);
+        return queryElements;
     }
 
+    /**
+     * Creates string representation of query.
+     *
+     * @param elEngine   the EL engine
+     * @param parameters the query parameters
+     * @return string representation of query
+     */
     public String build(ELEngine elEngine, Map<String, Object> parameters) {
+        Validate.notNull(elEngine, "el engine cannot be null");
         QBuilder queryBuilder = new QueryBuilder(queryType, elEngine, parameters);
         queryElements.forEach(element -> element.accept(queryBuilder));
         return queryBuilder.buildQuery();
+    }
 
+    /**
+     * Builder for {@link com.mingo.query.Query}.
+     */
+    public static class Builder {
+
+        private String id;
+        private String collectionName;
+        private String converterClass;
+        private String converterMethod;
+        /* escape null parameters*/
+        private boolean escapeNullParameters = false;
+        private QueryType queryType = PLAIN;
+        private List<QueryElement> queryElements = Lists.newArrayList();
+
+        public Builder id(String val) {
+            Validate.notBlank(val, "query id is required field and cannot be null");
+            this.id = val;
+            return this;
+        }
+
+        public Builder collectionName(String val) {
+            Validate.notBlank(val, "collection name is required field and cannot be null");
+            this.collectionName = val;
+            return this;
+        }
+
+        public Builder converterClass(String val) {
+            this.converterClass = val;
+            return this;
+        }
+
+        public Builder converterMethod(String val) {
+            this.converterMethod = val;
+            return this;
+        }
+
+        public Builder escapeNullParameters(boolean val) {
+            this.escapeNullParameters = val;
+            return this;
+        }
+
+        public Builder queryType(QueryType queryType) {
+            Validate.notNull(queryType, "query type is required field and cannot be null");
+            this.queryType = queryType;
+            return this;
+        }
+
+        public Builder add(QueryElement queryEl) {
+            queryElements.add(queryEl);
+            return this;
+        }
+
+        public Builder add(List<QueryElement> qElements) {
+            if (CollectionUtils.isNotEmpty(qElements)) {
+                queryElements.addAll(qElements);
+            }
+            return this;
+        }
+
+        public Builder addTextElement(String text) {
+            queryElements.add(new TextElement(text));
+            return this;
+        }
+
+        public String compositeId() {
+            return QueryUtils.buildCompositeId(collectionName, id);
+        }
+
+        public Query build() {
+            return new Query(this);
+        }
     }
 
 }

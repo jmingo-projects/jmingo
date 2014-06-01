@@ -1,12 +1,12 @@
 package com.mingo.exceptions;
 
 
-public class MingoException extends RuntimeException {
+public class ShutdownException extends RuntimeException {
 
     /**
      * Default constructor.
      */
-    public MingoException() {
+    public ShutdownException() {
     }
 
     /**
@@ -14,7 +14,7 @@ public class MingoException extends RuntimeException {
      *
      * @param message message
      */
-    public MingoException(String message) {
+    public ShutdownException(String message) {
         super(message);
     }
 
@@ -23,7 +23,7 @@ public class MingoException extends RuntimeException {
      *
      * @param cause cause
      */
-    public MingoException(Throwable cause) {
+    public ShutdownException(Throwable cause) {
         super(cause);
     }
 
@@ -33,7 +33,7 @@ public class MingoException extends RuntimeException {
      * @param message message
      * @param cause   cause
      */
-    public MingoException(String message, Throwable cause) {
+    public ShutdownException(String message, Throwable cause) {
         super(message, cause);
     }
 }

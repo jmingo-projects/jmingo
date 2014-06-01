@@ -15,9 +15,22 @@
  */
 package com.mingo.query;
 
+/**
+ * Base interface represents single query unit.
+ */
 public interface QueryElement {
 
-    void accept(QBuilder visitor);
+    /**
+     * Accepts builder to append current element.
+     *
+     * @param builder the builder to accept
+     */
+    void accept(QBuilder builder);
 
+    /**
+     * Returns string representation of query element.
+     *
+     * @return string representation of query element
+     */
     String asString();
 }

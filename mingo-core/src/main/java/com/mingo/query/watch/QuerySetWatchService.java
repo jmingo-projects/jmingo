@@ -43,9 +43,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+/**
+ * Service to watch for any changes in query sets files. Fires {@link QuerySetUpdateEvent} in a case of any changes.
+ */
 public class QuerySetWatchService {
 
-    ThreadFactory watcherNamedThreadFactory = new ThreadFactoryBuilder().setNameFormat("watcher-thread-%d").build();
+    private ThreadFactory watcherNamedThreadFactory = new ThreadFactoryBuilder().setNameFormat("watcher-thread-%d").build();
     private final ExecutorService executorService = Executors.newFixedThreadPool(10, watcherNamedThreadFactory);
     private final Set<Path> registered = Sets.newConcurrentHashSet();
     private final WatchService watchService;
@@ -57,6 +60,11 @@ public class QuerySetWatchService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(QuerySetWatchService.class);
 
+    /**
+     * Constructor to set event bus.
+     *
+     * @param eventBus the event bus
+     */
     public QuerySetWatchService(EventBus eventBus) {
         try {
             this.eventBus = eventBus;
@@ -101,6 +109,12 @@ public class QuerySetWatchService {
         }
     }
 
+    /**
+     * Shutdown current watch service.
+     * Closes all running watcher threads.
+     *
+     * @throws WatchServiceException if any errors occur
+     */
     public void shutdown() throws WatchServiceException {
         try {
             lock.lock();

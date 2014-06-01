@@ -1,8 +1,3 @@
-package com.mingo.query;
-
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-
 /**
  * Copyright 2012-2013 The Mingo Team
  * <p/>
@@ -18,9 +13,24 @@ import com.google.common.collect.Lists;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.mingo.query;
+
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+
+/**
+ * Represents query types.
+ */
 public enum QueryType {
 
+    /**
+     * Aggregation MongoDB query.
+     */
     AGGREGATION("aggregation"),
+
+    /**
+     * Plain MongoDB query.
+     */
     PLAIN("plain");
 
     private String name;

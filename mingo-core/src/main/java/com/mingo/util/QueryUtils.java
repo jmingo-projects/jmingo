@@ -3,11 +3,8 @@ package com.mingo.util;
 import com.fasterxml.jackson.core.JsonParser;
 import com.google.common.collect.Lists;
 import com.mingo.mapping.marshall.jackson.MongoMapper;
-import com.mingo.query.Query;
-import com.mingo.query.QuerySet;
 import com.mongodb.util.JSONSerializers;
 import com.mongodb.util.ObjectSerializer;
-import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 
@@ -50,7 +47,7 @@ public final class QueryUtils {
      * Builds composite query ID ith next structure "collectionName.id".
      *
      * @param collectionName collection name
-     * @param id query id
+     * @param id             query id
      * @return composite ID - { [collectionName].[id] }
      */
     public static String buildCompositeId(String collectionName, String id) {
@@ -93,20 +90,6 @@ public final class QueryUtils {
     }
 
     /**
-     * Creates composite Id for all queries in querySet.
-     *
-     * @param querySet {@link com.mingo.query.QuerySet}
-     */
-    public static void createCompositeIdForQueries(QuerySet querySet) {
-        if(MapUtils.isEmpty(querySet.getQueryMap())) {
-            return;
-        }
-        for(Query query : querySet.getQueryMap().values()) {
-            query.setCompositeId(buildCompositeId(querySet.getCollectionName(), query.getId()));
-        }
-    }
-
-    /**
      * Validates composite id.
      *
      * @param compositeId expected format ( [database-name].[collection-name].[query-id] )
@@ -118,17 +101,17 @@ public final class QueryUtils {
         Validate.notBlank(compositeId, "compositeId cannot be null or empty");
         String[] elements = StringUtils.split(compositeId, ".");
         Validate.isTrue(elements.length == NUMBER_OF_ELEMENTS,
-            "composite id should consist of " + NUMBER_OF_ELEMENTS + " parts: " +
-                "([collection-name].[query-id]). current value: " + compositeId
+                "composite id should consist of " + NUMBER_OF_ELEMENTS + " parts: " +
+                        "([collection-name].[query-id]). current value: " + compositeId
         );
-        for(int index = 0; index < elements.length; index++) {
+        for (int index = 0; index < elements.length; index++) {
             Validate.notBlank(elements[index], "element with position: " + (index + 1) +
-                " in composite id is empty. current value: " + compositeId);
+                    " in composite id is empty. current value: " + compositeId);
         }
     }
 
     private static String getElementByPosition(String[] elements, int numberOfElements, int pos) {
-        if(elements != null && elements.length == numberOfElements && pos < numberOfElements) {
+        if (elements != null && elements.length == numberOfElements && pos < numberOfElements) {
             return elements[pos];
         } else {
             return null;
@@ -145,11 +128,11 @@ public final class QueryUtils {
         boolean valid = false;
         try {
             final JsonParser parser = new MongoMapper().getFactory()
-                .createParser(json);
-            while(parser.nextToken() != null) {
+                    .createParser(json);
+            while (parser.nextToken() != null) {
             }
             valid = true;
-        } catch(IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
@@ -175,7 +158,5 @@ public final class QueryUtils {
     public static String wrapInBracket(String query) {
         return format(OPERATION_TEMPLATE, query).getMessage();
     }
-
-
 
 }

@@ -1,23 +1,3 @@
-package com.mingo.query;
-
-import static com.mingo.util.QueryUtils.getQueryId;
-import static com.mingo.util.QueryUtils.validateCompositeId;
-import static org.slf4j.helpers.MessageFormatter.format;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.MapUtils;
-import org.apache.commons.lang3.Validate;
-
-import java.nio.file.Path;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 /**
  * Copyright 2012-2013 The Mingo Team
  * <p/>
@@ -33,56 +13,76 @@ import java.util.Set;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.mingo.query;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang3.Validate;
+
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static com.mingo.util.QueryUtils.getQueryId;
+import static com.mingo.util.QueryUtils.validateCompositeId;
+import static org.slf4j.helpers.MessageFormatter.format;
+
+/**
+ * Query set contains queries within which they were defined.
+ */
 public class QuerySet {
 
     private Path path;
 
-    private String dbName;
-
     private String collectionName;
 
-    private Map<String, Query> queries = Collections.emptyMap();
+    private Map<String, Query> queries = Maps.newHashMap();
 
-    private Set<QueryFragment> queryFragments = Collections.emptySet();
+    private Set<QueryFragment> queryFragments = Sets.newHashSet();
 
     private String checksum;
 
     private static final String DUPLICATED_QUERY_ID = "duplicated query id: '{}'";
 
+    /**
+     * Gets path to file with query set definition.
+     *
+     * @return path to file with query set
+     */
     public Path getPath() {
         return path;
     }
 
+    /**
+     * Sets path to file with query set definition
+     *
+     * @param path the path to file with query set
+     */
     public void setPath(Path path) {
         this.path = path;
     }
 
+    /**
+     * Gets checksum of file with query set definition
+     *
+     * @return checksum of file with query set definition
+     */
     public String getChecksum() {
         return checksum;
     }
 
+    /**
+     * Sets checksum of file with query set definition
+     *
+     * @param checksum the checksum of file with query set definition
+     */
     public void setChecksum(String checksum) {
         this.checksum = checksum;
-    }
-
-    /**
-     * Gets DB name.
-     *
-     * @return DB name
-     */
-    @Deprecated
-    public String getDbName() {
-        return dbName;
-    }
-
-    /**
-     * Sets DB name.
-     *
-     * @param dbName DB name
-     */
-    @Deprecated
-    public void setDbName(String dbName) {
-        this.dbName = dbName;
     }
 
     /**
@@ -127,14 +127,10 @@ public class QuerySet {
      * @param query query
      */
     public void addQuery(Query query) {
-        Validate.notNull(query, "query parameter cannot be null");
-
-        if (MapUtils.isEmpty(queries)) {
-            queries = Maps.newHashMap();
-        }
+        Validate.notNull(query, "query cannot be null");
         if (queries.containsKey(query.getId())) {
             throw new IllegalArgumentException(
-                format(DUPLICATED_QUERY_ID, query.getId()).getMessage());
+                    format(DUPLICATED_QUERY_ID, query.getId()).getMessage());
         }
         queries.put(query.getId(), query);
     }
@@ -173,7 +169,7 @@ public class QuerySet {
      * @return true - if query exist, otherwise - false
      */
     public boolean queryExist(String id) {
-        return getQueryById(id) != null ? true : false;
+        return getQueryById(id) != null;
     }
 
     /**
@@ -201,9 +197,6 @@ public class QuerySet {
      */
     public void addQueryFragment(QueryFragment queryFragment) {
         Validate.notNull(queryFragment, "query fragment cannot be empty");
-        if (CollectionUtils.isEmpty(queryFragments)) {
-            queryFragments = Sets.newHashSet();
-        }
         queryFragments.add(queryFragment);
     }
 
@@ -247,11 +240,13 @@ public class QuerySet {
      */
     @Override
     public String toString() {
-        return "QuerySet{" +
-            "dbName='" + dbName + '\'' +
-            ", collectionName='" + collectionName + '\'' +
-            ", queries=" + queries +
-            '}';
+        final StringBuilder sb = new StringBuilder("QuerySet{");
+        sb.append("path=").append(path);
+        sb.append(", collectionName='").append(collectionName).append('\'');
+        sb.append(", queries=").append(queries);
+        sb.append(", queryFragments=").append(queryFragments);
+        sb.append(", checksum='").append(checksum).append('\'');
+        sb.append('}');
+        return sb.toString();
     }
-
 }

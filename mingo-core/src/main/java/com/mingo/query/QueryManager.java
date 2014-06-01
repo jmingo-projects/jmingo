@@ -27,6 +27,7 @@ import com.google.common.eventbus.AsyncEventBus;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.mingo.exceptions.ContextInitializationException;
+import com.mingo.exceptions.ShutdownException;
 import com.mingo.parser.Parser;
 import com.mingo.parser.xml.dom.ParserFactory;
 import com.mingo.query.watch.QuerySetUpdateEvent;
@@ -53,11 +54,11 @@ import static org.slf4j.helpers.MessageFormatter.arrayFormat;
 /**
  * Query manager contains all query sets and allows get necessary query by composite id.
  * All queries within single context should have different composite ids, duplication prohibited.
+ * Query manager doesn't have methods to get {@link com.mingo.query.QuerySet} for security purposes because QuerySet isn't immutable.
+ * Query manager provides methods to get queries and single query by id.
  */
 public class QueryManager {
 
-    private static final String CONVERTER_METHOD_DEFINITION_ERROR = "if converter class was defined then " +
-            "converter method must be defined too. see query set : '{}', query: '{}'";
     private static final String DUPLICATED_COMPOSITE_ID_ERROR =
             "duplicated query composite id: '{}'. please check: '{}' and '{}' query sets.";
 
@@ -88,10 +89,20 @@ public class QueryManager {
         initialize(Sets.newHashSet(paths));
     }
 
+    /**
+     * Creates manager and initializes query sets for specified paths.
+     *
+     * @param paths the set of querySet paths
+     */
     public QueryManager(Set<String> paths) {
         initialize(paths);
     }
 
+    /**
+     * Initializes query manager.
+     *
+     * @param querySetPath the set of querySet paths
+     */
     private void initialize(Set<String> querySetPath) {
         //register in event bus
         eventBus.register(this);
@@ -109,11 +120,54 @@ public class QueryManager {
         });
     }
 
-
+    /**
+     * Gets immutable representation of queries.
+     *
+     * @return immutable representation of queries
+     */
     public Map<String, Query> getQueries() {
         return ImmutableMap.copyOf(queries);
     }
 
+    /**
+     * Gets query by composite id.
+     *
+     * @param compositeId composite id
+     * @return query or null if query there are no query with specified composite id
+     */
+    public Query getQueryByCompositeId(String compositeId) {
+        return queries.get(compositeId);
+    }
+
+    /**
+     * Gets query by composite id.
+     * Similar with getQueryByCompositeId but throws exception if query doesn't exist.
+     *
+     * @param compositeId the composed id to find query
+     * @return the query {@link Query} for specified composite id
+     * @throws RuntimeException if query with specified composite id doesn't exists
+     */
+    public Query lookupQuery(String compositeId) throws RuntimeException {
+        Query query = queries.get(compositeId);
+        if (query == null) {
+            throw new RuntimeException(MessageFormatter.format(QUERY_NOT_FOUND_ERROR_MSG, compositeId).getMessage());
+        }
+        return query;
+    }
+
+    /**
+     * This method is called when mingo context is being closed.
+     * The entry of this method contains actions to properly close all running within current manager services.
+     *
+     * @throws RuntimeException if any errors occur
+     */
+    public void shutdown() throws RuntimeException {
+        querySetWatchService.shutdown();
+        eventBus.unregister(this);
+        eventBusThreadPool.shutdown();
+    }
+
+    // todo can be private ?
     @Subscribe
     @AllowConcurrentEvents
     public void onChange(QuerySetUpdateEvent event) {
@@ -123,12 +177,11 @@ public class QueryManager {
 
     private void putQueries(QuerySet querySet) {
         querySet.getQueries().forEach(query -> {
-            String compositeId = QueryUtils.buildCompositeId(querySet.getCollectionName(), query.getId());
+            String compositeId = query.getCompositeId();
             if (queries.containsKey(compositeId)) {
                 throw new ContextInitializationException(arrayFormat(DUPLICATED_COMPOSITE_ID_ERROR,
                         new Object[]{compositeId, query.getId(), querySet.getPath()}).getMessage());
             } else {
-                validateConverter(query, querySet);
                 queries.put(compositeId, query);
             }
         });
@@ -136,46 +189,49 @@ public class QueryManager {
 
     /**
      * The entire method invocation is performed atomically.
-     * Some attempted update operations on this map by other threads
-     * may be blocked while computation is in progress, so the
-     * computation should be short and simple.
+     * Any attempts to perform update operations on {@link #queries} by other threads
+     * may be blocked while reloading is in progress, so the
+     * reloading logic shouldn't take a much time.
+     * This method uses optimistic concurrency control thus if during reloading the query set by specified path was
+     * changed again then current reloading process will be canceled and necessary message will be showed.
      */
     private void reload(Path path) {
         LOGGER.debug("reload query set: {}", path);
         AtomicReference<QuerySet> currentQuerySetRef = getQuerySetRef(path);
         QuerySet currQuerySet = currentQuerySetRef.get();
         String checksum = FileUtils.checksum(path.toFile());
-        if(StringUtils.equals(checksum, currQuerySet.getChecksum())) {
-            LOGGER.debug("query set: {} wasn't changed, content remains the same", path);
+        if (StringUtils.equals(checksum, currQuerySet.getChecksum())) {
+            LOGGER.debug("query set: {} was edited but wasn't changed, content remains the same", path);
             return;
         }
         QuerySet newQuerySet = loadQuerySet(path);
-        if(newQuerySet.getQueries().size() > currQuerySet.getQueries().size()) {
+        if (newQuerySet.getQueries().size() > currQuerySet.getQueries().size()) {
             LOGGER.warn("{} queries was added in query set: {}. " +
-                "Operations 'add' and 'remove' on query set aren't supported.",
-                newQuerySet.getQueries().size() - currQuerySet.getQueries().size(), path);
-        }
-
-        if(newQuerySet.getQueries().size() < currQuerySet.getQueries().size()) {
-            LOGGER.warn("{} queries was removed from query set: {}. " +
-                    "Operations 'add' and 'remove' on query set aren't supported.",
-                currQuerySet.getQueries().size() - newQuerySet.getQueries().size(), path
+                            "Operations 'add' and 'remove' on query set aren't supported.",
+                    newQuerySet.getQueries().size() - currQuerySet.getQueries().size(), path
             );
         }
 
-        if(currentQuerySetRef.compareAndSet(currQuerySet, newQuerySet)) {
-            for(Query updatedQuery : newQuerySet.getQueries()) {
+        if (newQuerySet.getQueries().size() < currQuerySet.getQueries().size()) {
+            LOGGER.warn("{} queries was removed from query set: {}. " +
+                            "Operations 'add' and 'remove' on query set aren't supported.",
+                    currQuerySet.getQueries().size() - newQuerySet.getQueries().size(), path
+            );
+        }
+
+        if (currentQuerySetRef.compareAndSet(currQuerySet, newQuerySet)) {
+            for (Query updatedQuery : newQuerySet.getQueries()) {
                 String compositeId = QueryUtils.buildCompositeId(newQuerySet.getCollectionName(), updatedQuery.getId());
                 queries.computeIfPresent(compositeId, (key, currentQuery) -> {
                     LOGGER.debug("query with composite id:'{}' was refreshed. query set: '{}'",
-                        compositeId, newQuerySet.getPath());
+                            compositeId, newQuerySet.getPath());
                     return updatedQuery;
                 });
             }
-            LOGGER.debug("query set: {} was successfully refreshed", path);
+            LOGGER.debug("query set: {} was successfully reloaded", path);
         } else {
             LOGGER.error("query set with path: {} was changed by someone before the actual update operation ended, " +
-                "please refresh file {} and try again", path, path);
+                    "please refresh file {} and try to edit this query set again", path, path);
         }
     }
 
@@ -193,57 +249,15 @@ public class QueryManager {
 
     private void registerInWatchService(Path path) {
         if (!Files.exists(path)) {
-            throw new RuntimeException("query set with path'" + path + "' is not exists" );
+            throw new RuntimeException("query set with path'" + path + "' is not exists");
         }
         querySetWatchService.regiser(path);
-    }
-
-    public void shutdown() {
-        querySetWatchService.shutdown();
-        eventBus.unregister(this);
-        eventBusThreadPool.shutdown();
     }
 
     private AtomicReference<QuerySet> getQuerySetRef(Path path) {
         Optional<AtomicReference<QuerySet>> result = Iterables.tryFind(querySetRegistry, querySet ->
                 querySet.get().getPath().equals(path));
         return result.or(new AtomicReference<>(null));
-    }
-
-    /**
-     * Gets query by composite id.
-     *
-     * @param compositeId composite id
-     * @return query or null if query not found
-     */
-    public Query getQueryByCompositeId(String compositeId) {
-        //validateCompositeId(compositeId); todo move validation in executor
-        return queries.get(compositeId);
-    }
-
-    /**
-     * Gets query by composite id.
-     * Similar with getQueryByCompositeId but throws exception if query isn't exist.
-     *
-     * @param compositeId - composed id
-     * @return query {@link Query}
-     * @throws RuntimeException {@link RuntimeException}
-     */
-    public Query lookupQuery(String compositeId) throws RuntimeException {
-        Query query = queries.get(compositeId);
-        if (query == null) {
-            throw new RuntimeException(MessageFormatter.format(QUERY_NOT_FOUND_ERROR_MSG, compositeId).getMessage());
-        }
-        return query;
-    }
-
-    // todo refine this method
-    private void validateConverter(Query query, QuerySet querySet) {
-        if (StringUtils.isNotBlank(query.getConverter()) &&
-                StringUtils.isBlank(query.getConverterMethod())) {
-            throw new ContextInitializationException(MessageFormatter.arrayFormat(CONVERTER_METHOD_DEFINITION_ERROR,
-                    new Object[]{querySet.getPath(), query.getId()}).getMessage());
-        }
     }
 
 }

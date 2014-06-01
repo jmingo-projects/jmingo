@@ -101,7 +101,7 @@
             <xs:attribute name="type" type="queryType" default="plain"/>
             <xs:attribute name="converter-class" type="xs:string"/>
             <xs:attribute name="converter-method" type="xs:string"/>
-            <xs:attribute name="escape-null-parameters" type="xs:boolean" default="true"/>
+            <xs:attribute name="escape-null-parameters" type="xs:boolean" default="false"/>
         </xs:complexType>
     </xs:element>
 

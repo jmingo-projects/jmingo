@@ -15,11 +15,26 @@
  */
 package com.mingo.query;
 
-
+/**
+ * Builder to build string query from multiple {@link QueryElement} objects.
+ */
 public interface QBuilder {
 
+    /**
+     * Appends text of the given text element to the current query.
+     *
+     * @param queryEl the text element to append
+     * @return true if element was appended, otherwise - false
+     */
     boolean append(TextElement queryEl);
 
+    /**
+     * Checks condition element and appends it if element expression
+     * evaluates 'true' for specified parameters.
+     *
+     * @param queryEl the condition element
+     * @return true if element was appended, otherwise - false
+     */
     boolean append(ConditionElement queryEl);
 
     /**
@@ -27,5 +42,10 @@ public interface QBuilder {
      */
     boolean appendIfAbsent(String suffix);
 
+    /**
+     * Builds query.
+     *
+     * @return query
+     */
     String buildQuery();
 }

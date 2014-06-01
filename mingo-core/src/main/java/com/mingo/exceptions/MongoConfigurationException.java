@@ -18,19 +18,37 @@ package com.mingo.exceptions;
 
 public class MongoConfigurationException extends RuntimeException {
 
+    /**
+     * Default constructor.
+     */
     public MongoConfigurationException() {
     }
 
+    /**
+     * Constructor with parameters.
+     *
+     * @param message message
+     */
     public MongoConfigurationException(String message) {
         super(message);
     }
 
-    public MongoConfigurationException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
+    /**
+     * Constructor with parameters.
+     *
+     * @param cause cause
+     */
     public MongoConfigurationException(Throwable cause) {
         super(cause);
     }
 
+    /**
+     * Constructor with parameters.
+     *
+     * @param message message
+     * @param cause   cause
+     */
+    public MongoConfigurationException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }
