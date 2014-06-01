@@ -23,14 +23,19 @@ import java.util.Map;
 public class SimpleObjectReplacementCallback extends AbstractReplacementCallback<Object> implements ReplacementCallback<Object> {
 
     /**
-     * {@inheritDoc}
+     * Constructor this parameters.
+     *
+     * @param prefix       the prefix identifies that field is parameter
+     * @param replacements the replacements
      */
     public SimpleObjectReplacementCallback(String prefix, Map<String, Object> replacements) {
         super(prefix, replacements);
     }
 
     /**
-     * {@inheritDoc}
+     * Constructor this parameters.
+     *
+     * @param replacements the replacements
      */
     public SimpleObjectReplacementCallback(Map<String, Object> replacements) {
         super(replacements);

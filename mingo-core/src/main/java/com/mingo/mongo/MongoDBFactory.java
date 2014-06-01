@@ -41,6 +41,9 @@ import java.util.Set;
 import static com.mingo.util.PropertyUtils.transform;
 import static com.mingo.util.ReflectionUtils.findMethod;
 
+/**
+ * This factory creates and configures {@link DB}.
+ */
 public class MongoDBFactory {
 
     private String dbName;
@@ -49,20 +52,41 @@ public class MongoDBFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoDBFactory.class);
 
+    /**
+     * Constructor to set config. Creates and configures {@link Mongo} instances based on the config.
+     *
+     * @param config the mongo configuration
+     */
     public MongoDBFactory(MongoConfig config) {
         dbName = config.getDbName();
         mongo = create(config);
     }
 
+    /**
+     * Constructor with parameters.
+     *
+     * @param config the mongo configuration
+     * @param mongo  the mongo instance
+     */
     public MongoDBFactory(MongoConfig config, Mongo mongo) {
         dbName = config.getDbName();
         this.mongo = mongo;
     }
 
+    /**
+     * Gets mongo {@link DB}.
+     *
+     * @return mongo {@link DB}
+     */
     public DB getDB() {
         return mongo.getDB(dbName);
     }
 
+    /**
+     * Gets mongo instance.
+     *
+     * @return current mongo instance
+     */
     public Mongo getMongo() {
         return mongo;
     }

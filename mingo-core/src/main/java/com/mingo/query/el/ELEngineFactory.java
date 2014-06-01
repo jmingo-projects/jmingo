@@ -1,5 +1,3 @@
-package com.mingo.query.el;
-
 /**
  * Copyright 2012-2013 The Mingo Team
  * <p>
@@ -15,6 +13,11 @@ package com.mingo.query.el;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.mingo.query.el;
+
+/**
+ * Creates EL engine instances in accordance with specified engine type.
+ */
 public final class ELEngineFactory {
 
     private ELEngineFactory() {
@@ -22,14 +25,14 @@ public final class ELEngineFactory {
     }
 
     /**
-     * Creates query analyzer for specified type.
+     * Creates EL engine for specified type.
      *
-     * @param queryAnalyzerType query analyzer type
+     * @param elEngineType EL engine type
      * @return implementation of {@link com.mingo.query.el.ELEngine} interface
      */
-    public static ELEngine create(ELEngineType queryAnalyzerType) {
+    public static ELEngine create(ELEngineType elEngineType) throws UnsupportedOperationException {
         ELEngine queryAnalyzer;
-        switch (queryAnalyzerType) {
+        switch (elEngineType) {
             case JEXL:
                 queryAnalyzer = new JexlELEngine();
                 break;
@@ -37,8 +40,7 @@ public final class ELEngineFactory {
                 queryAnalyzer = new SpringELEngine();
                 break;
             default:
-                // todo throw an exception instead
-                queryAnalyzer = new JexlELEngine();
+                throw new UnsupportedOperationException("unsupported EL engine type: " + elEngineType);
         }
         return queryAnalyzer;
     }

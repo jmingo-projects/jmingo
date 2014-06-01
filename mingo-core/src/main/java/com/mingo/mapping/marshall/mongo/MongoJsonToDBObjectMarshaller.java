@@ -32,6 +32,7 @@ import java.util.Map;
 
 /**
  * Implementation of {@link JsonToDBObjectMarshaller} based on {@link JSON}.
+ * Has ability to replace parameters in json with specified replacements.
  */
 public class MongoJsonToDBObjectMarshaller implements JsonToDBObjectMarshaller {
 
@@ -58,6 +59,10 @@ public class MongoJsonToDBObjectMarshaller implements JsonToDBObjectMarshaller {
         return (DBObject) JSON.parse(json, new BSONCallback(parameters));
     }
 
+    /**
+     * This callback is called for each element in json during parsing and applies specific implementation of
+     * {@link ReplacementCallback} for each json element based on element type.
+     */
     private static class BSONCallback extends JSONCallback {
         private ReplacementCallback<BasicDBObject> basicDBObjectReplacementCallback;
         private ReplacementCallback<BasicDBList> basicDBListReplacementCallback;

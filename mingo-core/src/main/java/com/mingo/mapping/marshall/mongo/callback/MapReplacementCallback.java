@@ -20,16 +20,36 @@ import com.mingo.util.MapTraversal;
 import java.util.Collection;
 import java.util.Map;
 
+/**
+ * Callback to replace values in map.
+ */
 public class MapReplacementCallback extends AbstractReplacementCallback<Map> implements ReplacementCallback<Map> {
 
+    /**
+     * Constructor this parameters.
+     *
+     * @param prefix       the prefix identifies that field is parameter
+     * @param replacements the replacements
+     */
     public MapReplacementCallback(String prefix, Map<String, Object> replacements) {
         super(prefix, replacements);
     }
 
+    /**
+     * Constructor this parameters.
+     *
+     * @param replacements the replacements
+     */
     public MapReplacementCallback(Map<String, Object> replacements) {
         super(replacements);
     }
 
+    /**
+     * Replaces all values in map with replacements.
+     *
+     * @param map the map to replace
+     * @return map with replaced values
+     */
     @Override
     public Object doReplace(Map map) {
         MapTraversal.traverseEntries(map, (currPap, entry) -> {

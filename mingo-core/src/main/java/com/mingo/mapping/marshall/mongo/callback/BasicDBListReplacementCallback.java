@@ -20,15 +20,29 @@ import org.apache.commons.collections.CollectionUtils;
 
 import java.util.Map;
 
+/**
+ * Callback to replace elements in {@link BasicDBList}.
+ */
 public class BasicDBListReplacementCallback extends AbstractReplacementCallback<BasicDBList> implements ReplacementCallback<BasicDBList> {
 
     private ReplacementCallback<Map> mapReplacementCallback;
 
+    /**
+     * Constructor this parameters.
+     *
+     * @param replacements the replacements
+     */
     public BasicDBListReplacementCallback(Map<String, Object> replacements) {
         super(replacements);
         mapReplacementCallback = new MapReplacementCallback(replacements);
     }
 
+    /**
+     * Replace all elements in dbList.
+     *
+     * @param dbList the dbList to replace
+     * @return dbList with replaced elements
+     */
     @Override
     public Object doReplace(BasicDBList dbList) {
         if (CollectionUtils.isNotEmpty(dbList)) {

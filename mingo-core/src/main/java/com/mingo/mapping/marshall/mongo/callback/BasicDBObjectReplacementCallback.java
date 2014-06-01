@@ -19,14 +19,28 @@ import com.mongodb.BasicDBObject;
 
 import java.util.Map;
 
+/**
+ * Callback to replace values in {@link BasicDBObject}.
+ */
 public class BasicDBObjectReplacementCallback implements ReplacementCallback<BasicDBObject> {
 
     private ReplacementCallback<Map> mapReplacementCallback;
 
+    /**
+     * Constructor this parameters.
+     *
+     * @param replacements the replacements
+     */
     public BasicDBObjectReplacementCallback(Map<String, Object> replacements) {
         mapReplacementCallback = new MapReplacementCallback(replacements);
     }
 
+    /**
+     * Replace all values in dbObject with replacements.
+     *
+     * @param dbObject the dbObject to replace
+     * @return dbObject with replaced values
+     */
     @Override
     public Object doReplace(BasicDBObject dbObject) {
         if (dbObject != null) {

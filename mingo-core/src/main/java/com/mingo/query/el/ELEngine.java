@@ -1,7 +1,3 @@
-package com.mingo.query.el;
-
-import java.util.Map;
-
 /**
  * Copyright 2012-2013 The Mingo Team
  * <p>
@@ -16,6 +12,13 @@ import java.util.Map;
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ */
+package com.mingo.query.el;
+
+import java.util.Map;
+
+/**
+ * Base interface declares methods to work with expression language.
  */
 public interface ELEngine {
 
