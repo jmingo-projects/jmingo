@@ -77,7 +77,18 @@ public class Context {
      * @return loaded and configured context
      */
     public static Context create(String contextPath) {
-        return create(contextPath, null);
+        return create(contextPath, null, Collections.emptyList());
+    }
+
+    /**
+     * Loads context from file. Path can be relative(file should be in application classpath) or absolute.
+     *
+     * @param contextPath       the path to the xml file with context configuration
+     * @param benchmarkServices the list of {@link com.mingo.benchmark.BenchmarkService}
+     * @return loaded and configured context
+     */
+    public static Context create(String contextPath, List<BenchmarkService> benchmarkServices) {
+        return create(contextPath, null, benchmarkServices);
     }
 
     /**
