@@ -2,6 +2,10 @@
 
 <context xmlns="http://www.mingo.com/schema/context">
 
+    <config>
+        <benchmark enabled="true"/>
+    </config>
+
     <querySetConfig>
         <querySet path="/META-INF/mingo/query/reviewQuerySet.xml"/>
     </querySetConfig>

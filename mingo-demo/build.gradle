@@ -23,6 +23,7 @@ dependencies {
     compile("org.springframework:spring-test:$springVersion")
     /* ---------------- mingo dependencies ---------------- */
     compile('com.git.mingo:mingo-core:1.0.0')
+    compile('com.git.mingo:mingo-benchmark:1.0.0')
 
     /* ---------------- byte code tools ---------------- */
     compile('cglib:cglib:3.0')
