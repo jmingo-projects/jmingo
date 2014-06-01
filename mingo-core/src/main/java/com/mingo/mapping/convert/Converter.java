@@ -1,7 +1,3 @@
-package com.mingo.mapping.convert;
-
-import com.mongodb.DBObject;
-
 /**
  * Copyright 2012-2013 The Mingo Team
  * <p>
@@ -16,8 +12,13 @@ import com.mongodb.DBObject;
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * <p>
- * Specific converter interface which contains methods for conversion DBObject to specified type.
+ */
+package com.mingo.mapping.convert;
+
+import com.mongodb.DBObject;
+
+/**
+ * Specific converter interface which contains methods to convert DBObject to an object with specified type.
  *
  * @param <T> the type of the class modeled by this {@code Class} object.
  */
@@ -25,7 +26,7 @@ import com.mongodb.DBObject;
 public interface Converter<T> {
 
     /**
-     * Converts the given source into the object with specified type.
+     * Converts the given source into an object with specified type.
      *
      * @param type   the type of target object
      * @param source implementation of {@link DBObject} interface.

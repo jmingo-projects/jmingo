@@ -110,8 +110,9 @@ public class QuerySetWatchService {
     }
 
     /**
-     * Shutdown current watch service.
-     * Closes all running watcher threads.
+     * Shutdown current query watch service.
+     * Terminates all running watcher threads and closes watch service.
+     * Waits for 30 seconds until watchers have completed and throws exception if the timeout elapsed.
      *
      * @throws WatchServiceException if any errors occur
      */

@@ -22,10 +22,20 @@ public class MingoContextConfig {
 
     private boolean benchmarkEnabled = false;
 
+    /**
+     * Is benchmark enabled.
+     *
+     * @return true id benchmark enabled, otherwise false
+     */
     public boolean isBenchmarkEnabled() {
         return benchmarkEnabled;
     }
 
+    /**
+     * Disable or enable benchmark.
+     *
+     * @param benchmarkEnabled true to enable benchmark, false to disable
+     */
     public void setBenchmarkEnabled(boolean benchmarkEnabled) {
         this.benchmarkEnabled = benchmarkEnabled;
     }

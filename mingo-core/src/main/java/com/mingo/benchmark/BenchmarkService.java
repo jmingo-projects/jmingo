@@ -26,22 +26,24 @@ public interface BenchmarkService {
 
     /**
      * This method is invoked immediately after {@link com.mingo.context.Context#addBenchmarkService(BenchmarkService)}
-     * methods invocation. The aim of this method is prepare current benchmark service to use.
+     * methods invocation. The aim of this method is prepare current benchmark service for use.
      *
-     * @param context the current mingo context, is used to get data necessary to init service
+     * @param context the current mingo context, is used to get data necessary to init current benchmark service
      */
     void init(Context context);
 
     /**
      * Mingo invokes this method each time when some code was profiled,
      * for instance it can be measuring execution time and etc.
+     * Try to avoid long operations in this method but if needed to perform long operations such as saving in database
+     * or sending via network then perform this operations in separate thread.
      *
      * @param metric
      */
     void submit(Metrics metric);
 
     /**
-     * This method is called when {@link Context#shutdown()} is invoked.
+     * This method is called when {@link Context#shutdown()} is being called.
      * Try to avoid long operations in this method.
      */
     void destroy();

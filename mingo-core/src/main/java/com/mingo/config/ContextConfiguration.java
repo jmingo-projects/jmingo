@@ -19,7 +19,7 @@ import com.mingo.query.el.ELEngineType;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
- * Mingo context configurations contains information to create and initialize context.
+ * Mingo context configurations contains necessary information to create and initialize context.
  */
 public class ContextConfiguration {
 

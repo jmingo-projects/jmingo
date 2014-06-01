@@ -1,8 +1,3 @@
-package com.mingo.executor;
-
-import java.util.List;
-import java.util.Map;
-
 /**
  * Copyright 2012-2013 The Mingo Team
  * <p/>
@@ -17,6 +12,14 @@ import java.util.Map;
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ */
+package com.mingo.executor;
+
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Interface defines common methods to perform custom queries that are defined in xml files.
  */
 public interface QueryExecutor {
 

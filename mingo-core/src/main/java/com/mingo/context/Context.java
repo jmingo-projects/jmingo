@@ -47,6 +47,7 @@ import static com.mingo.parser.xml.dom.ParserFactory.ParseComponent.CONTEXT;
 
 /**
  * Mingo context includes all components and also combines them together.
+ * All necessary components can be taken from context.
  * Context is loaded from xml file that's managed by context.xsd schema.
  */
 public class Context {
@@ -60,7 +61,7 @@ public class Context {
     private MongoDBFactory mongoDBFactory;
     private QueryExecutor queryExecutor;
     private MingoTemplate mingoTemplate;
-    private List<BenchmarkService> benchmarkServices = Lists.newCopyOnWriteArrayList();
+    private List<BenchmarkService> benchmarkServices = Lists.newArrayList();
 
     private static final String CONTEXT_PATH_ERROR = "path to context configuration cannot be empty or null";
 
@@ -110,6 +111,12 @@ public class Context {
         return context;
     }
 
+    /**
+     * Registers benchmark services in the context.
+     *
+     * @param services the benchmark services
+     * @param context the context
+     */
     private static void register(List<BenchmarkService> services, Context context) {
         if (CollectionUtils.isNotEmpty(services)) {
             services.forEach(service -> {
@@ -146,7 +153,7 @@ public class Context {
 
     /**
      * Gets current implementation of {@link ELEngine} interface. A EL engine allows evaluate EL expressions.
-     * Basically this component is required by another components and isn't of interest as separate component to use.
+     * Basically this component is required by another components and isn't of interest as separate component for use.
      *
      * @return EL engine
      */

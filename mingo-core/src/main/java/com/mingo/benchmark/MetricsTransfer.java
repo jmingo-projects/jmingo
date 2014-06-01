@@ -33,7 +33,8 @@ import java.util.concurrent.Executors;
  */
 public class MetricsTransfer {
 
-    private ExecutorService eventBusThreadPool = Executors.newFixedThreadPool(10);
+    public static final int THREADS = 20; // todo should be configurable
+    private ExecutorService eventBusThreadPool = Executors.newFixedThreadPool(THREADS);
     private EventBus eventBus = new AsyncEventBus("EventBus_" + getClass().getSimpleName(), eventBusThreadPool);
     private static final Logger LOGGER = LoggerFactory.getLogger(MetricsTransfer.class);
 

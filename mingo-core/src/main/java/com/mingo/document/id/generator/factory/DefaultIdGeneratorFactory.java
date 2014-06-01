@@ -26,6 +26,9 @@ import org.bson.types.ObjectId;
 
 import java.util.Map;
 
+/**
+ * Implementation of {@link IdGeneratorFactory}.
+ */
 public class DefaultIdGeneratorFactory implements IdGeneratorFactory {
 
     private Map<String, IdGenerator> generators = Maps.newHashMap();

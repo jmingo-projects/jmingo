@@ -16,8 +16,6 @@
 package com.mingo.benchmark;
 
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
-
 import java.io.Serializable;
 import java.util.concurrent.TimeUnit;
 
@@ -104,12 +102,13 @@ public class Metrics implements Serializable {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
-                .append("name", name)
-                .append("startTime", startTime)
-                .append("executionTime", executionTime)
-                .append("timeUnit", timeUnit)
-                .toString();
+        final StringBuilder sb = new StringBuilder("Metrics{");
+        sb.append("name='").append(name).append('\'');
+        sb.append(", startTime=").append(startTime);
+        sb.append(", executionTime=").append(executionTime);
+        sb.append(", timeUnit=").append(timeUnit);
+        sb.append('}');
+        return sb.toString();
     }
 }
 

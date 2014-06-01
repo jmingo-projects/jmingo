@@ -1,11 +1,3 @@
-package com.mingo.executor;
-
-import com.mongodb.AggregationOutput;
-import com.mongodb.BasicDBList;
-import com.mongodb.DBCollection;
-import com.mongodb.DBObject;
-import org.springframework.util.Assert;
-
 /**
  * Copyright 2012-2013 The Mingo Team
  * <p/>
@@ -20,6 +12,17 @@ import org.springframework.util.Assert;
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ */
+package com.mingo.executor;
+
+import com.mongodb.AggregationOutput;
+import com.mongodb.BasicDBList;
+import com.mongodb.DBCollection;
+import com.mongodb.DBObject;
+import org.springframework.util.Assert;
+
+/**
+ * Base implementation of {@link QueryExecutor}.
  */
 public abstract class AbstractQueryExecutor implements QueryExecutor {
 
