@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<context xmlns="http://www.jmingo.com/schema/context">
+<context xmlns="http://www.jmingo.org/schema/context">
 
 
     <config>
@@ -18,7 +18,7 @@
         </options>
     </mongo>
 
-    <defaultConverter class="com.jmingo.mapping.convert.DefaultConverter"/>
+    <defaultConverter class="org.jmingo.mapping.convert.DefaultConverter"/>
 
-    <converters package="com.jmingo.mapping.converter.custom"/>
+    <converters package="org.jmingo.mapping.converter.custom"/>
 </context>

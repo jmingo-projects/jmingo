@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<querySet xmlns="http://www.jmingo.com/schema/query">
+<querySet xmlns="http://www.jmingo.org/schema/query">
 
     <config collectionName="collectionOne"/>
 
