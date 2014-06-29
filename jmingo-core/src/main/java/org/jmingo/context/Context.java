@@ -15,10 +15,9 @@
  */
 package org.jmingo.context;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
+import com.mongodb.Mongo;
+import org.apache.commons.lang3.StringUtils;
 import org.jmingo.MingoTemplate;
-import org.jmingo.benchmark.BenchmarkService;
 import org.jmingo.config.ContextConfiguration;
 import org.jmingo.document.id.generator.factory.DefaultIdGeneratorFactory;
 import org.jmingo.document.id.generator.factory.IdGeneratorFactory;
@@ -28,21 +27,14 @@ import org.jmingo.exceptions.ContextInitializationException;
 import org.jmingo.exceptions.ShutdownException;
 import org.jmingo.executor.MongoQueryExecutor;
 import org.jmingo.executor.QueryExecutor;
-import org.jmingo.executor.QueryExecutorBenchmark;
 import org.jmingo.mapping.convert.ConverterService;
 import org.jmingo.mongo.MongoDBFactory;
 import org.jmingo.parser.Parser;
 import org.jmingo.parser.xml.dom.ParserFactory;
 import org.jmingo.query.QueryManager;
 import org.jmingo.util.FileUtils;
-import com.mongodb.Mongo;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Collections;
-import java.util.List;
 
 import static org.jmingo.parser.xml.dom.ParserFactory.ParseComponent.CONTEXT;
 
@@ -62,7 +54,6 @@ public class Context {
     private MongoDBFactory mongoDBFactory;
     private QueryExecutor queryExecutor;
     private MingoTemplate mingoTemplate;
-    private List<BenchmarkService> benchmarkServices = Lists.newArrayList();
 
     private static final String CONTEXT_PATH_ERROR = "path to context configuration cannot be empty or null";
 
@@ -79,31 +70,7 @@ public class Context {
      * @return loaded and configured context
      */
     public static Context create(String contextPath) {
-        return create(contextPath, null, Collections.emptyList());
-    }
-
-    /**
-     * Loads context from file. Path can be relative(file should be in application classpath) or absolute.
-     *
-     * @param contextPath       the path to the xml file with context configuration
-     * @param benchmarkServices the list of {@link org.jmingo.benchmark.BenchmarkService}
-     * @return loaded and configured context
-     */
-    public static Context create(String contextPath, List<BenchmarkService> benchmarkServices) {
-        return create(contextPath, null, benchmarkServices);
-    }
-
-    /**
-     * Loads context from file. Path can be relative(file should be in application classpath) or absolute.
-     *
-     * @param contextPath
-     * @param mongo       the {@link Mongo} instance. If mongo configuration was defined in mingo context then will be
-     *                    ignored and the given mongo will be used instead. It can be useful if you want to configure
-     *                    your own mongo instance and don't use mingo for it.
-     * @return loaded and configured context
-     */
-    public static Context create(String contextPath, Mongo mongo) {
-        return create(contextPath, mongo, Collections.emptyList());
+        return create(contextPath, null);
     }
 
     /**
@@ -113,34 +80,13 @@ public class Context {
      * @param mongo             the {@link Mongo} instance. If mongo configuration was defined in mingo context then will be
      *                          ignored and the given mongo will be used instead. It can be useful if you want to configure
      *                          your own mongo instance and don't use mingo for it.
-     * @param benchmarkServices the list of {@link org.jmingo.benchmark.BenchmarkService}.
      * @return loaded and configured context
      */
-    public static Context create(String contextPath, Mongo mongo, List<BenchmarkService> benchmarkServices) {
+    public static Context create(String contextPath, Mongo mongo) {
         Context context = new Context();
         context.initialize(contextPath, mongo);
         currentContext.set(context);
-        register(benchmarkServices, context);
         return context;
-    }
-
-    /**
-     * Registers benchmark services in the context.
-     *
-     * @param services the benchmark services
-     * @param context  the context
-     */
-    private static void register(List<BenchmarkService> services, Context context) {
-        if (CollectionUtils.isNotEmpty(services)) {
-            services.forEach(service -> {
-                service.init(context);
-                context.addBenchmarkService(service);
-            });
-        }
-    }
-
-    private void addBenchmarkService(BenchmarkService service) {
-        benchmarkServices.add(service);
     }
 
     /**
@@ -224,28 +170,16 @@ public class Context {
     }
 
     /**
-     * Gets registered benchmark services.
-     *
-     * @return immutable list
-     */
-    public List<BenchmarkService> getBenchmarkServices() {
-        return ImmutableList.copyOf(benchmarkServices);
-    }
-
-    /**
      * Closes context. Notifies all component what context is closing and will be destroyed soon.
      * How long this method will execute depends on time of actions that will be performed be other components:
-     * for instance if one of the benchmarks services will save data in slow storage then calling code will wait until
-     * the operation is completed, thus try to avoid complicated logic in those methods.
+     * for instance if one of the components will save data in storage then calling code will wait until
+     * the operation is completed, thus try to avoid complicated logic in shutdown methods.
      *
      * @throws ShutdownException if any errors occur
      */
     public void shutdown() throws ShutdownException {
         try {
             queryManager.shutdown();
-            if (CollectionUtils.isNotEmpty(benchmarkServices)) {
-                benchmarkServices.forEach(BenchmarkService::destroy);
-            }
         } catch (RuntimeException e) {
             throw new ShutdownException(e);
         }
@@ -271,12 +205,6 @@ public class Context {
                     : new MongoDBFactory(config.getMongoConfig());
             createElEngine();
             queryExecutor = new MongoQueryExecutor(mongoDBFactory, queryManager, elEngine, converterService);
-
-            //todo add factory for executors
-            if (config.getMingoContextConfig().isBenchmarkEnabled()) {
-                queryExecutor = new QueryExecutorBenchmark(queryExecutor);
-            }
-
             mingoTemplate = new MingoTemplate(queryExecutor, mongoDBFactory, converterService, idGeneratorFactory);
         } catch (Throwable e) {
             throw new ContextInitializationException(e);

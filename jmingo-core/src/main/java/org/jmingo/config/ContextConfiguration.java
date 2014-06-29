@@ -22,8 +22,6 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
  */
 public class ContextConfiguration {
 
-    private MingoContextConfig mingoContextConfig;
-
     private QuerySetConfiguration querySetConfiguration;
 
     private MongoConfig mongoConfig;
@@ -32,24 +30,6 @@ public class ContextConfiguration {
     private String defaultConverter;
 
     private String converterPackageScan;
-
-    /**
-     * Gets mingo context config.
-     *
-     * @return the mingo context config
-     */
-    public MingoContextConfig getMingoContextConfig() {
-        return mingoContextConfig;
-    }
-
-    /**
-     * Sets mingo context config.
-     *
-     * @param mingoContextConfig the mingo context config {@link MingoContextConfig}
-     */
-    public void setMingoContextConfig(MingoContextConfig mingoContextConfig) {
-        this.mingoContextConfig = mingoContextConfig;
-    }
 
     /**
      * Gets query set configuration.
@@ -146,7 +126,6 @@ public class ContextConfiguration {
     @Override
     public String toString() {
         return new ToStringBuilder(this)
-                .append("mingoContextConfig", mingoContextConfig)
                 .append("querySetConfiguration", querySetConfiguration)
                 .append("defaultConverter", defaultConverter)
                 .append("converterPackageScan", converterPackageScan)

@@ -17,21 +17,13 @@ package org.jmingo.parser.xml.dom;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.jmingo.config.ContextConfiguration;
-import org.jmingo.config.MingoContextConfig;
 import org.jmingo.config.MongoConfig;
 import org.jmingo.config.QuerySetConfiguration;
 import org.jmingo.exceptions.MingoParserException;
 import org.jmingo.parser.Parser;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.nio.file.Path;
-import java.util.Set;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -41,13 +33,19 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.nio.file.Path;
+import java.util.Set;
+
 import static org.jmingo.parser.xml.dom.DocumentBuilderFactoryCreator.createDocumentBuilderFactory;
 import static org.jmingo.parser.xml.dom.util.DomUtil.assertPositive;
 import static org.jmingo.parser.xml.dom.util.DomUtil.getAllChildNodes;
-import static org.jmingo.parser.xml.dom.util.DomUtil.getAttributeBoolean;
 import static org.jmingo.parser.xml.dom.util.DomUtil.getAttributeInt;
 import static org.jmingo.parser.xml.dom.util.DomUtil.getAttributeString;
-import static org.jmingo.parser.xml.dom.util.DomUtil.getChildNodes;
 import static org.jmingo.parser.xml.dom.util.DomUtil.getFirstTagOccurrence;
 
 /**
@@ -64,21 +62,14 @@ public class ContextConfigurationParser implements Parser<ContextConfiguration> 
 
     private static final String CONTEXT_TAG = "context";
 
-    private static final String CONFIG_TAG = "config";
-    private static final String BENCHMARK_TAG = "benchmark";
-    private static final String BENCHMARK_ENABLED_ATTR = "enabled";
-
     private static final String QUERY_SET_CONFIG_TAG = "querySetConfig";
     private static final String QUERY_SET_TAG = "querySet";
-    private static final String QUERY_ANALYZER_TAG = "queryAnalyzer";
     private static final String QUERY_SET_PATH_ATTR = "path";
-    private static final String QUERY_ANALYZER_TYPE_ATTR = "type";
 
     private static final String MONGO_TAG = "mongo";
     private static final String MONGO_HOST_ATTR = "host";
     private static final String MONGO_PORT_ATTR = "port";
     private static final String MONGO_DBNAME_ATTR = "dbName";
-
 
     private static final String DEFAULT_CONVERTER_TAG = "defaultConverter";
     private static final String CONVERTERS_TAG = "converters";
@@ -114,7 +105,6 @@ public class ContextConfigurationParser implements Parser<ContextConfiguration> 
             Document document = builder.parse(new InputSource(is));
             contextConfiguration = new ContextConfiguration();
             Element element = document.getDocumentElement();
-            contextConfiguration.setMingoContextConfig(parseConfigTag(element));
             contextConfiguration.setQuerySetConfiguration(parseQuerySetConfigTag(element));
             contextConfiguration.setMongoConfig(parseMongoTag(element));
             parseConvertersTag(contextConfiguration, element);
@@ -123,25 +113,6 @@ public class ContextConfigurationParser implements Parser<ContextConfiguration> 
             throw new MingoParserException(e);
         }
         return contextConfiguration;
-    }
-
-    /**
-     * Parse <config/> tag.
-     *
-     * @param element element of XML document
-     * @return MingoContextConfig
-     */
-    private MingoContextConfig parseConfigTag(Element element) throws MingoParserException {
-        MingoContextConfig mingoContextConfig = new MingoContextConfig();
-        Node configNode = getFirstTagOccurrence(element, CONFIG_TAG);
-        if (configNode != null && configNode.hasChildNodes()) {
-            getChildNodes(configNode).forEach((childNode) -> {
-                if (BENCHMARK_TAG.equals(childNode.getNodeName())) {
-                    mingoContextConfig.setBenchmarkEnabled(getAttributeBoolean(childNode, BENCHMARK_ENABLED_ATTR));
-                }
-            });
-        }
-        return mingoContextConfig;
     }
 
     /**

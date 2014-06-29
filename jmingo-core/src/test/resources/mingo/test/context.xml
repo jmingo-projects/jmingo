@@ -2,11 +2,6 @@
 
 <context xmlns="http://www.jmingo.org/schema/context">
 
-
-    <config>
-        <benchmark enabled="false"/>
-    </config>
-
     <querySetConfig>
         <querySet path="/mingo/test/testQuerySet.xml"/>
         <querySet path="/mingo/test/second/testQuerySet2.xml"/>
