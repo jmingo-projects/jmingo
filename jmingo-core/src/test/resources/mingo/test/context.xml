@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<context xmlns="http://www.jmingo.com/schema/context">
+
+
+    <config>
+        <benchmark enabled="false"/>
+    </config>
+
+    <querySetConfig>
+        <querySet path="/mingo/test/testQuerySet.xml"/>
+        <querySet path="/mingo/test/second/testQuerySet2.xml"/>
+    </querySetConfig>
+
+
+    <queryAnalyzer type="jexl"/>
+
+    <mongo port="27017" host="localhost" dbName="dbTest">
+        <options>
+            <option name="connectTimeout" value="100"/>
+        </options>
+    </mongo>
+
+    <defaultConverter class="com.jmingo.mapping.convert.DefaultConverter"/>
+
+    <converters package="com.jmingo.mapping.converter.custom"/>
+</context>

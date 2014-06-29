@@ -2,11 +2,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0                              http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.git.mingo</groupId>
-    <artifactId>mingo</artifactId>
+    <groupId>com.jmingo.projects</groupId>
+    <artifactId>jmingo</artifactId>
     <packaging>pom</packaging>
     <version>1.0.0</version>
-    <name>Mingo ORM framework</name>
+    <name>JMingo - MongoDB ORM Framework</name>
 
     <properties>
         <slf4jVersion>1.7.5</slf4jVersion>
@@ -18,7 +18,6 @@
         <guavaVersion>17.0</guavaVersion>
         <mongoDriverVersion>2.12.1</mongoDriverVersion>
         <embedmongo-version>0.1.9</embedmongo-version>
-        <mavenRepoPath/> <!-- pass the value from the command line as -DmavenRepoPath={path} -->
     </properties>
 
     <build>
@@ -83,9 +82,6 @@
     </build>
 
     <modules>
-        <module>mingo-core</module>
-        <!-- <module>mingo-test</module>
-        <module>mingo-dashboard</module>-->
-    <module>mingo-benchmark</module>
+        <module>jmingo-core</module>
   </modules>
 </project>

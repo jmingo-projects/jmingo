@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://www.jmingo.com/schema/query"
+           xmlns="http://www.jmingo.com/schema/query"
+           elementFormDefault="qualified">
+
+    <!-- QUERY SCHEMA -->
+
+    <xs:simpleType name="queryType">
+        <xs:restriction base="xs:normalizedString">
+            <xs:enumeration value="aggregation"/>
+            <xs:enumeration value="plain"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <!-- definition of attributes -->
+
+
+    <xs:element name="config">
+        <xs:complexType>
+            <xs:attribute name="collectionName" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="queryFragment">
+        <xs:complexType mixed="true">
+            <xs:attribute name="id" type="xs:ID" use="required"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="fragment">
+        <xs:complexType>
+            <xs:attribute name="ref" use="required" type="xs:string"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:complexType name="condition" mixed="true">
+        <xs:annotation>
+            <xs:documentation>
+                Specifies common type for element that can have condition expression
+            </xs:documentation>
+
+        </xs:annotation>
+        <xs:sequence></xs:sequence>
+        <xs:attribute name="condition" type="xs:string" use="required"/>
+    </xs:complexType>
+
+    <xs:element name="else">
+        <xs:complexType mixed="true" >
+                    <xs:sequence>
+                        <xs:element ref="fragment" minOccurs="0" maxOccurs="unbounded"/>
+                    </xs:sequence>
+        </xs:complexType>
+
+    </xs:element>
+
+    <xs:element name="elseIf" >
+        <xs:complexType>
+            <xs:complexContent mixed="true">
+                <xs:extension base="condition">
+                    <xs:sequence>
+                        <xs:element ref="fragment" minOccurs="0" maxOccurs="unbounded"/>
+                    </xs:sequence>
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="if">
+        <xs:complexType mixed="true">
+            <xs:annotation>
+                <xs:documentation>
+                    Extends 'condition' type and has child elements: 'elseIf' and 'else'.
+                    Also this element can have fragments, see fragment type
+
+                    if (condition) { ... }
+                    elseif (condition2){ ... }
+                    elseif (condition3) { ... }
+                    else { ... }
+
+                </xs:documentation>
+            </xs:annotation>
+            <xs:complexContent>
+                <xs:extension base="condition">
+                    <xs:sequence>
+                        <xs:element ref="fragment" minOccurs="0" maxOccurs="unbounded"/>
+                        <xs:element ref="elseIf" minOccurs="0" maxOccurs="unbounded"/>
+                        <xs:element ref="else" minOccurs="0" maxOccurs="1"/>
+                    </xs:sequence>
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="query">
+        <xs:complexType mixed="true">
+            <xs:sequence>
+                <xs:element ref="if" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="fragment" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="id" type="xs:ID" use="required"/>
+            <xs:attribute name="type" type="queryType" default="plain"/>
+            <xs:attribute name="converter-class" type="xs:string"/>
+            <xs:attribute name="converter-method" type="xs:string"/>
+            <xs:attribute name="escape-null-parameters" type="xs:boolean" default="false"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="querySet">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="config" minOccurs="1" maxOccurs="1"/>
+                <xs:element ref="queryFragment" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="query" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+</xs:schema>
+
