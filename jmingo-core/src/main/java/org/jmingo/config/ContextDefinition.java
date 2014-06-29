@@ -18,39 +18,39 @@ package org.jmingo.config;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
- * Mingo context configurations contains necessary information to create and initialize context.
+ * Mingo context definition contains necessary information parsed from a xml file to create and initialize context.
  */
-public class ContextConfiguration {
+public class ContextDefinition {
 
-    private QuerySetConfiguration querySetConfiguration;
+    private QuerySetConfig querySetConfig;
 
     private MongoConfig mongoConfig;
 
     /* default converter class */
     private String defaultConverter;
-
+    /* package to scan for converters */
     private String converterPackageScan;
 
     /**
      * Gets query set configuration.
      *
-     * @return {@link QuerySetConfiguration}
+     * @return {@link QuerySetConfig}
      */
-    public QuerySetConfiguration getQuerySetConfiguration() {
-        return querySetConfiguration;
+    public QuerySetConfig getQuerySetConfig() {
+        return querySetConfig;
     }
 
     /**
      * Sets query set configuration.
      *
-     * @param querySetConfiguration {@link QuerySetConfiguration}
+     * @param querySetConfig {@link QuerySetConfig}
      */
-    public void setQuerySetConfiguration(QuerySetConfiguration querySetConfiguration) {
-        this.querySetConfiguration = querySetConfiguration;
+    public void setQuerySetConfig(QuerySetConfig querySetConfig) {
+        this.querySetConfig = querySetConfig;
     }
 
     /**
-     * Gets database host. also see {@link #getMongoConfig()}.
+     * Gets database host. see {@link #getMongoConfig()}.
      *
      * @return database host
      */
@@ -59,11 +59,10 @@ public class ContextConfiguration {
     }
 
     /**
-     * Gets database port. also see {@link #getMongoConfig()}.
+     * Gets database port. see {@link #getMongoConfig()}.
      *
      * @return database port
      */
-    @Deprecated
     public int getDatabasePort() {
         return mongoConfig.getDatabasePort();
     }
@@ -126,10 +125,10 @@ public class ContextConfiguration {
     @Override
     public String toString() {
         return new ToStringBuilder(this)
-                .append("querySetConfiguration", querySetConfiguration)
+                .append("mongoConfig", mongoConfig)
+                .append("querySetConfiguration", querySetConfig)
                 .append("defaultConverter", defaultConverter)
                 .append("converterPackageScan", converterPackageScan)
-                .append("mongoConfig", mongoConfig)
                 .toString();
     }
 }

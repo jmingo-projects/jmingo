@@ -58,7 +58,7 @@ import static org.jmingo.util.StringUtils.removeLineBreaks;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 /**
- * This class is implementation of {@link Parser} interface for parsing QuerySet xml.
+ * This class is implementation of {@link Parser} interface for parsing query sets.
  */
 public class QuerySetParser implements Parser<QuerySet> {
 
@@ -298,7 +298,7 @@ public class QuerySetParser implements Parser<QuerySet> {
      * @param querySet        the query set to build detail information for exception message
      * @throws IllegalArgumentException if current converter configuration isn't correct
      */
-    public static void validateConverter(String converterClass, String converterMethod, String queryId, QuerySet querySet) {
+    private void validateConverter(String converterClass, String converterMethod, String queryId, QuerySet querySet) {
         if (StringUtils.isNotBlank(converterClass) && StringUtils.isBlank(converterMethod)) {
             throw new IllegalArgumentException(MessageFormatter.arrayFormat(CONVERTER_METHOD_DEFINITION_ERROR,
                     new Object[]{querySet.getPath(), queryId}).getMessage());

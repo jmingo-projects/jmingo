@@ -25,7 +25,7 @@ import java.util.Set;
 /**
  * Contains properties related to the query sets.
  */
-public class QuerySetConfiguration {
+public class QuerySetConfig {
 
     private Set<String> querySets = Sets.newHashSet();
 
@@ -57,5 +57,13 @@ public class QuerySetConfiguration {
         if (CollectionUtils.isNotEmpty(pQuerySets)) {
             querySets.addAll(pQuerySets);
         }
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("QuerySetConfig{");
+        sb.append("querySets=").append(querySets);
+        sb.append('}');
+        return sb.toString();
     }
 }

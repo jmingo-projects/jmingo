@@ -18,7 +18,7 @@ package org.jmingo.context;
 import com.mongodb.Mongo;
 import org.apache.commons.lang3.StringUtils;
 import org.jmingo.MingoTemplate;
-import org.jmingo.config.ContextConfiguration;
+import org.jmingo.config.ContextDefinition;
 import org.jmingo.document.id.generator.factory.DefaultIdGeneratorFactory;
 import org.jmingo.document.id.generator.factory.IdGeneratorFactory;
 import org.jmingo.el.ELEngineFactory;
@@ -49,7 +49,7 @@ public class Context {
     private ConverterService converterService;
     private QueryManager queryManager;
 
-    private ContextConfiguration config;
+    private ContextDefinition config;
     private IdGeneratorFactory idGeneratorFactory = new DefaultIdGeneratorFactory();
     private MongoDBFactory mongoDBFactory;
     private QueryExecutor queryExecutor;
@@ -57,7 +57,7 @@ public class Context {
 
     private static final String CONTEXT_PATH_ERROR = "path to context configuration cannot be empty or null";
 
-    private static final Parser<ContextConfiguration> CONTEXT_CONFIGURATION_PARSER =
+    private static final Parser<ContextDefinition> CONTEXT_CONFIGURATION_PARSER =
             ParserFactory.createParser(CONTEXT);
 
     private static ThreadLocal<Context> currentContext = new InheritableThreadLocal<>();
@@ -186,7 +186,7 @@ public class Context {
     }
 
     /**
-     * Creates and initialize mingo context with all necessary components based on {@link ContextConfiguration}.
+     * Creates and initialize mingo context with all necessary components based on {@link org.jmingo.config.ContextDefinition}.
      *
      * @param contextPath the path to the xml file with context configuration
      * @param mongo       the mongo instance , can be null
@@ -200,7 +200,7 @@ public class Context {
             // load context configuration from xml file
             config = loadContextConfiguration(contextPath);
             converterService = new ConverterService(config.getConverterPackageScan(), config.getDefaultConverter());
-            queryManager = new QueryManager(config.getQuerySetConfiguration().getQuerySets());
+            queryManager = new QueryManager(config.getQuerySetConfig().getQuerySets());
             mongoDBFactory = mongo != null ? new MongoDBFactory(config.getMongoConfig(), mongo)
                     : new MongoDBFactory(config.getMongoConfig());
             createElEngine();
@@ -213,9 +213,9 @@ public class Context {
     }
 
     /**
-     * Parses xml file which managing by schema: context.xsd and creates {@link ContextConfiguration} object.
+     * Parses xml file which managing by schema: context.xsd and creates {@link org.jmingo.config.ContextDefinition} object.
      */
-    private ContextConfiguration loadContextConfiguration(String contextPath) {
+    private ContextDefinition loadContextConfiguration(String contextPath) {
         return CONTEXT_CONFIGURATION_PARSER.parse(FileUtils.getAbsolutePath(contextPath));
     }
 

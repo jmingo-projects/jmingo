@@ -66,7 +66,7 @@ public final class ParserFactory {
         try {
             switch (parseComponent) {
                 case CONTEXT:
-                    xmlParser = new ContextConfigurationParser(createValidatedConfiguration(CONTEXT_XSD),
+                    xmlParser = new ContextDefinitionParser(createValidatedConfiguration(CONTEXT_XSD),
                         DEFAULT_PARSE_ERROR_HANDLER);
                     break;
                 case QUERY:

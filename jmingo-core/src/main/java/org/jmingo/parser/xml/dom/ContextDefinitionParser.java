@@ -19,9 +19,9 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.jmingo.config.ContextConfiguration;
+import org.jmingo.config.ContextDefinition;
 import org.jmingo.config.MongoConfig;
-import org.jmingo.config.QuerySetConfiguration;
+import org.jmingo.config.QuerySetConfig;
 import org.jmingo.exceptions.MingoParserException;
 import org.jmingo.parser.Parser;
 import org.slf4j.Logger;
@@ -49,16 +49,16 @@ import static org.jmingo.parser.xml.dom.util.DomUtil.getAttributeString;
 import static org.jmingo.parser.xml.dom.util.DomUtil.getFirstTagOccurrence;
 
 /**
- * This class is implementation of {@link Parser} interface.
- * XML parser for context configuration. See  context.xsd schema for details.
+ * This class is implementation of {@link Parser} interface to parse context configuration.
+ * See context.xsd schema for details.
  */
-public class ContextConfigurationParser implements Parser<ContextConfiguration> {
+public class ContextDefinitionParser implements Parser<ContextDefinition> {
 
     private DocumentBuilderFactory documentBuilderFactory;
 
     private ErrorHandler parseErrorHandler;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ContextConfigurationParser.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ContextDefinitionParser.class);
 
     private static final String CONTEXT_TAG = "context";
 
@@ -86,7 +86,7 @@ public class ContextConfigurationParser implements Parser<ContextConfiguration> 
      * @param parseErrorHandler   parser error handler {@link ErrorHandler}
      * @throws ParserConfigurationException {@link ParserConfigurationException}
      */
-    public ContextConfigurationParser(ParserConfiguration parserConfiguration, ErrorHandler parseErrorHandler)
+    public ContextDefinitionParser(ParserConfiguration parserConfiguration, ErrorHandler parseErrorHandler)
             throws ParserConfigurationException {
         this.documentBuilderFactory = createDocumentBuilderFactory(parserConfiguration);
         this.parseErrorHandler = parseErrorHandler;
@@ -96,23 +96,23 @@ public class ContextConfigurationParser implements Parser<ContextConfiguration> 
      * {@inheritDoc}
      */
     @Override
-    public ContextConfiguration parse(Path path) throws MingoParserException {
+    public ContextDefinition parse(Path path) throws MingoParserException {
         LOGGER.debug("parse context configuration: {}", path);
-        ContextConfiguration contextConfiguration;
+        ContextDefinition contextDefinition;
         try (InputStream is = new FileInputStream(path.toFile())) {
             DocumentBuilder builder = documentBuilderFactory.newDocumentBuilder();
             builder.setErrorHandler(parseErrorHandler);
             Document document = builder.parse(new InputSource(is));
-            contextConfiguration = new ContextConfiguration();
+            contextDefinition = new ContextDefinition();
             Element element = document.getDocumentElement();
-            contextConfiguration.setQuerySetConfiguration(parseQuerySetConfigTag(element));
-            contextConfiguration.setMongoConfig(parseMongoTag(element));
-            parseConvertersTag(contextConfiguration, element);
-            contextConfiguration.setDefaultConverter(parseDefaultConverterTag(element));
+            contextDefinition.setQuerySetConfig(parseQuerySetConfigTag(element));
+            contextDefinition.setMongoConfig(parseMongoTag(element));
+            parseConvertersTag(contextDefinition, element);
+            contextDefinition.setDefaultConverter(parseDefaultConverterTag(element));
         } catch(Exception e) {
             throw new MingoParserException(e);
         }
-        return contextConfiguration;
+        return contextDefinition;
     }
 
     /**
@@ -121,8 +121,8 @@ public class ContextConfigurationParser implements Parser<ContextConfiguration> 
      * @param element element of XML document
      * @return set of paths queries definitions
      */
-    private QuerySetConfiguration parseQuerySetConfigTag(Element element) throws MingoParserException {
-        QuerySetConfiguration querySetConfiguration = new QuerySetConfiguration();
+    private QuerySetConfig parseQuerySetConfigTag(Element element) throws MingoParserException {
+        QuerySetConfig querySetConfig = new QuerySetConfig();
         Set<String> querySets = ImmutableSet.of();
         // expected what xml contains single <querySetConfig> tag
         // therefore take first element from node list is normal
@@ -130,8 +130,8 @@ public class ContextConfigurationParser implements Parser<ContextConfiguration> 
         if (querySetConfigNode != null && querySetConfigNode.hasChildNodes()) {
             querySets = parseQuerySets(querySetConfigNode.getChildNodes());
         }
-        querySetConfiguration.addQuerySet(querySets);
-        return querySetConfiguration;
+        querySetConfig.addQuerySet(querySets);
+        return querySetConfig;
     }
 
     /**
@@ -189,11 +189,11 @@ public class ContextConfigurationParser implements Parser<ContextConfiguration> 
         return mongoConfig;
     }
 
-    private void parseConvertersTag(ContextConfiguration contextConfiguration, Element element) {
+    private void parseConvertersTag(ContextDefinition contextDefinition, Element element) {
         Node convertersNode = getFirstTagOccurrence(element, CONVERTERS_TAG);
         if (convertersNode != null) {
             String convertersPackage = getAttributeString(convertersNode, CONVERTERS_PACKAGE_ATTR);
-            contextConfiguration.setConverterPackageScan(convertersPackage);
+            contextDefinition.setConverterPackageScan(convertersPackage);
         }
     }
 
