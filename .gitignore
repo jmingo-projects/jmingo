@@ -19,4 +19,4 @@ out
 build
 test-output
 .springBeans
-/mingo-core/*.bat
+/jmingo-core/*.bat

@@ -22,7 +22,7 @@ import org.apache.commons.lang3.Validate;
 import org.jmingo.config.ContextDefinition;
 import org.jmingo.config.MongoConfig;
 import org.jmingo.config.QuerySetConfig;
-import org.jmingo.exceptions.MingoParserException;
+import org.jmingo.exceptions.JMingoParserException;
 import org.jmingo.parser.Parser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -96,7 +96,7 @@ public class ContextDefinitionParser implements Parser<ContextDefinition> {
      * {@inheritDoc}
      */
     @Override
-    public ContextDefinition parse(Path path) throws MingoParserException {
+    public ContextDefinition parse(Path path) throws JMingoParserException {
         LOGGER.debug("parse context configuration: {}", path);
         ContextDefinition contextDefinition;
         try (InputStream is = new FileInputStream(path.toFile())) {
@@ -110,7 +110,7 @@ public class ContextDefinitionParser implements Parser<ContextDefinition> {
             parseConvertersTag(contextDefinition, element);
             contextDefinition.setDefaultConverter(parseDefaultConverterTag(element));
         } catch(Exception e) {
-            throw new MingoParserException(e);
+            throw new JMingoParserException(e);
         }
         return contextDefinition;
     }
@@ -121,7 +121,7 @@ public class ContextDefinitionParser implements Parser<ContextDefinition> {
      * @param element element of XML document
      * @return set of paths queries definitions
      */
-    private QuerySetConfig parseQuerySetConfigTag(Element element) throws MingoParserException {
+    private QuerySetConfig parseQuerySetConfigTag(Element element) throws JMingoParserException {
         QuerySetConfig querySetConfig = new QuerySetConfig();
         Set<String> querySets = ImmutableSet.of();
         // expected what xml contains single <querySetConfig> tag
@@ -156,10 +156,10 @@ public class ContextDefinitionParser implements Parser<ContextDefinition> {
      * Throws exception if 'mongo' tag was not found.
      *
      * @param element element of XML document
-     * @throws MingoParserException {@link MingoParserException}
+     * @throws org.jmingo.exceptions.JMingoParserException {@link org.jmingo.exceptions.JMingoParserException}
      */
     private MongoConfig parseMongoTag(Element element)
-            throws MingoParserException {
+            throws JMingoParserException {
         MongoConfig mongoConfig = null;
         Node mongoNode = getFirstTagOccurrence(element, MONGO_TAG);
         if (mongoNode != null) {
@@ -184,7 +184,7 @@ public class ContextDefinitionParser implements Parser<ContextDefinition> {
             }
             mongoConfig = mongoConfigBuilder.build();
         } else {
-            throw new MingoParserException("<"+MONGO_TAG+"/>" + " is required");
+            throw new JMingoParserException("<"+MONGO_TAG+"/>" + " is required");
         }
         return mongoConfig;
     }

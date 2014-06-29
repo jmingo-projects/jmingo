@@ -16,7 +16,7 @@
 package org.jmingo.parser.xml.dom;
 
 import com.google.common.collect.Sets;
-import org.jmingo.exceptions.MingoParserException;
+import org.jmingo.exceptions.JMingoParserException;
 import org.jmingo.parser.Parser;
 import org.jmingo.query.ConditionElement;
 import org.jmingo.query.IfElseConditionalConstruct;
@@ -108,7 +108,7 @@ public class QuerySetParser implements Parser<QuerySet> {
      * {@inheritDoc}
      */
     @Override
-    public QuerySet parse(Path path) throws MingoParserException {
+    public QuerySet parse(Path path) throws JMingoParserException {
         LOGGER.debug("parse query set: {}", path);
         QuerySet querySet;
         try (InputStream is = new FileInputStream(path.toFile())) {
@@ -123,7 +123,7 @@ public class QuerySetParser implements Parser<QuerySet> {
             parseQueryFragments(root, querySet);
             parseQueries(root, querySet);
         } catch (Exception e) {
-            throw new MingoParserException(e);
+            throw new JMingoParserException(e);
         }
         return querySet;
     }
@@ -135,7 +135,7 @@ public class QuerySetParser implements Parser<QuerySet> {
      * @param element  element of XML document
      * @param querySet {@link QuerySet}
      */
-    private void parseConfigTag(Element element, QuerySet querySet) throws MingoParserException {
+    private void parseConfigTag(Element element, QuerySet querySet) throws JMingoParserException {
         Validate.notNull(element, "element cannot be null");
         Validate.notNull(querySet, "query set cannot be null");
         Node configTag = getFirstNecessaryTagOccurrence(element, CONFIG_TAG);
@@ -173,7 +173,7 @@ public class QuerySetParser implements Parser<QuerySet> {
      * @param root element XML document
      * @return set of {@link Query} elements
      */
-    private void parseQueries(Element root, QuerySet querySet) throws MingoParserException {
+    private void parseQueries(Element root, QuerySet querySet) throws JMingoParserException {
         NodeList queryNodeList = root.getElementsByTagName(QUERY_TAG);
         if (isNotEmpty(queryNodeList)) {
             for (int i = 0; i < queryNodeList.getLength(); i++) {
@@ -187,7 +187,7 @@ public class QuerySetParser implements Parser<QuerySet> {
      *
      * @param node the query node
      */
-    private void parseQueryTag(Node node, QuerySet querySet) throws MingoParserException {
+    private void parseQueryTag(Node node, QuerySet querySet) throws JMingoParserException {
         if (node == null || !QUERY_TAG.equals(node.getNodeName())) {
             return;
         }
@@ -225,7 +225,7 @@ public class QuerySetParser implements Parser<QuerySet> {
         });
         Query query = builder.build();
         if (!QueryUtils.isValidJSON(query.getText())) {
-            throw new MingoParserException(MessageFormatter.format(INVALID_QUERY_ERROR_MSG,
+            throw new JMingoParserException(MessageFormatter.format(INVALID_QUERY_ERROR_MSG,
                     query.getId(), query).getMessage());
         }
         querySet.addQuery(query);
@@ -236,7 +236,7 @@ public class QuerySetParser implements Parser<QuerySet> {
      *
      * @param node node
      */
-    private IfElseConditionalConstruct parseIfElseTag(Node node) throws MingoParserException {
+    private IfElseConditionalConstruct parseIfElseTag(Node node) throws JMingoParserException {
         IfElseConditionalConstruct.Builder builder = IfElseConditionalConstruct.builder();
         String ifCondition = getAttributeString(node, CONDITION);
         StringBuilder clauseBuilder = new StringBuilder();
@@ -279,7 +279,7 @@ public class QuerySetParser implements Parser<QuerySet> {
         return clause.toString();
     }
 
-    private String parseTextNode(Node node) throws MingoParserException {
+    private String parseTextNode(Node node) throws JMingoParserException {
         String body = node.getNodeValue();
         return removeLineBreaks(trim(body));
     }

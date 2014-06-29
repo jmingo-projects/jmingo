@@ -3,8 +3,8 @@
 <context xmlns="http://www.jmingo.org/schema/context">
 
     <querySetConfig>
-        <querySet path="/mingo/test/testQuerySet.xml"/>
-        <querySet path="/mingo/test/second/testQuerySet2.xml"/>
+        <querySet path="/jmingo/test/testQuerySet.xml"/>
+        <querySet path="/jmingo/test/second/testQuerySet2.xml"/>
     </querySetConfig>
 
     <mongo port="27017" host="localhost" dbName="dbTest">

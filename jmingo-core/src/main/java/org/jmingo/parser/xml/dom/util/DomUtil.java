@@ -17,7 +17,7 @@ package org.jmingo.parser.xml.dom.util;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import org.jmingo.exceptions.MingoParserException;
+import org.jmingo.exceptions.JMingoParserException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.w3c.dom.Element;
@@ -81,12 +81,12 @@ public class DomUtil {
      * @param element interface represents an element in an HTML or XML document.
      * @param tagName tag name
      * @return found node
-     * @throws MingoParserException {@link MingoParserException}
+     * @throws org.jmingo.exceptions.JMingoParserException {@link org.jmingo.exceptions.JMingoParserException}
      */
-    public static Node getFirstNecessaryTagOccurrence(Element element, String tagName) throws MingoParserException {
+    public static Node getFirstNecessaryTagOccurrence(Element element, String tagName) throws JMingoParserException {
         Node node = getFirstTagOccurrence(element, tagName);
         if (node == null) {
-            throw new MingoParserException("not found necessary <" + tagName + "/> tag");
+            throw new JMingoParserException("not found necessary <" + tagName + "/> tag");
         }
         return node;
     }

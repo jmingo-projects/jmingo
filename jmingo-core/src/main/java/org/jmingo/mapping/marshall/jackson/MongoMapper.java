@@ -32,7 +32,7 @@ import org.bson.types.ObjectId;
 import java.util.Date;
 
 /**
- * Mapper configured to use within mingo.
+ * Mapper configured to use within jmingo.
  */
 public class MongoMapper extends ObjectMapper {
 

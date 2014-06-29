@@ -17,7 +17,7 @@ package org.jmingo.context;
 
 import com.mongodb.Mongo;
 import org.apache.commons.lang3.StringUtils;
-import org.jmingo.MingoTemplate;
+import org.jmingo.JMingoTemplate;
 import org.jmingo.config.ContextDefinition;
 import org.jmingo.document.id.generator.factory.DefaultIdGeneratorFactory;
 import org.jmingo.document.id.generator.factory.IdGeneratorFactory;
@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
 import static org.jmingo.parser.xml.dom.ParserFactory.ParseComponent.CONTEXT;
 
 /**
- * Mingo context includes all components and also combines them together.
+ * JMingo context includes all components and also combines them together.
  * All necessary components can be taken from context.
  * Context is loaded from xml file that's managed by context.xsd schema.
  */
@@ -49,11 +49,11 @@ public class Context {
     private ConverterService converterService;
     private QueryManager queryManager;
 
-    private ContextDefinition config;
+    private ContextDefinition contextDefinition;
     private IdGeneratorFactory idGeneratorFactory = new DefaultIdGeneratorFactory();
     private MongoDBFactory mongoDBFactory;
     private QueryExecutor queryExecutor;
-    private MingoTemplate mingoTemplate;
+    private JMingoTemplate JMingoTemplate;
 
     private static final String CONTEXT_PATH_ERROR = "path to context configuration cannot be empty or null";
 
@@ -77,9 +77,9 @@ public class Context {
      * Loads context from file. Path can be relative(file should be in application classpath) or absolute.
      *
      * @param contextPath
-     * @param mongo             the {@link Mongo} instance. If mongo configuration was defined in mingo context then will be
+     * @param mongo             the {@link Mongo} instance. If mongo configuration was defined in jmingo context then will be
      *                          ignored and the given mongo will be used instead. It can be useful if you want to configure
-     *                          your own mongo instance and don't use mingo for it.
+     *                          your own mongo instance and don't use jmingo for it.
      * @return loaded and configured context
      */
     public static Context create(String contextPath, Mongo mongo) {
@@ -160,13 +160,13 @@ public class Context {
     }
 
     /**
-     * Gets mingo template. Template contains methods to perform CRUD
+     * Gets jmingo template. Template contains methods to perform CRUD
      * operations and also user queries that are defined in xml files.
      *
-     * @return mingo template
+     * @return jmingo template
      */
-    public MingoTemplate getMingoTemplate() {
-        return mingoTemplate;
+    public JMingoTemplate getJMingoTemplate() {
+        return JMingoTemplate;
     }
 
     /**
@@ -186,26 +186,25 @@ public class Context {
     }
 
     /**
-     * Creates and initialize mingo context with all necessary components based on {@link org.jmingo.config.ContextDefinition}.
+     * Creates and initialize jmingo context with all necessary components based on {@link org.jmingo.config.ContextDefinition}.
      *
      * @param contextPath the path to the xml file with context configuration
      * @param mongo       the mongo instance , can be null
      */
     private void initialize(String contextPath, Mongo mongo) {
-        Context context;
         try {
             if (StringUtils.isBlank(contextPath)) {
                 throw new IllegalArgumentException(CONTEXT_PATH_ERROR);
             }
-            // load context configuration from xml file
-            config = loadContextConfiguration(contextPath);
-            converterService = new ConverterService(config.getConverterPackageScan(), config.getDefaultConverter());
-            queryManager = new QueryManager(config.getQuerySetConfig().getQuerySets());
-            mongoDBFactory = mongo != null ? new MongoDBFactory(config.getMongoConfig(), mongo)
-                    : new MongoDBFactory(config.getMongoConfig());
+            // load context definition from xml file
+            contextDefinition = loadContextDefinition(contextPath);
+            converterService = new ConverterService(contextDefinition.getConverterPackageScan(), contextDefinition.getDefaultConverter());
+            queryManager = new QueryManager(contextDefinition.getQuerySetConfig().getQuerySets());
+            mongoDBFactory = mongo != null ? new MongoDBFactory(contextDefinition.getMongoConfig(), mongo)
+                    : new MongoDBFactory(contextDefinition.getMongoConfig());
             createElEngine();
             queryExecutor = new MongoQueryExecutor(mongoDBFactory, queryManager, elEngine, converterService);
-            mingoTemplate = new MingoTemplate(queryExecutor, mongoDBFactory, converterService, idGeneratorFactory);
+            JMingoTemplate = new JMingoTemplate(queryExecutor, mongoDBFactory, converterService, idGeneratorFactory);
         } catch (Throwable e) {
             throw new ContextInitializationException(e);
         }
@@ -215,7 +214,7 @@ public class Context {
     /**
      * Parses xml file which managing by schema: context.xsd and creates {@link org.jmingo.config.ContextDefinition} object.
      */
-    private ContextDefinition loadContextConfiguration(String contextPath) {
+    private ContextDefinition loadContextDefinition(String contextPath) {
         return CONTEXT_CONFIGURATION_PARSER.parse(FileUtils.getAbsolutePath(contextPath));
     }
 

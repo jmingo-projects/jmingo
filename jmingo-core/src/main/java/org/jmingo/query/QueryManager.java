@@ -155,7 +155,7 @@ public class QueryManager {
     }
 
     /**
-     * This method is called when mingo context is being closed.
+     * This method is called when jmingo context is being closed.
      * The entry of this method contains actions to properly close all running within current manager services.
      *
      * @throws RuntimeException if any errors occur

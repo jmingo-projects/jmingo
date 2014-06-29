@@ -1,7 +1,5 @@
-package org.jmingo.exceptions;
-
 /**
- * Copyright 2012-2013 The Mingo Team
+ * Copyright 2013-2014 The JMingo Team
  * <p/>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +13,8 @@ package org.jmingo.exceptions;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jmingo.exceptions;
+
 public class ConversionException extends RuntimeException {
 
     /**

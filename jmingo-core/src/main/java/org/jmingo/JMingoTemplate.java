@@ -16,6 +16,15 @@
 package org.jmingo;
 
 import com.google.common.collect.Iterables;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DB;
+import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
+import com.mongodb.WriteResult;
+import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.jmingo.document.id.IdFieldGenerator;
 import org.jmingo.document.id.generator.factory.IdGeneratorFactory;
 import org.jmingo.executor.QueryExecutor;
@@ -28,28 +37,16 @@ import org.jmingo.mapping.marshall.mongo.MongoBsonMarshallingFactory;
 import org.jmingo.mongo.MongoDBFactory;
 import org.jmingo.mongo.index.Index;
 import org.jmingo.query.Criteria;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
-import com.mongodb.WriteResult;
-import org.apache.commons.collections.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
 import org.jmingo.util.DocumentUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static org.jmingo.util.DocumentUtils.assertDocument;
-import static org.jmingo.util.DocumentUtils.getCollectionName;
-
 /**
- * Class that specifies a basic set of Mingo operations.
+ * Class that specifies a basic set of JMingo operations.
  */
-public class MingoTemplate {
+public class JMingoTemplate {
 
 
     private QueryExecutor queryExecutor;
@@ -62,8 +59,8 @@ public class MingoTemplate {
 
     private IdFieldGenerator idFieldModifier;
 
-    public MingoTemplate(QueryExecutor queryExecutor, MongoDBFactory mongoDBFactory, ConverterService converterService,
-                         IdGeneratorFactory idGeneratorFactory) {
+    public JMingoTemplate(QueryExecutor queryExecutor, MongoDBFactory mongoDBFactory, ConverterService converterService,
+                          IdGeneratorFactory idGeneratorFactory) {
         this.queryExecutor = queryExecutor;
         this.mongoDBFactory = mongoDBFactory;
         this.converterService = converterService;

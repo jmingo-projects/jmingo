@@ -1,7 +1,6 @@
 package org.jmingo.parser;
 
-import org.jmingo.exceptions.MingoParserException;
-import org.jmingo.parser.Parser;
+import org.jmingo.exceptions.JMingoParserException;
 import org.jmingo.parser.xml.dom.ParserFactory;
 import org.jmingo.query.Query;
 import org.jmingo.query.QuerySet;
@@ -24,7 +23,7 @@ public class QueryParserTest {
 
 
     @Test(groups = "unit")
-    public void testParseQuery() throws MingoParserException {
+    public void testParseQuery() throws JMingoParserException {
         //given
         String queryXml = "/xml/testQuerySet.xml";
         Parser<QuerySet> xmlParser = ParserFactory.createParser(ParserFactory.ParseComponent.QUERY);

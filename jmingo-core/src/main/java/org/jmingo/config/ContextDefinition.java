@@ -18,7 +18,7 @@ package org.jmingo.config;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
- * Mingo context definition contains necessary information parsed from a xml file to create and initialize context.
+ * JMingo context definition contains necessary information parsed from a xml file to create and initialize context.
  */
 public class ContextDefinition {
 

@@ -15,7 +15,7 @@
  */
 package org.jmingo.parser;
 
-import org.jmingo.exceptions.MingoParserException;
+import org.jmingo.exceptions.JMingoParserException;
 
 import java.nio.file.Path;
 
@@ -31,7 +31,7 @@ public interface Parser<T> {
      *
      * @param path the path to file to parse
      * @return specific domain object as result of parsing
-     * @throws org.jmingo.exceptions.MingoParserException {@link org.jmingo.exceptions.MingoParserException}
+     * @throws org.jmingo.exceptions.JMingoParserException {@link org.jmingo.exceptions.JMingoParserException}
      */
-    T parse(Path path) throws MingoParserException;
+    T parse(Path path) throws JMingoParserException;
 }

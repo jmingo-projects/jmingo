@@ -1,7 +1,7 @@
 package org.jmingo.parser;
 
 import org.jmingo.config.ContextDefinition;
-import org.jmingo.exceptions.MingoParserException;
+import org.jmingo.exceptions.JMingoParserException;
 import org.jmingo.parser.xml.dom.ParserFactory;
 import org.jmingo.util.FileUtils;
 import org.apache.commons.collections.CollectionUtils;
@@ -15,7 +15,7 @@ import org.testng.annotations.Test;
 public class ContextParserTest {
 
     @Test(groups = "unit")
-    public void contextParserTest() throws MingoParserException {
+    public void contextParserTest() throws JMingoParserException {
         //given
         String contextXml = "/xml/context.xml";
         Parser<ContextDefinition> xmlParser = ParserFactory.createParser(ParserFactory.ParseComponent.CONTEXT);

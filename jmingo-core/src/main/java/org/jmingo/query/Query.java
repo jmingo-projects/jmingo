@@ -29,7 +29,7 @@ import org.apache.commons.lang3.Validate;
 import static org.jmingo.query.QueryType.PLAIN;
 
 /**
- * Mingo query. Immutable.
+ * JMingo query. Immutable.
  */
 public class Query {
 

@@ -21,7 +21,7 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.Iterables;
 import org.jmingo.document.annotation.Document;
 import org.jmingo.document.annotation.Id;
-import org.jmingo.exceptions.MingoException;
+import org.jmingo.exceptions.JMingoException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 
@@ -70,16 +70,16 @@ public class DocumentUtils {
     }
 
     public static void assertDocument(Object object) {
-        Validate.notNull(object, "object isn't mingo document because the null");
+        Validate.notNull(object, "object isn't jmingo document because the null");
         assertDocument(object.getClass());
     }
 
     public static void assertDocument(Class<?> documentType) {
         if (!isDocument(documentType)) {
-            throw new MingoException(
+            throw new JMingoException(
                     "[class:"
                             + documentType.getName() +
-                            "] is not mingo document because is not annotated with @Document annotation."
+                            "] is not jmingo document because is not annotated with @Document annotation."
             );
         }
     }

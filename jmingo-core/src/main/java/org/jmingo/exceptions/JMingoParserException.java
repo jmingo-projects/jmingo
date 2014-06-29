@@ -15,13 +15,12 @@
  */
 package org.jmingo.exceptions;
 
-
-public class MingoException extends RuntimeException {
+public class JMingoParserException extends RuntimeException {
 
     /**
      * Default constructor.
      */
-    public MingoException() {
+    public JMingoParserException() {
     }
 
     /**
@@ -29,7 +28,7 @@ public class MingoException extends RuntimeException {
      *
      * @param message message
      */
-    public MingoException(String message) {
+    public JMingoParserException(String message) {
         super(message);
     }
 
@@ -38,7 +37,7 @@ public class MingoException extends RuntimeException {
      *
      * @param cause cause
      */
-    public MingoException(Throwable cause) {
+    public JMingoParserException(Throwable cause) {
         super(cause);
     }
 
@@ -48,7 +47,7 @@ public class MingoException extends RuntimeException {
      * @param message message
      * @param cause   cause
      */
-    public MingoException(String message, Throwable cause) {
+    public JMingoParserException(String message, Throwable cause) {
         super(message, cause);
     }
 }
