@@ -6,7 +6,7 @@
     <artifactId>mingo</artifactId>
     <packaging>pom</packaging>
     <version>1.0.0</version>
-    <name>Mingo framework</name>
+    <name>Mingo ORM framework</name>
 
     <properties>
         <slf4jVersion>1.7.5</slf4jVersion>
