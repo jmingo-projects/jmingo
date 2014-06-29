@@ -24,44 +24,26 @@ import org.jmingo.document.id.generator.IdGenerator;
 public interface IdGeneratorFactory {
 
     /**
-     * Creates instance of {@link IdGenerator} implementation related to the given strategy.
+     * Creates generator instance for the given strategy or returns the generator instance if already created.
      *
-     * @param strategy the id generation strategy
-     * @param type     the type of id field to generate value.
+     * @param strategy the generation strategy
      * @return specific implementation of {@link IdGenerator}
      */
-    IdGenerator create(String strategy, Class<?> type);
+    IdGenerator create(String strategy);
 
     /**
-     * Registers the given generator for the specified strategy.
+     * Registers the given generator for the given strategy. Replaces registered generator with new if need be. see {@link #isRegistered(String)}.
      *
-     * @param strategy    the name of strategy, not necessary to be mentioned in {@link org.jmingo.document.id.generator.IdGeneratorStrategy}
-     *                    and can have same name but it's prohibited to use 'type' strategy name
-     * @param idGenerator implementation of {@link org.jmingo.document.id.generator.IdGenerator} for the specified strategy
+     * @param strategy    the name of generator strategy
+     * @param idGenerator implementation of {@link org.jmingo.document.id.generator.IdGenerator} for the given strategy
      */
     void register(String strategy, IdGenerator idGenerator);
 
     /**
-     * Registers the given generator for the specified type. Later to create generator for the given type the "type" strategy must used.
+     * Checks that a generator already registered for specified strategy name.
      *
-     * @param type        the type of id field for which the given generator should be registered
-     * @param idGenerator implementation of {@link org.jmingo.document.id.generator.IdGenerator} for the specified type
-     */
-    void register(Class<?> type, IdGenerator idGenerator);
-
-    /**
-     * Checks that a generator already registered for specified strategy.
-     *
-     * @param strategy the id generation strategy
-     * @return true of there is generator for specified strategy, otherwise - false
+     * @param strategy the generation strategy
+     * @return true of there is registered generator for the given strategy, otherwise - false
      */
     boolean isRegistered(String strategy);
-
-    /**
-     * Checks that a generator already registered for specified type.
-     *
-     * @param type the type
-     * @return true of there is generator for specified type, otherwise - false
-     */
-    boolean isRegistered(Class<?> type);
 }

@@ -101,7 +101,7 @@ public class IdFieldGenerator {
     private void checkAndGenerateId(Object pojo, Field field) throws IdGenerationException {
         if (field.isAnnotationPresent(GeneratedValue.class)) {
             GeneratedValue generatedValue = field.getAnnotation(GeneratedValue.class);
-            IdGenerator idGenerator = idGeneratorFactory.create(generatedValue.strategy(), field.getType());
+            IdGenerator idGenerator = idGeneratorFactory.create(generatedValue.strategy());
             if (idGenerator == null) {
                 throw new IdGenerationException(format(GENERATOR_NOT_FOUND, generatedValue.strategy(), field.getType()));
             }

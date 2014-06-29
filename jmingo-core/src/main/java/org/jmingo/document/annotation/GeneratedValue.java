@@ -38,5 +38,5 @@ public @interface GeneratedValue {
      *
      * @return id generation strategy
      */
-    String strategy() default IdGeneratorStrategy.TYPE;
+    String strategy();
 }

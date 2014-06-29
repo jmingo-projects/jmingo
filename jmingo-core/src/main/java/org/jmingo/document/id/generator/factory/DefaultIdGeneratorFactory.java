@@ -22,7 +22,7 @@ import org.jmingo.document.id.generator.IdGeneratorStrategy;
 import org.jmingo.document.id.generator.ObjectIdGenerator;
 import org.jmingo.document.id.generator.SnowflakeGenerator;
 import org.jmingo.document.id.generator.UUIDGenerator;
-import org.bson.types.ObjectId;
+import org.jmingo.exceptions.IdGenerationException;
 
 import java.util.Map;
 
@@ -31,27 +31,17 @@ import java.util.Map;
  */
 public class DefaultIdGeneratorFactory implements IdGeneratorFactory {
 
-    private Map<String, IdGenerator> generators = Maps.newHashMap();
-    private Map<Class<?>, IdGenerator> generatorsBindingTypes = Maps.newHashMap();
-
+    private Map<String, Class<? extends IdGenerator>> lazyGeneratorRegistry = Maps.newHashMap();
+    private Map<String, IdGenerator> generatorRegistry = Maps.newConcurrentMap();
 
     public DefaultIdGeneratorFactory() {
         register();
     }
 
     private void register() {
-        IdGenerator uuidGenerator = new UUIDGenerator();
-        IdGenerator objectIdGenerator = new ObjectIdGenerator();
-        IdGenerator snowflakeGenerator = new SnowflakeGenerator();
-        register(IdGeneratorStrategy.OBJECT_ID, objectIdGenerator);
-        register(IdGeneratorStrategy.UUID, uuidGenerator);
-        register(IdGeneratorStrategy.SNOWFLAKE, snowflakeGenerator);
-        //don't register IdGeneratorStrategy.TYPE because it's used to find generator by field type
-
-        register(ObjectId.class, objectIdGenerator);
-        register(String.class, uuidGenerator);
-        register(Long.class, snowflakeGenerator);
-        register(Long.TYPE, snowflakeGenerator);
+        register(IdGeneratorStrategy.OBJECT_ID, ObjectIdGenerator.class);
+        register(IdGeneratorStrategy.UUID, UUIDGenerator.class);
+        register(IdGeneratorStrategy.SNOWFLAKE, SnowflakeGenerator.class);
     }
 
     /**
@@ -59,15 +49,7 @@ public class DefaultIdGeneratorFactory implements IdGeneratorFactory {
      */
     @Override
     public boolean isRegistered(String strategy) {
-        return generators.containsKey(strategy);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isRegistered(Class<?> type) {
-        return generatorsBindingTypes.containsKey(type);
+        return lazyGeneratorRegistry.containsKey(strategy) || generatorRegistry.containsKey(strategy);
     }
 
     /**
@@ -75,33 +57,30 @@ public class DefaultIdGeneratorFactory implements IdGeneratorFactory {
      */
     @Override
     public void register(String strategy, IdGenerator idGenerator) {
-        if (!IdGeneratorStrategy.TYPE.equalsIgnoreCase(strategy)) {
-            generators.put(strategy, idGenerator);
-        }
+        generatorRegistry.put(strategy, idGenerator);
+    }
+
+    private void register(String strategy, Class<? extends IdGenerator> idGenerator) {
+        lazyGeneratorRegistry.put(strategy, idGenerator);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void register(Class<?> type, IdGenerator idGenerator) {
-        generatorsBindingTypes.put(type, idGenerator);
+    public IdGenerator create(String strategy) {
+        return generatorRegistry.computeIfAbsent(strategy, this::load);
     }
 
-    /**
-     * @param strategy the id generation strategy
-     * @param type     the type of id field to generate value. if strategy is
-     *                 {@link org.jmingo.document.id.generator.IdGeneratorStrategy#TYPE} then factory
-     *                 tries to find applicable generator based on id field type.
-     * @return an implementation of {@link IdGenerator} for specified strategy/type
-     */
-    @Override
-    public IdGenerator create(String strategy, Class<?> type) {
+    private IdGenerator load(String strategy) {
         IdGenerator idGenerator = null;
-        if (generators.containsKey(strategy)) {
-            idGenerator = generators.get(strategy);
-        } else if (IdGeneratorStrategy.TYPE.equalsIgnoreCase(strategy)) {
-            idGenerator = generatorsBindingTypes.get(type);
+        if (lazyGeneratorRegistry.containsKey(strategy)) {
+            Class<? extends IdGenerator> generatorClass = lazyGeneratorRegistry.get(strategy);
+            try {
+                idGenerator = generatorClass.newInstance();
+            } catch (InstantiationException | IllegalAccessException e) {
+                throw new IdGenerationException(e);
+            }
         }
         return idGenerator;
     }
