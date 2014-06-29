@@ -1,8 +1,7 @@
 JMingo
 =====
 
-Free open source MongoDB framework for rapid development. 
-Mingo makes creation queries process simple and convenient for developers. 
+Free open source ORM framework for MongoDB database.
 Please read [introduction to Mingo](https://github.com/dmgcodevil/mingo/wiki/Introduction-to-Mingo) 
 about how and why did the idea create the JMingo framework.
 
