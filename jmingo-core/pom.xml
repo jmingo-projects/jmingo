@@ -4,7 +4,7 @@
                              http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>com.jmingo.projects</groupId>
+        <groupId>org.jmingo</groupId>
         <artifactId>jmingo</artifactId>
         <version>1.0.0</version>
     </parent>
@@ -12,6 +12,12 @@
     <name>JMingo Core</name>
 
     <dependencies>
+
+        <dependency>
+            <groupId>org.jmingo</groupId>
+            <artifactId>jmingo-el-api</artifactId>
+            <version>1.0.0</version>
+        </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
@@ -60,22 +66,17 @@
             <version>${mongoDriverVersion}</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-jexl</artifactId>
-            <version>2.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-expression</artifactId>
-            <version>3.2.4.RELEASE</version>
-        </dependency>
-        <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
             <version>6.8.5</version>
             <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>org.jmingo</groupId>
+            <artifactId>jmingo-el-springexp</artifactId>
+            <version>1.0.0</version>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>net.jcip</groupId>
             <artifactId>jcip-annotations</artifactId>

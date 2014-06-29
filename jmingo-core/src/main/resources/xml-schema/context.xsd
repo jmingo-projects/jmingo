@@ -8,13 +8,6 @@
 
     <!-- definition of simple types -->
 
-    <xs:simpleType name="queryExecutorAnalyzerType">
-        <xs:restriction base="xs:normalizedString">
-            <xs:enumeration value="jexl"/>
-            <xs:enumeration value="springEL"/>
-        </xs:restriction>
-    </xs:simpleType>
-
     <xs:simpleType name="writeConcern">
         <xs:restriction base="xs:normalizedString">
             <xs:enumeration value="ACKNOWLEDGED"/>
@@ -86,12 +79,6 @@
         </xs:complexType>
     </xs:element>
 
-    <xs:element name="queryAnalyzer">
-        <xs:complexType>
-            <xs:attribute name="type" type="queryExecutorAnalyzerType" use="optional" default="jexl"/>
-        </xs:complexType>
-    </xs:element>
-
     <xs:element name="mongo">
         <xs:complexType mixed="true">
             <xs:sequence>
@@ -109,7 +96,6 @@
             <xs:sequence>
                 <xs:element ref="config" minOccurs="0" maxOccurs="1"/>
                 <xs:element ref="querySetConfig" minOccurs="0" maxOccurs="1"/>
-                <xs:element ref="queryAnalyzer" minOccurs="0" maxOccurs="1"/>
                 <xs:element ref="mongo" minOccurs="1" maxOccurs="1"/>
                 <xs:element ref="defaultConverter" minOccurs="0" maxOccurs="1"/>
                 <xs:element ref="converters" minOccurs="0" maxOccurs="1"/>

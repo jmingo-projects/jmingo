@@ -15,7 +15,6 @@
  */
 package com.jmingo.config;
 
-import com.jmingo.query.el.ELEngineType;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
@@ -28,12 +27,6 @@ public class ContextConfiguration {
     private QuerySetConfiguration querySetConfiguration;
 
     private MongoConfig mongoConfig;
-
-    private ELEngineType queryAnalyzerType = ELEngineType.JEXL;
-
-    private String databaseHost;
-
-    private int databasePort;
 
     /* default converter class */
     private String defaultConverter;
@@ -74,26 +67,6 @@ public class ContextConfiguration {
      */
     public void setQuerySetConfiguration(QuerySetConfiguration querySetConfiguration) {
         this.querySetConfiguration = querySetConfiguration;
-    }
-
-    /**
-     * Gets query analyzer type.
-     *
-     * @return query analyzer type
-     */
-    public ELEngineType getQueryAnalyzerType() {
-        return queryAnalyzerType;
-    }
-
-    /**
-     * Sets query analyzer type.
-     *
-     * @param queryAnalyzerType query analyzer type
-     */
-    public void setQueryAnalyzerType(ELEngineType queryAnalyzerType) {
-        if (queryAnalyzerType != null) {
-            this.queryAnalyzerType = queryAnalyzerType;
-        }
     }
 
     /**
@@ -175,9 +148,6 @@ public class ContextConfiguration {
         return new ToStringBuilder(this)
                 .append("mingoContextConfig", mingoContextConfig)
                 .append("querySetConfiguration", querySetConfiguration)
-                .append("queryAnalyzerType", queryAnalyzerType)
-                .append("databaseHost", databaseHost)
-                .append("databasePort", databasePort)
                 .append("defaultConverter", defaultConverter)
                 .append("converterPackageScan", converterPackageScan)
                 .append("mongoConfig", mongoConfig)

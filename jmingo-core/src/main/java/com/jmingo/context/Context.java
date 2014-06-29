@@ -22,6 +22,8 @@ import com.jmingo.benchmark.BenchmarkService;
 import com.jmingo.config.ContextConfiguration;
 import com.jmingo.document.id.generator.factory.DefaultIdGeneratorFactory;
 import com.jmingo.document.id.generator.factory.IdGeneratorFactory;
+import com.jmingo.el.ELEngineFactory;
+import com.jmingo.el.api.ELEngine;
 import com.jmingo.exceptions.ContextInitializationException;
 import com.jmingo.exceptions.ShutdownException;
 import com.jmingo.executor.MongoQueryExecutor;
@@ -31,14 +33,13 @@ import com.jmingo.mapping.convert.ConverterService;
 import com.jmingo.mongo.MongoDBFactory;
 import com.jmingo.parser.Parser;
 import com.jmingo.parser.xml.dom.ParserFactory;
-import com.jmingo.query.el.ELEngineType;
 import com.jmingo.query.QueryManager;
-import com.jmingo.query.el.ELEngine;
-import com.jmingo.query.el.ELEngineFactory;
 import com.jmingo.util.FileUtils;
 import com.mongodb.Mongo;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.List;
@@ -69,6 +70,7 @@ public class Context {
             ParserFactory.createParser(CONTEXT);
 
     private static ThreadLocal<Context> currentContext = new InheritableThreadLocal<>();
+    private static final Logger LOGGER = LoggerFactory.getLogger(Context.class);
 
     /**
      * Loads context from file. Path can be relative(file should be in application classpath) or absolute.
@@ -126,7 +128,7 @@ public class Context {
      * Registers benchmark services in the context.
      *
      * @param services the benchmark services
-     * @param context the context
+     * @param context  the context
      */
     private static void register(List<BenchmarkService> services, Context context) {
         if (CollectionUtils.isNotEmpty(services)) {
@@ -222,15 +224,6 @@ public class Context {
     }
 
     /**
-     * Gets EL engine type.
-     *
-     * @return EL engine type
-     */
-    public ELEngineType getELEngineType() {
-        return config.getQueryAnalyzerType();
-    }
-
-    /**
      * Gets registered benchmark services.
      *
      * @return immutable list
@@ -244,6 +237,7 @@ public class Context {
      * How long this method will execute depends on time of actions that will be performed be other components:
      * for instance if one of the benchmarks services will save data in slow storage then calling code will wait until
      * the operation is completed, thus try to avoid complicated logic in those methods.
+     *
      * @throws ShutdownException if any errors occur
      */
     public void shutdown() throws ShutdownException {
@@ -275,7 +269,7 @@ public class Context {
             queryManager = new QueryManager(config.getQuerySetConfiguration().getQuerySets());
             mongoDBFactory = mongo != null ? new MongoDBFactory(config.getMongoConfig(), mongo)
                     : new MongoDBFactory(config.getMongoConfig());
-            elEngine = ELEngineFactory.create(config.getQueryAnalyzerType());
+            createElEngine();
             queryExecutor = new MongoQueryExecutor(mongoDBFactory, queryManager, elEngine, converterService);
 
             //todo add factory for executors
@@ -295,5 +289,12 @@ public class Context {
      */
     private ContextConfiguration loadContextConfiguration(String contextPath) {
         return CONTEXT_CONFIGURATION_PARSER.parse(FileUtils.getAbsolutePath(contextPath));
+    }
+
+    private void createElEngine() {
+        elEngine = ELEngineFactory.getElEngine();
+        if (elEngine != null) {
+            LOGGER.info("detected and loaded EL engine implementation: '{}'", elEngine);
+        }
     }
 }

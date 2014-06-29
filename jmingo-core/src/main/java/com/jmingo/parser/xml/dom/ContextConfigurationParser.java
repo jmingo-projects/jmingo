@@ -23,7 +23,6 @@ import com.jmingo.config.MongoConfig;
 import com.jmingo.config.QuerySetConfiguration;
 import com.jmingo.exceptions.MingoParserException;
 import com.jmingo.parser.Parser;
-import com.jmingo.query.el.ELEngineType;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.nio.file.Path;
@@ -117,7 +116,6 @@ public class ContextConfigurationParser implements Parser<ContextConfiguration> 
             Element element = document.getDocumentElement();
             contextConfiguration.setMingoContextConfig(parseConfigTag(element));
             contextConfiguration.setQuerySetConfiguration(parseQuerySetConfigTag(element));
-            contextConfiguration.setQueryAnalyzerType(parseQueryAnalyzerTag(element));
             contextConfiguration.setMongoConfig(parseMongoTag(element));
             parseConvertersTag(contextConfiguration, element);
             contextConfiguration.setDefaultConverter(parseDefaultConverterTag(element));
@@ -180,27 +178,6 @@ public class ContextConfigurationParser implements Parser<ContextConfiguration> 
             }
         }
         return querySets;
-    }
-
-    /**
-     * Gets 'type' attr from <queryAnalyzer/> tag.
-     *
-     * @param element element of XML document
-     * @return {@link com.jmingo.query.el.ELEngineType}
-     * @throws MingoParserException {@link MingoParserException}
-     */
-    private ELEngineType parseQueryAnalyzerTag(Element element) throws MingoParserException {
-        ELEngineType type = null;
-        Node queryAnalyzerNode = getFirstTagOccurrence(element, QUERY_ANALYZER_TAG);
-        if (queryAnalyzerNode != null) {
-            type = ELEngineType.getByName(getAttributeString(queryAnalyzerNode,
-                    QUERY_ANALYZER_TYPE_ATTR));
-            if (type == null) {
-                throw new MingoParserException("unsupported query analyzer type.");
-            }
-        }
-
-        return type;
     }
 
     /**

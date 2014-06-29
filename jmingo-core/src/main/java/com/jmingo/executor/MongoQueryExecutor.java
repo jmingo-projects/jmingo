@@ -17,6 +17,7 @@ package com.jmingo.executor;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import com.jmingo.el.api.ELEngine;
 import com.jmingo.mapping.convert.ConversionUtils;
 import com.jmingo.mapping.convert.Converter;
 import com.jmingo.mapping.convert.ConverterService;
@@ -26,7 +27,6 @@ import com.jmingo.mongo.MongoDBFactory;
 import com.jmingo.query.QueryManager;
 import com.jmingo.query.QueryStatement;
 import com.jmingo.query.QueryType;
-import com.jmingo.query.el.ELEngine;
 import com.mongodb.AggregationOutput;
 import com.mongodb.BasicDBList;
 import com.mongodb.DB;

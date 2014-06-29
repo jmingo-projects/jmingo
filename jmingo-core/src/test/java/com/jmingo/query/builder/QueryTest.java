@@ -2,12 +2,12 @@ package com.jmingo.query.builder;
 
 
 import com.google.common.collect.ImmutableMap;
+import com.jmingo.el.ELEngineFactory;
+import com.jmingo.el.api.ELEngine;
 import com.jmingo.query.IfElseConditionalConstruct;
 import com.jmingo.query.Query;
 import com.jmingo.query.QueryElement;
 import com.jmingo.query.TextElement;
-import com.jmingo.query.el.ELEngine;
-import com.jmingo.query.el.SpringELEngine;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -20,7 +20,7 @@ import static org.testng.Assert.assertEquals;
 
 public class QueryTest {
 
-    private ELEngine elEngine = new SpringELEngine();
+    private ELEngine elEngine = ELEngineFactory.getElEngine();
 
     private IfElseConditionalConstruct ifElseConstruct = IfElseConditionalConstruct.builder()
             .withIf("#a > #b", "a gt b")

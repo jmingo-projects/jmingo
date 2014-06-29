@@ -6,8 +6,6 @@
         <querySet path="/xml/testQuerySet.xml"/>
     </querySetConfig>
 
-    <queryAnalyzer type="jexl"/>
-
     <mongo port="27017" host="localhost" dbName="dbTest" writeConcern="ACKNOWLEDGED">
         <options>
             <option name="connectTimeout" value="100"/>

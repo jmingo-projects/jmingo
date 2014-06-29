@@ -15,7 +15,7 @@
  */
 package com.jmingo.query;
 
-import com.jmingo.query.el.ELEngine;
+import com.jmingo.el.api.ELEngine;
 import com.jmingo.util.QueryUtils;
 
 import java.util.Map;
@@ -115,7 +115,7 @@ public class QueryStatement {
     }
 
     /**
-     * Builds query using {@link com.jmingo.query.Query#build(com.jmingo.query.el.ELEngine, java.util.Map)}
+     * Builds query using {@link com.jmingo.query.Query#build(com.jmingo.el.api.ELEngine, java.util.Map)}
      * and prepares for execution.
      *
      * @param elEngine   the EL engine

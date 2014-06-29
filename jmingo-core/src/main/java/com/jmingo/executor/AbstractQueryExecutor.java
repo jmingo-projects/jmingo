@@ -19,7 +19,7 @@ import com.mongodb.AggregationOutput;
 import com.mongodb.BasicDBList;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
-import org.springframework.util.Assert;
+import org.apache.commons.lang3.Validate;
 
 /**
  * Base implementation of {@link QueryExecutor}.
@@ -36,8 +36,8 @@ public abstract class AbstractQueryExecutor implements QueryExecutor {
      * @return {@link AggregationOutput}
      */
     protected AggregationOutput performAggregationQuery(DBCollection dbCollection, BasicDBList operators) {
-        Assert.notNull(dbCollection, "dbCollection cannot be null");
-        Assert.notEmpty(operators, "operators cannot be null or empty");
+        Validate.notNull(dbCollection, "dbCollection cannot be null");
+        Validate.notEmpty(operators, "operators cannot be null or empty");
         DBObject firstOperator = (DBObject) operators.remove(FIRST_ELEMENT);
         return dbCollection.aggregate(firstOperator, operators.toArray(new DBObject[FIRST_ELEMENT]));
     }

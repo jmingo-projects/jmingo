@@ -16,9 +16,7 @@
 package com.jmingo.query;
 
 
-import com.jmingo.query.el.ELEngine;
-import com.jmingo.query.el.ELEngineFactory;
-import com.jmingo.query.el.ELEngineType;
+import com.jmingo.el.api.ELEngine;
 import com.jmingo.util.StringUtils;
 
 import java.util.Collections;
@@ -35,7 +33,7 @@ import static com.jmingo.util.QueryUtils.pipeline;
 public class QueryBuilder implements QBuilder {
 
     private StringBuilder query = new StringBuilder();
-    private ELEngine elEngine = ELEngineFactory.create(ELEngineType.SPRING_EL);
+    private ELEngine elEngine;
     private Map<String, Object> parameters = Collections.emptyMap();
     private QueryType queryType;
 
@@ -78,7 +76,7 @@ public class QueryBuilder implements QBuilder {
     @Override
     public boolean append(ConditionElement conditionEl) {
         boolean appended = false;
-        if (elEngine.evaluate(conditionEl.getExpression(), parameters)) {
+        if (elEngine != null && elEngine.evaluate(conditionEl.getExpression(), parameters)) {
             query.append(conditionEl.getText());
             appended = true;
         }
