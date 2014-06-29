@@ -1,0 +1,73 @@
+apply plugin: 'java'
+apply plugin: 'groovy'
+apply plugin: 'idea'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+def springVersion = "4.0.5.RELEASE";
+
+dependencies {
+
+    compile 'org.codehaus.groovy:groovy-all:2.3.0-rc-1'
+
+    /* ---------------- spring dependencies ---------------- */
+    compile("org.springframework:spring-core:$springVersion")
+    compile("org.springframework:spring-beans:$springVersion")
+    compile("org.springframework:spring-context:$springVersion")
+    compile("org.springframework:spring-aop:$springVersion")
+    compile("org.springframework:spring-test:$springVersion")
+    /* ---------------- mingo dependencies ---------------- */
+    compile('org.jmingo:jmingo-core:1.0.0')
+    compile('org.jmingo:jmingo-el-springexp:1.0.0')
+    /* ---------------- byte code tools ---------------- */
+    compile('cglib:cglib:3.0')
+    compile('asm:asm-util:3.3.1')
+
+    /* ---------------- test dependencies ---------------- */
+    testCompile('org.testng:testng:6.8.7')
+
+    /* ---------------- logger dependencies ---------------- */
+    compile('log4j:log4j:1.2.17')
+    compile('org.slf4j:slf4j-simple:1.6.4')
+    compile('org.slf4j:slf4j-api:1.6.4')
+    /* ---------------- libs & tools ---------------- */
+
+    compile('com.google.guava:guava:15.0')
+    compile('commons-collections:commons-collections:3.2.1')
+    compile('org.apache.commons:commons-lang3:3.1')
+
+    sourceSets.main.java.srcDirs = []
+    sourceSets.main.groovy.srcDir 'src/main/java'
+    sourceSets.test.groovy.srcDir 'src/test/java'
+}
+
+test {
+    // enable TestNG support (default is JUnit)
+    useTestNG()
+    include 'com/mingo/demo/repository/integration/**'
+    // show standard out and standard error of the test JVM(s) on the console
+    testLogging.showStandardStreams = true
+
+    // set heap size for the test JVM(s)
+    minHeapSize = "128m"
+    maxHeapSize = "512m"
+
+    // set JVM arguments for the test JVM(s)
+    jvmArgs '-XX:MaxPermSize=256m'
+
+    // listen to events in the test execution lifecycle
+    beforeTest { descriptor ->
+        logger.lifecycle("Running test: " + descriptor)
+    }
+
+    // listen to standard out and standard error of the test JVM(s)
+    onOutput { descriptor, event ->
+        logger.lifecycle("Test: " + descriptor + " produced standard out/err: " + event.message)
+    }
+}
+

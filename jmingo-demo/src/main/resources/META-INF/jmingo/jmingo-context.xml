@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<context xmlns="http://www.jmingo.org/schema/context">
+
+    <querySetConfig>
+        <querySet path="/META-INF/jmingo/query/reviewQuerySet.xml"/>
+    </querySetConfig>
+
+    <mongo dbName="mingodemo"/>
+</context>

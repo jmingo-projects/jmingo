@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<querySet xmlns="http://www.jmingo.org/schema/query">
+
+    <config collectionName="Review"/>
+
+    <queryFragment id="review-project">
+        { "$project" : { "_id" : 1 , "tags" : 1 , "moderationStatus" : 1 , "author" : 1 , "ratings" : 1 , "text" : 1 ,
+        "title" : 1 , "comments" : { "$ifNull" : [ "$comments" , [ { "moderationStatus" : "STATUS_REJECTED"}]]}}},
+    </queryFragment>
+
+    <query id="getByAuthor">
+        { "author.name": "#name", "author.email": "#email"}
+    </query>
+
+    <query id="getTagsCount" type="aggregation"
+           converter-class="org.jmingo.demo.util.converter.ReviewSpecificConverter"
+           converter-method="convertTagsCount">
+        <if condition="#statuses != null and #statuses.size()>0">
+            {$match : { "moderationStatus": { $in: "#statuses"}}},
+        </if>
+        {$unwind: "$tags"},
+        {$project: {moderationStatus:1, tags: 1, count: {$add: [1]}}},
+        {$group: {_id: "$tags", totalCount: {$sum: "$count"}}}
+    </query>
+
+
+    <query id="getByModerationStatus" type="aggregation"
+           converter-class="org.jmingo.demo.util.converter.ReviewSpecificConverter"
+           converter-method="convertVehicleReviewsWithAggregatedInfo">
+        <if condition="#status != null">
+            { "$match" : { "moderationStatus" : "#status"}} ,
+            <else>
+                { "$match" : { "moderationStatus" : "STATUS_PASSED"}} ,
+            </else>
+        </if>
+        { "$sort" : { "created" : -1}} , { "$limit" : 10} , { "$skip" : 0} ,
+        <fragment ref="review-project"/>
+        { "$unwind" : "$comments"} ,
+        { "$group" : { "_id" : { "_id" : "$_id" , "author" : "$author" , "created" : "$created" , "title" : "$title" ,
+        "moderationStatus" : "$moderationStatus" , "text" : "$text" , "tags" : "$tags" , "ratings" : "$ratings"} ,
+        "comments": { "$addToSet": "$comments" },
+        "commentsCount" : { "$sum" : { "$cond" : [ { "$eq" : [ "$comments.moderationStatus" , "STATUS_REJECTED"]} , 0 ,
+        1]}}}} ,
+        { "$sort" : { "_id.created" : -1}}
+    </query>
+
+</querySet>
